@@ -1,1 +1,2 @@
-mod anime;
+mod requests;
+mod responses;

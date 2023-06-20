@@ -1,1 +1,2 @@
-mod manga;
+mod requests;
+mod responses;
