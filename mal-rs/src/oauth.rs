@@ -15,6 +15,10 @@ use url::Url;
 
 use std::fmt;
 
+// Expiration date for access tokens is one month
+// We use 28 days in seconds to be safe
+const EXPIRATION_IN_SECONDS: u64 = 2419200;
+
 #[derive(Debug)]
 pub struct OauthResponseError {
     pub message: String,
@@ -133,7 +137,7 @@ impl OauthClient<Unauthenticated> {
             state: PhantomData::<Authenticated>,
             access_token: token_result.access_token().to_owned(),
             refresh_token: token_result.refresh_token().unwrap().to_owned(),
-            expires_in: token_result.expires_in().unwrap().to_owned()
+            expires_in: Duration::from_secs(EXPIRATION_IN_SECONDS)
         })
     }
 }
