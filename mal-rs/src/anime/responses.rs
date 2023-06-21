@@ -3,10 +3,18 @@
 
 use serde::Deserialize;
 
+#[derive(Debug, Deserialize)]
+pub struct Paging {
+    previous: String,
+    next: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct AnimeList {
     data: Vec<AnimeListNode>,
 }
 
+#[derive(Debug, Deserialize)]
 pub struct AnimeListNode {
     node: AnimeFields,
 }
