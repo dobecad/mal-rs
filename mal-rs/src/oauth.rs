@@ -3,8 +3,9 @@ use oauth2::basic::BasicClient;
 use oauth2::http::Uri;
 use oauth2::reqwest::async_http_client;
 use oauth2::{
-    AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge,
-    PkceCodeVerifier, RedirectUrl, RequestTokenError, Scope, TokenResponse, StandardTokenResponse, AccessToken, RefreshToken,
+    AccessToken, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge,
+    PkceCodeVerifier, RedirectUrl, RefreshToken, RequestTokenError, Scope, StandardTokenResponse,
+    TokenResponse,
 };
 use serde::Deserialize;
 use std::env;
@@ -79,7 +80,7 @@ impl OauthClient<Unauthenticated> {
             state: PhantomData::<Unauthenticated>,
             access_token: AccessToken::new("".to_string()),
             refresh_token: RefreshToken::new("".to_string()),
-            expires_in: Duration::new(0, 0)
+            expires_in: Duration::new(0, 0),
         }
     }
 
@@ -120,7 +121,9 @@ impl OauthClient<Unauthenticated> {
     ) -> Result<OauthClient<Authenticated>, Box<dyn Error>> {
         let redirect_response = RedirectResponse::new(&authorization_response)?;
         if redirect_response.state != *self.csrf.secret() {
-            return Err(Box::new(OauthResponseError::new("State does not match".to_string())));
+            return Err(Box::new(OauthResponseError::new(
+                "State does not match".to_string(),
+            )));
         }
 
         let token_result = self
@@ -137,7 +140,7 @@ impl OauthClient<Unauthenticated> {
             state: PhantomData::<Authenticated>,
             access_token: token_result.access_token().to_owned(),
             refresh_token: token_result.refresh_token().unwrap().to_owned(),
-            expires_in: Duration::from_secs(EXPIRATION_IN_SECONDS)
+            expires_in: Duration::from_secs(EXPIRATION_IN_SECONDS),
         })
     }
 }
@@ -153,6 +156,24 @@ impl OauthClient<Authenticated> {
 
     pub fn get_expires_in(&self) -> &Duration {
         &self.expires_in
+    }
+
+    pub async fn refresh(self) -> Result<Self, Box<dyn Error>> {
+        let refresh_result = self
+            .client
+            .exchange_refresh_token(&self.refresh_token)
+            .request_async(async_http_client)
+            .await?;
+
+        Ok(OauthClient::<Authenticated> {
+            client: self.client,
+            csrf: self.csrf,
+            pkce_verifier: PkceCodeVerifier::new("".to_string()),
+            state: PhantomData::<Authenticated>,
+            access_token: refresh_result.access_token().to_owned(),
+            refresh_token: refresh_result.refresh_token().unwrap().to_owned(),
+            expires_in: Duration::from_secs(EXPIRATION_IN_SECONDS),
+        })
     }
 }
 
