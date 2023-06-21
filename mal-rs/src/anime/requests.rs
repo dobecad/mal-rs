@@ -3,11 +3,7 @@
 
 use serde::{Deserialize, Serialize};
 
-pub struct Paging {
-    previous: String,
-    next: String,
-}
-
+#[derive(Debug, Serialize)]
 pub struct GetAnimeList {
     q: String,
     limit: u8,
@@ -15,6 +11,7 @@ pub struct GetAnimeList {
     fields: String,
 }
 
+#[derive(Debug, Serialize)]
 pub struct GetAnimeDetails {
     anime_id: u32,
     fields: String, // TODO: Create Enum for fields?
@@ -42,6 +39,7 @@ pub enum RankingType {
     FAVORITE,
 }
 
+#[derive(Debug, Serialize)]
 pub struct GetAnimeRanking {
     ranking_type: RankingType,
     limit: u16,
@@ -69,6 +67,7 @@ pub enum SeasonalAnimeSort {
     ANIMENUMLISTUSERS,
 }
 
+#[derive(Debug, Serialize)]
 pub struct GetSeasonalAnime {
     year: u8,
     season: Season,
@@ -78,6 +77,7 @@ pub struct GetSeasonalAnime {
     fields: String,
 }
 
+#[derive(Debug, Serialize)]
 pub struct GetSuggestedAnime {
     limit: u16,
     offset: u32,
@@ -98,13 +98,21 @@ pub enum AnimeStatus {
     PLANTOWATCH,
 }
 
+#[derive(Debug, Serialize)]
 pub enum UserAnimeListSort {
+    #[serde(rename = "list_score")]
     LISTSCORE,
+    #[serde(rename = "list_updated_at")]
     LISTUPDATEDAT,
+    #[serde(rename = "anime_title")]
     ANIMETITLE,
+    #[serde(rename = "anime_start_date")]
     ANIMESTARTDATE,
+    #[serde(rename = "anime_id")]
     ANIMEID,
 }
+
+#[derive(Debug, Serialize)]
 pub struct GetUserAnimeList {
     user_name: String,
     status: AnimeStatus,
