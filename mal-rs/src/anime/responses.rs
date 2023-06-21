@@ -1,17 +1,13 @@
 // Structs for deserializing Anime Endpoint responses
 #![allow(dead_code)]
 
+use crate::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW};
 use serde::Deserialize;
-
-#[derive(Debug, Deserialize)]
-pub struct Paging {
-    previous: String,
-    next: String,
-}
 
 #[derive(Debug, Deserialize)]
 pub struct AnimeList {
     data: Vec<AnimeListNode>,
+    paging: Paging,
 }
 
 #[derive(Debug, Deserialize)]
@@ -20,38 +16,9 @@ pub struct AnimeListNode {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct AnimeMainPicture {
-    medium: String,
-    large: String,
-}
-
-#[derive(Debug, Deserialize)]
 pub struct AnimePicture {
     medium: String,
     large: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct AlternativeTitles {
-    synonyms: Option<Vec<String>>,
-    en: Option<String>,
-    ja: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-pub enum NSFW {
-    #[serde(rename = "white")]
-    SFW,
-    #[serde(rename = "gray")]
-    MNSFW,
-    #[serde(rename = "black")]
-    NSFW,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Genre {
-    id: u32,
-    name: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -171,7 +138,7 @@ pub struct Studio {
 pub struct AnimeFields {
     id: Option<u32>,
     title: Option<String>,
-    main_picture: Option<AnimeMainPicture>,
+    main_picture: Option<MainPicture>,
     alternative_titles: Option<AlternativeTitles>,
     start_date: Option<String>,
     end_date: Option<String>,
@@ -195,26 +162,6 @@ pub struct AnimeFields {
     average_episode_duration: Option<u32>,
     rating: Option<Rating>,
     studios: Option<Vec<Studio>>,
-}
-
-#[derive(Debug, Deserialize)]
-pub enum RelationType {
-    #[serde(rename = "sequel")]
-    SEQUEL,
-    #[serde(rename = "prequel")]
-    PREQUEL,
-    #[serde(rename = "alternative_setting")]
-    ALTERNATIVESETTING,
-    #[serde(rename = "alternative_version")]
-    ALTERNATIVEVERSION,
-    #[serde(rename = "side_story")]
-    SIDESTORY,
-    #[serde(rename = "parent_story")]
-    PARENTSTORY,
-    #[serde(rename = "summary")]
-    SUMMARY,
-    #[serde(rename = "full_story")]
-    FULLSTORY,
 }
 
 #[derive(Debug, Deserialize)]
@@ -253,7 +200,7 @@ pub struct AnimeDetails {
     pictures: Option<Vec<AnimePicture>>,
     background: Option<String>,
     related_anime: Vec<RelatedAnime>,
-    related_manga: Option<Vec<String>>, // TODO: Add this once Manga structs done
+    related_manga: Option<Vec<crate::manga::responses::RelatedManga>>, // TODO: Add this once Manga structs done
     recommendations: Vec<Recommendations>,
     statistics: Option<Statistics>,
 }
