@@ -1,2 +1,2 @@
 # mal-rs
-MyAnimeList API written in Rust
+Asynchronous MyAnimeList API written in Rust
