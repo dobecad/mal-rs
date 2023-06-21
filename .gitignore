@@ -14,5 +14,4 @@ Cargo.lock
 *.pdb
 
 
-example/
 .env
