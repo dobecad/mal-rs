@@ -6,12 +6,13 @@ use std::io;
 async fn main() {
     dotenv::dotenv().ok();
 
-    println!("Hello, world!");
     let mut oauth_client = OauthClient::new();
-    println!("URL: {}", oauth_client.generate_readonly_auth_url());
+    println!(
+        "Visit this URL: {}\n",
+        oauth_client.generate_readonly_auth_url()
+    );
 
-    println!();
-    println!("Please enter the URL you were redirected to: ");
+    println!("After authorizing, please enter the URL you were redirected to: ");
     let mut input = String::new();
     io::stdin()
         .read_line(&mut input)
@@ -21,7 +22,12 @@ async fn main() {
 
     let token = oauth_client.authenticate(response).await;
     match token {
-        Ok(t) => println!("Got token: {:?}", t),
+        Ok(t) => {
+            println!("Got token: {:?}\n", t.get_access_token());
+
+            let t = t.refresh().await.unwrap();
+            println!("Refreshed token: {:?}", t.get_access_token());
+        }
         Err(e) => println!("Failed: {}", e),
     }
 }
