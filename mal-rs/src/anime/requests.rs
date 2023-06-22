@@ -3,12 +3,29 @@
 
 use serde::{Deserialize, Serialize};
 
+use super::{responses::AnimeFieldsEnum, error::AnimeApiError};
+
 #[derive(Debug, Serialize)]
 pub struct GetAnimeList {
     q: String,
     limit: u8,
-    offset: u16,
+    offset: u32,
     fields: String,
+}
+
+impl GetAnimeList {
+    pub fn new(q: String, limit: u8, offset: u32, fields: AnimeFields) -> Result<Self, AnimeApiError> {
+        if limit > 100 || limit < 1 {
+            return Err(AnimeApiError::new("Limit must be between 1 and 100 inclusive".to_string()));
+        }
+
+        Ok(Self {
+            q,
+            limit,
+            offset,
+            fields: fields.into(),
+        })
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -119,4 +136,18 @@ pub struct GetUserAnimeList {
     sort: UserAnimeListSort,
     limit: u16,
     offset: u32,
+}
+
+pub struct AnimeFields(pub Vec<AnimeFieldsEnum>);
+
+impl Into<String> for AnimeFields {
+    fn into(self) -> String {
+        let result = self
+            .0
+            .into_iter()
+            .map(|e| format!("{:?}", e))
+            .collect::<Vec<String>>()
+            .join(",");
+        result
+    }
 }

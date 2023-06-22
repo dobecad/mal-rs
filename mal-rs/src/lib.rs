@@ -14,7 +14,7 @@ const USER_URL: &'static str = "https://api.myanimelist.net/v2/user";
 
 #[derive(Debug, Deserialize)]
 pub struct Paging {
-    previous: String,
+    previous: Option<String>,
     next: String,
 }
 
