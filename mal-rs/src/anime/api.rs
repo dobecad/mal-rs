@@ -27,16 +27,16 @@ pub struct Oauth {}
 pub struct None {}
 
 #[derive(Debug, Clone)]
-pub struct AnimeApi<State = None> {
+pub struct AnimeApiClient<State = None> {
     client: reqwest::Client,
     client_id: Option<String>,
     access_token: Option<String>,
     state: PhantomData<State>,
 }
 
-impl From<AccessToken> for AnimeApi<Oauth> {
-    fn from(value: AccessToken) -> Self {
-        AnimeApi::<Oauth> {
+impl From<&AccessToken> for AnimeApiClient<Oauth> {
+    fn from(value: &AccessToken) -> Self {
+        AnimeApiClient::<Oauth> {
             client: reqwest::Client::new(),
             client_id: None,
             access_token: Some(value.secret().clone()),
@@ -45,9 +45,9 @@ impl From<AccessToken> for AnimeApi<Oauth> {
     }
 }
 
-impl From<ClientId> for AnimeApi<Client> {
-    fn from(value: ClientId) -> Self {
-        AnimeApi::<Client> {
+impl From<&ClientId> for AnimeApiClient<Client> {
+    fn from(value: &ClientId) -> Self {
+        AnimeApiClient::<Client> {
             client: reqwest::Client::new(),
             client_id: Some(value.clone().to_string()),
             access_token: None,
@@ -64,7 +64,7 @@ pub trait Request {
 }
 
 #[async_trait]
-pub trait Api {
+pub trait AnimeApi {
     type State: Request + Send + Sync;
 
     async fn get_anime_list(&self, query: GetAnimeList) -> Result<AnimeList, Box<dyn Error>> {
@@ -112,7 +112,7 @@ pub trait Api {
 }
 
 #[async_trait]
-impl Request for AnimeApi<Client> {
+impl Request for AnimeApiClient<Client> {
     async fn request<T>(&self, query: T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync,
@@ -141,7 +141,7 @@ impl Request for AnimeApi<Client> {
 }
 
 #[async_trait]
-impl Request for AnimeApi<Oauth> {
+impl Request for AnimeApiClient<Oauth> {
     async fn request<T>(&self, query: T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync,
@@ -170,8 +170,8 @@ impl Request for AnimeApi<Oauth> {
 }
 
 #[async_trait]
-impl Api for AnimeApi<Client> {
-    type State = AnimeApi<Client>;
+impl AnimeApi for AnimeApiClient<Client> {
+    type State = AnimeApiClient<Client>;
 
     fn get_self(&self) -> &Self::State {
         self
@@ -179,15 +179,15 @@ impl Api for AnimeApi<Client> {
 }
 
 #[async_trait]
-impl Api for AnimeApi<Oauth> {
-    type State = AnimeApi<Oauth>;
+impl AnimeApi for AnimeApiClient<Oauth> {
+    type State = AnimeApiClient<Oauth>;
 
     fn get_self(&self) -> &Self::State {
         self
     }
 }
 
-impl AnimeApi<Oauth> {
+impl AnimeApiClient<Oauth> {
     pub async fn get_suggested_anime(
         &self,
         query: GetSuggestedAnime,
