@@ -59,6 +59,8 @@ pub trait Request {
     async fn request<T>(&self, query: T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync;
+
+    async fn request_details(&self, query: GetMangaDetails) -> Result<String, Box<dyn Error>>;
 }
 
 #[async_trait]
@@ -70,6 +72,29 @@ impl Request for MangaApiClient<Client> {
         let response = self
             .client
             .get(MANGA_URL)
+            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        match response.status() {
+            reqwest::StatusCode::OK => {
+                let content = response.text().await.map_err(|err| {
+                    MangaApiError::new(format!("Failed to get content from response: {}", err))
+                })?;
+                Ok(content)
+            }
+            _ => Err(Box::new(MangaApiError::new(format!(
+                "Did not recieve OK response: {}",
+                response.status()
+            )))),
+        }
+    }
+
+    async fn request_details(&self, query: GetMangaDetails) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/{}", MANGA_URL, query.manga_id))
             .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
             .query(&query)
             .send()
@@ -117,6 +142,29 @@ impl Request for MangaApiClient<Oauth> {
             )))),
         }
     }
+
+    async fn request_details(&self, query: GetMangaDetails) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/{}", MANGA_URL, query.manga_id))
+            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        match response.status() {
+            reqwest::StatusCode::OK => {
+                let content = response.text().await.map_err(|err| {
+                    MangaApiError::new(format!("Failed to get content from response: {}", err))
+                })?;
+                Ok(content)
+            }
+            _ => Err(Box::new(MangaApiError::new(format!(
+                "Did not recieve OK response: {}",
+                response.status()
+            )))),
+        }
+    }
 }
 
 #[async_trait]
@@ -135,7 +183,7 @@ pub trait MangaApi {
         &self,
         query: GetMangaDetails,
     ) -> Result<MangaDetails, Box<dyn Error>> {
-        let response = self.get_self().request(query).await?;
+        let response = self.get_self().request_details(query).await?;
         let result: MangaDetails = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse MangaList result: {}", err))
         })?;

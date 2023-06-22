@@ -30,7 +30,7 @@ impl GetAnimeList {
 
 #[derive(Debug, Serialize)]
 pub struct GetAnimeDetails {
-    anime_id: u32,
+    pub(crate) anime_id: u32,
     fields: String, // TODO: Create Enum for fields?
 }
 

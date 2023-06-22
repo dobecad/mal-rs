@@ -61,6 +61,8 @@ pub trait Request {
     async fn request<T>(&self, query: T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync;
+
+    async fn request_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>>;
 }
 
 #[async_trait]
@@ -79,7 +81,7 @@ pub trait AnimeApi {
         &self,
         query: GetAnimeDetails,
     ) -> Result<AnimeDetails, Box<dyn Error>> {
-        let response = self.get_self().request(query).await?;
+        let response = self.get_self().request_details(query).await?;
         let result: AnimeDetails = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse AnimeList result: {}", err))
         })?;
@@ -138,6 +140,29 @@ impl Request for AnimeApiClient<Client> {
             )))),
         }
     }
+
+    async fn request_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/{}", ANIME_URL, query.anime_id))
+            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        match response.status() {
+            reqwest::StatusCode::OK => {
+                let content = response.text().await.map_err(|err| {
+                    AnimeApiError::new(format!("Failed to get content from response: {}", err))
+                })?;
+                Ok(content)
+            }
+            _ => Err(Box::new(AnimeApiError::new(format!(
+                "Did not recieve OK response: {}",
+                response.status()
+            )))),
+        }
+    }
 }
 
 #[async_trait]
@@ -150,6 +175,29 @@ impl Request for AnimeApiClient<Oauth> {
             .client
             .get(ANIME_URL)
             .bearer_auth(&self.access_token.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        match response.status() {
+            reqwest::StatusCode::OK => {
+                let content = response.text().await.map_err(|err| {
+                    AnimeApiError::new(format!("Failed to get content from response: {}", err))
+                })?;
+                Ok(content)
+            }
+            _ => Err(Box::new(AnimeApiError::new(format!(
+                "Did not recieve OK response: {}",
+                response.status()
+            )))),
+        }
+    }
+
+    async fn request_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/{}", ANIME_URL, query.anime_id))
+            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
             .query(&query)
             .send()
             .await?;

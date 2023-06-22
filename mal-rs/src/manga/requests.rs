@@ -1,5 +1,5 @@
 // Structs for crafting Manga Endpoint requests
-use super::{responses::MangaFieldsEnum, error::MangaApiError};
+use super::{error::MangaApiError, responses::MangaFieldsEnum};
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
@@ -11,9 +11,16 @@ pub struct GetMangaList {
 }
 
 impl GetMangaList {
-    pub fn new(q: String, limit: u8, offset: u32, fields: MangaFields) -> Result<Self, MangaApiError> {
+    pub fn new(
+        q: String,
+        limit: u8,
+        offset: u32,
+        fields: MangaFields,
+    ) -> Result<Self, MangaApiError> {
         if limit > 100 || limit < 1 {
-            return Err(MangaApiError::new("Limit must be between 1 and 100 inclusive".to_string()));
+            return Err(MangaApiError::new(
+                "Limit must be between 1 and 100 inclusive".to_string(),
+            ));
         }
 
         Ok(Self {
@@ -27,7 +34,7 @@ impl GetMangaList {
 
 #[derive(Debug, Serialize)]
 pub struct GetMangaDetails {
-    manga_id: u32,
+    pub(crate) manga_id: u32,
     fields: String,
 }
 
@@ -49,7 +56,7 @@ pub struct GetMangaRanking {
     ranking_type: MangaRankingType,
     limit: u16,
     offset: u32,
-    fields: String
+    fields: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -69,7 +76,6 @@ pub enum UserMangaListSort {
     MANGASTARTDATE,
     MANGAID,
 }
-
 
 #[derive(Debug, Serialize)]
 pub struct GetUserMangaList {
