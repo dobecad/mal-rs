@@ -1,6 +1,8 @@
 // Structs for crafting Manga Endpoint requests
 use super::{responses::MangaFieldsEnum, error::MangaApiError};
+use serde::Serialize;
 
+#[derive(Debug, Serialize)]
 pub struct GetMangaList {
     q: String,
     limit: u8,
@@ -23,11 +25,13 @@ impl GetMangaList {
     }
 }
 
+#[derive(Debug, Serialize)]
 pub struct GetMangaDetails {
     manga_id: u32,
     fields: String,
 }
 
+#[derive(Debug, Serialize)]
 pub enum MangaRankingType {
     ALL,
     MANGA,
@@ -40,6 +44,7 @@ pub enum MangaRankingType {
     FAVORITE,
 }
 
+#[derive(Debug, Serialize)]
 pub struct GetMangaRanking {
     ranking_type: MangaRankingType,
     limit: u16,
@@ -47,6 +52,7 @@ pub struct GetMangaRanking {
     fields: String
 }
 
+#[derive(Debug, Serialize)]
 pub enum UserMangaListStatus {
     READING,
     COMPLETED,
@@ -55,6 +61,7 @@ pub enum UserMangaListStatus {
     PLANTOREAD,
 }
 
+#[derive(Debug, Serialize)]
 pub enum UserMangaListSort {
     LISTSCORE,
     LISTUPDATEDAT,
@@ -63,6 +70,8 @@ pub enum UserMangaListSort {
     MANGAID,
 }
 
+
+#[derive(Debug, Serialize)]
 pub struct GetUserMangaList {
     user_name: String,
     status: UserMangaListStatus,
@@ -71,7 +80,7 @@ pub struct GetUserMangaList {
     offset: u32,
 }
 
-pub struct MangaFields(Vec<MangaFieldsEnum>);
+pub struct MangaFields(pub Vec<MangaFieldsEnum>);
 
 impl Into<String> for MangaFields {
     fn into(self) -> String {
