@@ -3,9 +3,10 @@ use oauth2::basic::BasicClient;
 use oauth2::http::Uri;
 use oauth2::reqwest::async_http_client;
 use oauth2::{
-    AccessToken, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge,
+    AccessToken, AuthUrl, AuthorizationCode, ClientSecret, CsrfToken, PkceCodeChallenge,
     PkceCodeVerifier, RedirectUrl, RefreshToken, Scope, TokenResponse, TokenUrl,
 };
+pub use oauth2::ClientId;
 use serde::Deserialize;
 use std::env;
 use std::error::Error;
