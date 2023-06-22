@@ -2,6 +2,7 @@
 #![allow(dead_code)]
 
 use crate::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW};
+use enum_from_struct::EnumFromStruct;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -134,7 +135,7 @@ pub struct Studio {
 }
 
 // Wrap everything in Options since user controls what fields should be returned
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, EnumFromStruct)]
 pub struct AnimeFields {
     id: Option<u32>,
     title: Option<String>,
