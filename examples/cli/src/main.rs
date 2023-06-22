@@ -1,6 +1,6 @@
 use dotenv;
-use mal_rs::oauth::{OauthClient, RedirectResponse};
-use std::io;
+use mal_rs::{oauth::{OauthClient, RedirectResponse}, user::{api::UserApiClient, requests::{UserFields, GetUserInformation}, responses::UserEnum}};
+use std::{io, vec};
 
 #[tokio::main]
 async fn main() {
@@ -20,14 +20,25 @@ async fn main() {
 
     let response = RedirectResponse::try_from(input).unwrap();
 
-    let token = oauth_client.authenticate(response).await;
-    match token {
+    // Authentication process
+    let result = oauth_client.authenticate(response).await;
+    let result = match result {
         Ok(t) => {
             println!("Got token: {:?}\n", t.get_access_token().secret());
 
             let t = t.refresh().await.unwrap();
             println!("Refreshed token: {:?}", t.get_access_token().secret());
+            t
         }
-        Err(e) => println!("Failed: {}", e),
-    }
+        Err(e) => panic!("Failed: {}", e),
+    };
+
+    // Using Oauth token to interact with User API
+    let token = result.get_access_token();
+    let api_client = UserApiClient::from(token);
+    let fields = UserFields(vec![UserEnum::id, UserEnum::name, UserEnum::is_supporter]);
+    let query = GetUserInformation::new(fields);
+    let response = api_client.get_my_user_information(query).await.unwrap();
+    println!("Information about yourself: {:?}", response);
+    
 }
