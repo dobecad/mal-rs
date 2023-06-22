@@ -21,7 +21,7 @@ use reqwest;
 pub struct Client {}
 
 #[derive(Debug)]
-pub struct Main {}
+pub struct Oauth {}
 
 #[derive(Debug)]
 pub struct None {}
@@ -34,13 +34,13 @@ pub struct AnimeApi<State = None> {
     state: PhantomData<State>,
 }
 
-impl From<AccessToken> for AnimeApi<Main> {
+impl From<AccessToken> for AnimeApi<Oauth> {
     fn from(value: AccessToken) -> Self {
-        AnimeApi::<Main> {
+        AnimeApi::<Oauth> {
             client: reqwest::Client::new(),
             client_id: None,
             access_token: Some(value.secret().clone()),
-            state: PhantomData::<Main>,
+            state: PhantomData::<Oauth>,
         }
     }
 }
@@ -141,7 +141,7 @@ impl Request for AnimeApi<Client> {
 }
 
 #[async_trait]
-impl Request for AnimeApi<Main> {
+impl Request for AnimeApi<Oauth> {
     async fn request<T>(&self, query: T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync,
@@ -179,15 +179,15 @@ impl Api for AnimeApi<Client> {
 }
 
 #[async_trait]
-impl Api for AnimeApi<Main> {
-    type State = AnimeApi<Main>;
+impl Api for AnimeApi<Oauth> {
+    type State = AnimeApi<Oauth>;
 
     fn get_self(&self) -> &Self::State {
         self
     }
 }
 
-impl AnimeApi<Main> {
+impl AnimeApi<Oauth> {
     pub async fn get_suggested_anime(
         &self,
         query: GetSuggestedAnime,
