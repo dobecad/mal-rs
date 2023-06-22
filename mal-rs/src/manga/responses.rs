@@ -3,6 +3,7 @@
 
 use crate::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW};
 use serde::Deserialize;
+use enum_from_struct::EnumFromStruct;
 
 #[derive(Debug, Deserialize)]
 pub struct MangaList {
@@ -16,7 +17,7 @@ pub struct MangaListNode {
 }
 
 // Wrap everything in Options since user controls what fields should be returned
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, EnumFromStruct)]
 pub struct MangaFields {
     id: Option<u32>,
     title: Option<String>,

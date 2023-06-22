@@ -1,11 +1,26 @@
 // Structs for crafting Manga Endpoint requests
-use serde::Deserialize;
+use super::{responses::MangaFieldsEnum, error::MangaApiError};
 
 pub struct GetMangaList {
     q: String,
-    limit: u16,
+    limit: u8,
     offset: u32,
     fields: String,
+}
+
+impl GetMangaList {
+    pub fn new(q: String, limit: u8, offset: u32, fields: MangaFields) -> Result<Self, MangaApiError> {
+        if limit > 100 || limit < 1 {
+            return Err(MangaApiError::new("Limit must be between 1 and 100 inclusive".to_string()));
+        }
+
+        Ok(Self {
+            q,
+            limit,
+            offset,
+            fields: fields.into(),
+        })
+    }
 }
 
 pub struct GetMangaDetails {
@@ -54,4 +69,18 @@ pub struct GetUserMangaList {
     sort: UserMangaListSort,
     limit: u16,
     offset: u32,
+}
+
+pub struct MangaFields(Vec<MangaFieldsEnum>);
+
+impl Into<String> for MangaFields {
+    fn into(self) -> String {
+        let result = self
+            .0
+            .into_iter()
+            .map(|e| format!("{:?}", e))
+            .collect::<Vec<String>>()
+            .join(",");
+        result
+    }
 }
