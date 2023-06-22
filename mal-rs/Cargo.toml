@@ -6,8 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-oauth2 = {version = "4.4.1", features = ["pkce-plain"]}
+oauth2 = { version = "4.4.1", features = ["pkce-plain"] }
 serde = { version = "1.0.164", features = ["derive"] }
 serde_json = "1.0.97"
 serde_urlencoded = "0.7.1"
 url = "2.4.0"
+enum-from-struct = { path = "../enum-from-struct" }
+reqwest = { version = "0.11.18", features = ["serde_json"] }

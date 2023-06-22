@@ -23,10 +23,10 @@ async fn main() {
     let token = oauth_client.authenticate(response).await;
     match token {
         Ok(t) => {
-            println!("Got token: {:?}\n", t.get_access_token());
+            println!("Got token: {:?}\n", t.get_access_token().secret());
 
             let t = t.refresh().await.unwrap();
-            println!("Refreshed token: {:?}", t.get_access_token());
+            println!("Refreshed token: {:?}", t.get_access_token().secret());
         }
         Err(e) => println!("Failed: {}", e),
     }
