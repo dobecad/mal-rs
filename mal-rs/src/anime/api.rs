@@ -26,11 +26,6 @@ pub struct Main {}
 #[derive(Debug)]
 pub struct None {}
 
-enum AuthType {
-    CLIENT,
-    MAIN,
-}
-
 #[derive(Debug, Clone)]
 pub struct AnimeApi<State = None> {
     client: reqwest::Client,
