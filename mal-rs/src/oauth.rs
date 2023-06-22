@@ -144,12 +144,12 @@ impl OauthClient<Unauthenticated> {
 }
 
 impl OauthClient<Authenticated> {
-    pub fn get_access_token(&self) -> &String {
-        &self.access_token.secret()
+    pub fn get_access_token(&self) -> &AccessToken {
+        &self.access_token
     }
 
-    pub fn get_refresh_token(&self) -> &String {
-        &self.refresh_token.secret()
+    pub fn get_refresh_token(&self) -> &RefreshToken {
+        &self.refresh_token
     }
 
     pub fn get_expires_in(&self) -> &Duration {
