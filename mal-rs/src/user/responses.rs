@@ -2,8 +2,9 @@
 #![allow(dead_code)]
 
 use serde::Deserialize;
+use enum_from_struct::EnumFromStruct;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, EnumFromStruct)]
 pub struct User {
     id: u32,
     name: String,
