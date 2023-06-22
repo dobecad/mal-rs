@@ -63,6 +63,8 @@ pub trait Request {
         T: Serialize + std::marker::Send + std::marker::Sync;
 
     async fn request_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>>;
+
+    async fn request_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>>;
 }
 
 #[async_trait]
@@ -127,18 +129,7 @@ impl Request for AnimeApiClient<Client> {
             .send()
             .await?;
 
-        match response.status() {
-            reqwest::StatusCode::OK => {
-                let content = response.text().await.map_err(|err| {
-                    AnimeApiError::new(format!("Failed to get content from response: {}", err))
-                })?;
-                Ok(content)
-            }
-            _ => Err(Box::new(AnimeApiError::new(format!(
-                "Did not recieve OK response: {}",
-                response.status()
-            )))),
-        }
+        handle_response(response).await
     }
 
     async fn request_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>> {
@@ -150,18 +141,19 @@ impl Request for AnimeApiClient<Client> {
             .send()
             .await?;
 
-        match response.status() {
-            reqwest::StatusCode::OK => {
-                let content = response.text().await.map_err(|err| {
-                    AnimeApiError::new(format!("Failed to get content from response: {}", err))
-                })?;
-                Ok(content)
-            }
-            _ => Err(Box::new(AnimeApiError::new(format!(
-                "Did not recieve OK response: {}",
-                response.status()
-            )))),
-        }
+        handle_response(response).await
+    }
+
+    async fn request_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/season/{}/{}", ANIME_URL, query.year, query.season))
+            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        handle_response(response).await
     }
 }
 
@@ -179,18 +171,7 @@ impl Request for AnimeApiClient<Oauth> {
             .send()
             .await?;
 
-        match response.status() {
-            reqwest::StatusCode::OK => {
-                let content = response.text().await.map_err(|err| {
-                    AnimeApiError::new(format!("Failed to get content from response: {}", err))
-                })?;
-                Ok(content)
-            }
-            _ => Err(Box::new(AnimeApiError::new(format!(
-                "Did not recieve OK response: {}",
-                response.status()
-            )))),
-        }
+        handle_response(response).await
     }
 
     async fn request_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>> {
@@ -202,18 +183,19 @@ impl Request for AnimeApiClient<Oauth> {
             .send()
             .await?;
 
-        match response.status() {
-            reqwest::StatusCode::OK => {
-                let content = response.text().await.map_err(|err| {
-                    AnimeApiError::new(format!("Failed to get content from response: {}", err))
-                })?;
-                Ok(content)
-            }
-            _ => Err(Box::new(AnimeApiError::new(format!(
-                "Did not recieve OK response: {}",
-                response.status()
-            )))),
-        }
+        handle_response(response).await
+    }
+
+    async fn request_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/season/{}/{}", ANIME_URL, query.year, query.season))
+            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        handle_response(response).await
     }
 }
 
@@ -245,5 +227,20 @@ impl AnimeApiClient<Oauth> {
             AnimeApiError::new(format!("Failed to parse AnimeList result: {}", err))
         })?;
         Ok(result)
+    }
+}
+
+async fn handle_response(response: reqwest::Response) -> Result<String, Box<dyn Error>> {
+    match response.status() {
+        reqwest::StatusCode::OK => {
+            let content = response.text().await.map_err(|err| {
+                AnimeApiError::new(format!("Failed to get content from response: {}", err))
+            })?;
+            Ok(content)
+        }
+        _ => Err(Box::new(AnimeApiError::new(format!(
+            "Did not recieve OK response: {}",
+            response.status()
+        )))),
     }
 }

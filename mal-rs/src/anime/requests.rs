@@ -3,7 +3,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use super::{responses::AnimeFieldsEnum, error::AnimeApiError};
+use super::{error::AnimeApiError, responses::AnimeFieldsEnum};
 
 #[derive(Debug, Serialize)]
 pub struct GetAnimeList {
@@ -14,9 +14,16 @@ pub struct GetAnimeList {
 }
 
 impl GetAnimeList {
-    pub fn new(q: String, limit: u8, offset: u32, fields: AnimeFields) -> Result<Self, AnimeApiError> {
+    pub fn new(
+        q: String,
+        limit: u8,
+        offset: u32,
+        fields: AnimeFields,
+    ) -> Result<Self, AnimeApiError> {
         if limit > 100 || limit < 1 {
-            return Err(AnimeApiError::new("Limit must be between 1 and 100 inclusive".to_string()));
+            return Err(AnimeApiError::new(
+                "Limit must be between 1 and 100 inclusive".to_string(),
+            ));
         }
 
         Ok(Self {
@@ -76,6 +83,25 @@ pub enum Season {
     FALL,
 }
 
+impl std::fmt::Display for Season {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::WINTER => {
+                write!(f, "winter")
+            }
+            Self::FALL => {
+                write!(f, "fall")
+            }
+            Self::SUMMER => {
+                write!(f, "summer")
+            }
+            Self::SPRING => {
+                write!(f, "spring")
+            }
+        }
+    }
+}
+
 #[derive(Debug, Serialize)]
 pub enum SeasonalAnimeSort {
     #[serde(rename = "anime_score")]
@@ -86,8 +112,8 @@ pub enum SeasonalAnimeSort {
 
 #[derive(Debug, Serialize)]
 pub struct GetSeasonalAnime {
-    year: u8,
-    season: Season,
+    pub(crate) year: u8,
+    pub(crate) season: Season,
     sort: SeasonalAnimeSort,
     limit: u16,
     offset: u32,
