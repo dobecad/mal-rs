@@ -15,7 +15,7 @@ impl GetMangaList {
         q: String,
         limit: u8,
         offset: u32,
-        fields: MangaFields,
+        fields: &MangaFields,
     ) -> Result<Self, MangaApiError> {
         if limit > 100 || limit < 1 {
             return Err(MangaApiError::new(
@@ -88,11 +88,11 @@ pub struct GetUserMangaList {
 
 pub struct MangaFields(pub Vec<MangaFieldsEnum>);
 
-impl Into<String> for MangaFields {
+impl Into<String> for &MangaFields {
     fn into(self) -> String {
         let result = self
             .0
-            .into_iter()
+            .iter()
             .map(|e| format!("{:?}", e))
             .collect::<Vec<String>>()
             .join(",");
