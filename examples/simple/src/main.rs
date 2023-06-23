@@ -4,7 +4,7 @@ use dotenv;
 use mal_rs::{
     anime::{
         api::{AnimeApi, AnimeApiClient},
-        requests::{AnimeFields, GetAnimeList},
+        requests::{AnimeFields, GetAnimeList, GetUserAnimeList, AnimeStatus, UserAnimeListSort},
         responses::AnimeFieldsEnum,
     },
     oauth::ClientId,
@@ -30,7 +30,7 @@ async fn main() {
         AnimeFieldsEnum::num_episodes,
         AnimeFieldsEnum::title,
     ]);
-    let query = GetAnimeList::new("one".to_string(), 5, 0, fields).unwrap();
+    let query = GetAnimeList::new("one".to_string(), 5, 0, &fields).unwrap();
     let result = api_client.get_anime_list(query).await.unwrap();
     println!("Result: {:?}", result);
 
