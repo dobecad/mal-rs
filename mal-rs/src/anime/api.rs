@@ -1,5 +1,6 @@
 // Wrapper for Anime API endpoint
 use super::error::AnimeApiError;
+use super::requests::GetUserAnimeList;
 use async_trait::async_trait;
 use oauth2::AccessToken;
 use oauth2::ClientId;
@@ -7,6 +8,7 @@ use serde::Serialize;
 use std::marker::PhantomData;
 
 use crate::ANIME_URL;
+use crate::USER_URL;
 use std::error::Error;
 
 use super::{
@@ -65,6 +67,8 @@ pub trait Request {
     async fn request_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>>;
 
     async fn request_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>>;
+
+    async fn request_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>>;
 }
 
 #[async_trait]
@@ -74,7 +78,7 @@ pub trait AnimeApi {
     async fn get_anime_list(&self, query: GetAnimeList) -> Result<AnimeList, Box<dyn Error>> {
         let response = self.get_self().request(query).await?;
         let result: AnimeList = serde_json::from_str(response.as_str()).map_err(|err| {
-            AnimeApiError::new(format!("Failed to parse AnimeList result: {}", err))
+            AnimeApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
         Ok(result)
     }
@@ -85,7 +89,7 @@ pub trait AnimeApi {
     ) -> Result<AnimeDetails, Box<dyn Error>> {
         let response = self.get_self().request_details(query).await?;
         let result: AnimeDetails = serde_json::from_str(response.as_str()).map_err(|err| {
-            AnimeApiError::new(format!("Failed to parse AnimeList result: {}", err))
+            AnimeApiError::new(format!("Failed to parse Anime Details result: {}", err))
         })?;
         Ok(result)
     }
@@ -96,7 +100,7 @@ pub trait AnimeApi {
     ) -> Result<AnimeRanking, Box<dyn Error>> {
         let response = self.get_self().request(query).await?;
         let result: AnimeRanking = serde_json::from_str(response.as_str()).map_err(|err| {
-            AnimeApiError::new(format!("Failed to parse AnimeList result: {}", err))
+            AnimeApiError::new(format!("Failed to parse Anime Ranking result: {}", err))
         })?;
         Ok(result)
     }
@@ -107,7 +111,15 @@ pub trait AnimeApi {
     ) -> Result<SeasonalAnime, Box<dyn Error>> {
         let response = self.get_self().request(query).await?;
         let result: SeasonalAnime = serde_json::from_str(response.as_str()).map_err(|err| {
-            AnimeApiError::new(format!("Failed to parse AnimeList result: {}", err))
+            AnimeApiError::new(format!("Failed to parse Seasonal Anime result: {}", err))
+        })?;
+        Ok(result)
+    }
+
+    async fn get_user_anime_list(&self, query: GetUserAnimeList) -> Result<AnimeList, Box<dyn Error>> {
+        let response = self.get_self().request_user(query).await?;
+        let result: AnimeList = serde_json::from_str(response.as_str()).map_err(|err| {
+            AnimeApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
         Ok(result)
     }
@@ -155,6 +167,18 @@ impl Request for AnimeApiClient<Client> {
 
         handle_response(response).await
     }
+
+    async fn request_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/{}", USER_URL, query.user_name))
+            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        handle_response(response).await
+    }
 }
 
 #[async_trait]
@@ -178,7 +202,7 @@ impl Request for AnimeApiClient<Oauth> {
         let response = self
             .client
             .get(format!("{}/{}", ANIME_URL, query.anime_id))
-            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+            .bearer_auth(&self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
             .await?;
@@ -190,7 +214,19 @@ impl Request for AnimeApiClient<Oauth> {
         let response = self
             .client
             .get(format!("{}/season/{}/{}", ANIME_URL, query.year, query.season))
-            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+            .bearer_auth(&self.access_token.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        handle_response(response).await
+    }
+
+    async fn request_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/{}", USER_URL, query.user_name))
+            .bearer_auth(&self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
             .await?;
@@ -224,7 +260,7 @@ impl AnimeApiClient<Oauth> {
     ) -> Result<SuggestedAnime, Box<dyn Error>> {
         let response = self.request(query).await?;
         let result: SuggestedAnime = serde_json::from_str(response.as_str()).map_err(|err| {
-            AnimeApiError::new(format!("Failed to parse AnimeList result: {}", err))
+            AnimeApiError::new(format!("Failed to parse Suggested Anime result: {}", err))
         })?;
         Ok(result)
     }

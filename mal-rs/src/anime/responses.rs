@@ -14,6 +14,9 @@ pub struct AnimeList {
 #[derive(Debug, Deserialize)]
 pub struct AnimeListNode {
     node: AnimeFields,
+
+    /// This field is only present when querying for a User's anime list
+    list_status: Option<ListStatus>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -51,7 +54,7 @@ pub enum Status {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct MyListStatus {
+pub struct ListStatus {
     status: Option<super::requests::AnimeStatus>,
     score: u8,
     num_episodes_watched: u32,
@@ -155,7 +158,7 @@ pub struct AnimeFields {
     updated_at: Option<String>,
     media_type: Option<MediaType>,
     status: Option<Status>,
-    my_list_status: Option<MyListStatus>,
+    my_list_status: Option<ListStatus>,
     num_episodes: Option<u32>,
     start_season: Option<StartSeason>,
     broadcast: Option<Broadcast>,

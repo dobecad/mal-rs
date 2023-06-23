@@ -18,7 +18,7 @@ impl GetAnimeList {
         q: String,
         limit: u8,
         offset: u32,
-        fields: AnimeFields,
+        fields: &AnimeFields,
     ) -> Result<Self, AnimeApiError> {
         if limit > 100 || limit < 1 {
             return Err(AnimeApiError::new(
@@ -39,6 +39,15 @@ impl GetAnimeList {
 pub struct GetAnimeDetails {
     pub(crate) anime_id: u32,
     fields: String, // TODO: Create Enum for fields?
+}
+
+impl GetAnimeDetails {
+    pub fn new(anime_id: u32, fields: &AnimeFields) -> Self {
+        Self {
+            anime_id,
+            fields: fields.into(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -71,7 +80,29 @@ pub struct GetAnimeRanking {
     fields: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl GetAnimeRanking {
+    pub fn new(
+        ranking_type: RankingType,
+        limit: u16,
+        offset: u32,
+        fields: &AnimeFields,
+    ) -> Result<Self, AnimeApiError> {
+        if limit < 1 || limit > 500 {
+            return Err(AnimeApiError::new(
+                "Limit must be between 1 and 500 inclusive".to_string(),
+            ));
+        }
+
+        Ok(Self {
+            ranking_type,
+            limit,
+            offset,
+            fields: fields.into(),
+        })
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Season {
     #[serde(rename = "winter")]
     WINTER,
@@ -112,12 +143,38 @@ pub enum SeasonalAnimeSort {
 
 #[derive(Debug, Serialize)]
 pub struct GetSeasonalAnime {
-    pub(crate) year: u8,
+    pub(crate) year: u16,
     pub(crate) season: Season,
     sort: SeasonalAnimeSort,
     limit: u16,
     offset: u32,
     fields: String,
+}
+
+impl GetSeasonalAnime {
+    pub fn new(
+        year: u16,
+        season: Season,
+        sort: SeasonalAnimeSort,
+        limit: u16,
+        offset: u32,
+        fields: &AnimeFields,
+    ) -> Result<Self, AnimeApiError> {
+        if limit < 1 || limit > 500 {
+            return Err(AnimeApiError::new(
+                "Limit must be between 1 and 500 inclusive".to_string(),
+            ));
+        }
+
+        Ok(Self {
+            year,
+            season,
+            sort,
+            limit,
+            offset,
+            fields: fields.into(),
+        })
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -127,7 +184,23 @@ pub struct GetSuggestedAnime {
     fields: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl GetSuggestedAnime {
+    pub fn new(limit: u16, offset: u32, fields: &AnimeFields) -> Result<Self, AnimeApiError> {
+        if limit < 1 || limit > 100 {
+            return Err(AnimeApiError::new(
+                "Limit must be between 1 and 100 inclusive".to_string(),
+            ));
+        }
+
+        Ok(Self {
+            limit,
+            offset,
+            fields: fields.into(),
+        })
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum AnimeStatus {
     #[serde(rename = "watching")]
     WATCHING,
@@ -157,20 +230,46 @@ pub enum UserAnimeListSort {
 
 #[derive(Debug, Serialize)]
 pub struct GetUserAnimeList {
-    user_name: String,
+    pub(crate) user_name: String,
     status: AnimeStatus,
     sort: UserAnimeListSort,
     limit: u16,
     offset: u32,
 }
 
+impl GetUserAnimeList {
+    /// Note: `user_name` should be the targets user name, or `@me` as a shortcut for yourself
+    pub fn new(
+        user_name: String,
+        status: AnimeStatus,
+        sort: UserAnimeListSort,
+        limit: u16,
+        offset: u32,
+    ) -> Result<Self, AnimeApiError> {
+        if limit < 1 || limit > 1000 {
+            return Err(AnimeApiError::new(
+                "Limit must be between 1 and 1000 inclusive".to_string(),
+            ));
+        }
+
+        Ok(Self {
+            user_name,
+            status,
+            sort,
+            limit,
+            offset,
+        })
+    }
+}
+
+#[derive(Debug)]
 pub struct AnimeFields(pub Vec<AnimeFieldsEnum>);
 
-impl Into<String> for AnimeFields {
+impl<'a> Into<String> for &'a AnimeFields {
     fn into(self) -> String {
         let result = self
             .0
-            .into_iter()
+            .iter()
             .map(|e| format!("{:?}", e))
             .collect::<Vec<String>>()
             .join(",");
