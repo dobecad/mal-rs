@@ -28,24 +28,13 @@ impl UserApiClient {
     {
         let response = self
             .client
-            .get(USER_URL)
+            .get(format!("{}/@me", USER_URL))
             .bearer_auth(&self.access_token)
             .query(&query)
             .send()
             .await?;
 
-        match response.status() {
-            reqwest::StatusCode::OK => {
-                let content = response.text().await.map_err(|err| {
-                    UserApiError::new(format!("Failed to get content from response: {}", err))
-                })?;
-                Ok(content)
-            }
-            _ => Err(Box::new(UserApiError::new(format!(
-                "Did not recieve OK response: {}",
-                response.status()
-            )))),
-        }
+        handle_response(response).await
     }
 
     pub async fn get_my_user_information(
@@ -57,5 +46,22 @@ impl UserApiClient {
             UserApiError::new(format!("Failed to parse AnimeList result: {}", err))
         })?;
         Ok(result)
+    }
+
+}
+
+
+async fn handle_response(response: reqwest::Response) -> Result<String, Box<dyn Error>> {
+    match response.status() {
+        reqwest::StatusCode::OK => {
+            let content = response.text().await.map_err(|err| {
+                UserApiError::new(format!("Failed to get content from response: {}", err))
+            })?;
+            Ok(content)
+        }
+        _ => Err(Box::new(UserApiError::new(format!(
+            "Did not recieve OK response: {}",
+            response.status()
+        )))),
     }
 }
