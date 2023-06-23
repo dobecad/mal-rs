@@ -230,6 +230,7 @@ pub enum UserAnimeListSort {
 
 #[derive(Debug, Serialize)]
 pub struct GetUserAnimeList {
+    #[serde(skip_serializing)]
     pub(crate) user_name: String,
     status: AnimeStatus,
     sort: UserAnimeListSort,
