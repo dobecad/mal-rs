@@ -1,7 +1,9 @@
 // Structs for deserializing Anime Endpoint responses
 #![allow(dead_code)]
 
-use crate::common::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW, PagingIter};
+use crate::common::{
+    AlternativeTitles, Genre, MainPicture, Paging, PagingIter, RelationType, NSFW,
+};
 use enum_from_struct::EnumFromStruct;
 use serde::Deserialize;
 
@@ -229,19 +231,34 @@ pub struct Ranking {
 
 #[derive(Debug, Deserialize)]
 pub struct AnimeRanking {
-    #[serde(flatten)]
-    shared_fields: AnimeFields,
+    data: Vec<AnimeRankingNode>,
+    paging: Paging,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AnimeRankingNode {
+    node: AnimeFields,
     ranking: Ranking,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct SeasonalAnime {
-    #[serde(flatten)]
-    shared_fields: AnimeFields,
+    data: Vec<SeasonalAnimeNode>,
+    paging: Paging,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SeasonalAnimeNode {
+    node: AnimeFields,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct SuggestedAnime {
-    #[serde(flatten)]
-    shared_fields: AnimeFields,
+    data: Vec<SuggestedAnimeNode>,
+    paging: Paging,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SuggestedAnimeNode {
+    node: AnimeFields,
 }

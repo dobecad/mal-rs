@@ -14,6 +14,9 @@ pub struct MangaList {
 #[derive(Debug, Deserialize)]
 pub struct MangaListNode {
     node: MangaFields,
+
+    /// This field is only present when querying for a User's anime list
+    list_status: Option<ListStatus>,
 }
 
 // Wrap everything in Options since user controls what fields should be returned
