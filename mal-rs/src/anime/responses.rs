@@ -1,7 +1,7 @@
 // Structs for deserializing Anime Endpoint responses
 #![allow(dead_code)]
 
-use crate::common::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW};
+use crate::common::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW, PagingIter};
 use enum_from_struct::EnumFromStruct;
 use serde::Deserialize;
 
@@ -9,6 +9,18 @@ use serde::Deserialize;
 pub struct AnimeList {
     data: Vec<AnimeListNode>,
     paging: Paging,
+}
+
+impl PagingIter for AnimeList {
+    type Item = Self;
+
+    fn next_page(&self) -> &Option<String> {
+        &self.paging.next
+    }
+
+    fn prev_page(&self) -> &Option<String> {
+        &self.paging.previous
+    }
 }
 
 #[derive(Debug, Deserialize)]
