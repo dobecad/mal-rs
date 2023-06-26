@@ -151,7 +151,10 @@ impl Request for AnimeApiClient<Client> {
     async fn request_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
-            .get(format!("{}/season/{}/{}", ANIME_URL, query.year, query.season))
+            .get(format!(
+                "{}/season/{}/{}",
+                ANIME_URL, query.year, query.season
+            ))
             .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
             .query(&query)
             .send()
@@ -205,7 +208,10 @@ impl Request for AnimeApiClient<Oauth> {
     async fn request_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
-            .get(format!("{}/season/{}/{}", ANIME_URL, query.year, query.season))
+            .get(format!(
+                "{}/season/{}/{}",
+                ANIME_URL, query.year, query.season
+            ))
             .bearer_auth(&self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
@@ -237,9 +243,14 @@ impl AnimeApi for AnimeApiClient<Client> {
 }
 
 impl AnimeApiClient<Client> {
-    pub async fn get_user_anime_list(&self, query: GetUserAnimeList) -> Result<AnimeList, Box<dyn Error>> {
+    pub async fn get_user_anime_list(
+        &self,
+        query: GetUserAnimeList,
+    ) -> Result<AnimeList, Box<dyn Error>> {
         if query.user_name == "@me".to_string() {
-            return Err(Box::new(AnimeApiError::new("You can only get your list via an Oauth client".to_string())));
+            return Err(Box::new(AnimeApiError::new(
+                "You can only get your list via an Oauth client".to_string(),
+            )));
         }
         let response = self.get_self().request_user(query).await?;
         let result: AnimeList = serde_json::from_str(response.as_str()).map_err(|err| {
@@ -270,7 +281,10 @@ impl AnimeApiClient<Oauth> {
         Ok(result)
     }
 
-    pub async fn get_user_anime_list(&self, query: GetUserAnimeList) -> Result<AnimeList, Box<dyn Error>> {
+    pub async fn get_user_anime_list(
+        &self,
+        query: GetUserAnimeList,
+    ) -> Result<AnimeList, Box<dyn Error>> {
         let response = self.get_self().request_user(query).await?;
         let result: AnimeList = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Anime List result: {}", err))
