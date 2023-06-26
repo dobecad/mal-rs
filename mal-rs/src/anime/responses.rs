@@ -1,7 +1,7 @@
 // Structs for deserializing Anime Endpoint responses
 #![allow(dead_code)]
 
-use crate::common_fields::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW};
+use crate::common::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW};
 use enum_from_struct::EnumFromStruct;
 use serde::Deserialize;
 

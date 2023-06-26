@@ -1,7 +1,7 @@
 // Structs for deserializing Manga Endpoint responses
 #![allow(dead_code)]
 
-use crate::common_fields::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW};
+use crate::common::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW};
 use serde::Deserialize;
 use enum_from_struct::EnumFromStruct;
 

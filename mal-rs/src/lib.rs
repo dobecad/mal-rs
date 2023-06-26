@@ -2,7 +2,7 @@ pub mod anime;
 pub mod manga;
 pub mod oauth;
 pub mod user;
-pub mod common_fields;
+pub mod common;
 
 use serde::{Deserialize};
 
