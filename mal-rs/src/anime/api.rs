@@ -5,10 +5,12 @@ use async_trait::async_trait;
 use oauth2::AccessToken;
 use oauth2::ClientId;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 use std::marker::PhantomData;
 
 use crate::ANIME_URL;
 use crate::USER_URL;
+use crate::common::PagingIter;
 use std::error::Error;
 
 use super::{
@@ -69,6 +71,8 @@ pub trait Request {
     async fn request_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>>;
 
     async fn request_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>>;
+
+    async fn request_next_or_prev(&self, query: &Option<String>) -> Result<String, Box<dyn Error>>;
 }
 
 #[async_trait]
@@ -112,6 +116,30 @@ pub trait AnimeApi {
         let response = self.get_self().request(query).await?;
         let result: SeasonalAnime = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Seasonal Anime result: {}", err))
+        })?;
+        Ok(result)
+    }
+
+    async fn next<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>> 
+    where
+        T: DeserializeOwned,
+        U: PagingIter + Sync + Send
+    {
+        let response = self.get_self().request_next_or_prev(response.next_page()).await?;
+        let result: T = serde_json::from_str(response.as_str()).map_err(|err| {
+            AnimeApiError::new(format!("Failed to fetch next page: {}", err))
+        })?;
+        Ok(result)
+    }
+
+    async fn prev<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>> 
+    where
+        T: DeserializeOwned,
+        U: PagingIter + Sync + Send
+    {
+        let response = self.get_self().request_next_or_prev(response.prev_page()).await?;
+        let result: T = serde_json::from_str(response.as_str()).map_err(|err| {
+            AnimeApiError::new(format!("Failed to fetch next page: {}", err))
         })?;
         Ok(result)
     }
@@ -174,6 +202,21 @@ impl Request for AnimeApiClient<Client> {
 
         handle_response(response).await
     }
+
+    async fn request_next_or_prev(&self, query: &Option<String>) -> Result<String, Box<dyn Error>> {
+        if let Some(itr) = query {
+            let response = self
+                .client
+                .get(itr)
+                .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+                .send()
+                .await?;
+    
+            handle_response(response).await
+        } else {
+            Err(Box::new(AnimeApiError::new("Page does not exist".to_string())))
+        }
+    }
 }
 
 #[async_trait]
@@ -230,6 +273,21 @@ impl Request for AnimeApiClient<Oauth> {
             .await?;
 
         handle_response(response).await
+    }
+
+    async fn request_next_or_prev(&self, query: &Option<String>) -> Result<String, Box<dyn Error>> {
+        if let Some(itr) = query {
+            let response = self
+                .client
+                .get(itr)
+                .bearer_auth(&self.access_token.as_ref().unwrap())
+                .send()
+                .await?;
+    
+            handle_response(response).await
+        } else {
+            Err(Box::new(AnimeApiError::new("Page does not exist".to_string())))
+        }
     }
 }
 
