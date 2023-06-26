@@ -1,9 +1,9 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Paging {
-    previous: Option<String>,
-    next: String,
+    pub previous: Option<String>,
+    pub next: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -53,4 +53,12 @@ pub enum RelationType {
     SUMMARY,
     #[serde(rename = "full_story")]
     FULLSTORY,
+}
+
+pub trait PagingIter {
+    type Item;
+
+    fn next_page(&self) -> &Option<String>;
+
+    fn prev_page(&self) -> &Option<String>;
 }
