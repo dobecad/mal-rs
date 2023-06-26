@@ -236,6 +236,7 @@ pub struct GetUserAnimeList {
     sort: UserAnimeListSort,
     limit: u16,
     offset: u32,
+    fields: String,
 }
 
 impl GetUserAnimeList {
@@ -246,6 +247,7 @@ impl GetUserAnimeList {
         sort: UserAnimeListSort,
         limit: u16,
         offset: u32,
+        fields: &AnimeFields,
     ) -> Result<Self, AnimeApiError> {
         if limit < 1 || limit > 1000 {
             return Err(AnimeApiError::new(
@@ -259,6 +261,7 @@ impl GetUserAnimeList {
             sort,
             limit,
             offset,
+            fields: fields.into(),
         })
     }
 }

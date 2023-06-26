@@ -1,5 +1,6 @@
 // Wrapper for Manga API endpoint
 use super::error::MangaApiError;
+use super::requests::GetUserMangaList;
 use async_trait::async_trait;
 use oauth2::AccessToken;
 use oauth2::ClientId;
@@ -7,6 +8,7 @@ use serde::Serialize;
 use std::marker::PhantomData;
 
 use crate::MANGA_URL;
+use crate::USER_URL;
 use std::error::Error;
 
 use super::{
@@ -61,6 +63,8 @@ pub trait Request {
         T: Serialize + std::marker::Send + std::marker::Sync;
 
     async fn request_details(&self, query: GetMangaDetails) -> Result<String, Box<dyn Error>>;
+
+    async fn request_user(&self, query: GetUserMangaList) -> Result<String, Box<dyn Error>>;
 }
 
 #[async_trait]
@@ -113,6 +117,29 @@ impl Request for MangaApiClient<Client> {
             )))),
         }
     }
+
+    async fn request_user(&self, query: GetUserMangaList) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/{}/mangalist", USER_URL, query.user_name))
+            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        match response.status() {
+            reqwest::StatusCode::OK => {
+                let content = response.text().await.map_err(|err| {
+                    MangaApiError::new(format!("Failed to get content from response: {}", err))
+                })?;
+                Ok(content)
+            }
+            _ => Err(Box::new(MangaApiError::new(format!(
+                "Did not recieve OK response: {}",
+                response.status()
+            )))),
+        }
+    }
 }
 
 #[async_trait]
@@ -147,7 +174,30 @@ impl Request for MangaApiClient<Oauth> {
         let response = self
             .client
             .get(format!("{}/{}", MANGA_URL, query.manga_id))
-            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+            .bearer_auth(self.client_id.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        match response.status() {
+            reqwest::StatusCode::OK => {
+                let content = response.text().await.map_err(|err| {
+                    MangaApiError::new(format!("Failed to get content from response: {}", err))
+                })?;
+                Ok(content)
+            }
+            _ => Err(Box::new(MangaApiError::new(format!(
+                "Did not recieve OK response: {}",
+                response.status()
+            )))),
+        }
+    }
+
+    async fn request_user(&self, query: GetUserMangaList) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/{}/mangalist", USER_URL, query.user_name))
+            .bearer_auth(self.client_id.as_ref().unwrap())
             .query(&query)
             .send()
             .await?;
@@ -201,6 +251,22 @@ pub trait MangaApi {
         Ok(result)
     }
 
+    async fn get_user_manga_list(
+        &self,
+        query: GetUserMangaList,
+    ) -> Result<MangaList, Box<dyn Error>> {
+        if query.user_name == "@me".to_string() {
+            return Err(Box::new(MangaApiError::new(
+                "You can only get your list via an Oauth client".to_string(),
+            )));
+        }
+        let response = self.get_self().request_user(query).await?;
+        let result: MangaList = serde_json::from_str(response.as_str()).map_err(|err| {
+            MangaApiError::new(format!("Failed to parse Anime List result: {}", err))
+        })?;
+        Ok(result)
+    }
+
     fn get_self(&self) -> &Self::State;
 }
 
@@ -219,5 +285,16 @@ impl MangaApi for MangaApiClient<Oauth> {
 
     fn get_self(&self) -> &Self::State {
         self
+    }
+
+    async fn get_user_manga_list(
+        &self,
+        query: GetUserMangaList,
+    ) -> Result<MangaList, Box<dyn Error>> {
+        let response = self.get_self().request_user(query).await?;
+        let result: MangaList = serde_json::from_str(response.as_str()).map_err(|err| {
+            MangaApiError::new(format!("Failed to parse Anime List result: {}", err))
+        })?;
+        Ok(result)
     }
 }

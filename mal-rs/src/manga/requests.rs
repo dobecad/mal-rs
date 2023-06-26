@@ -93,29 +93,42 @@ impl GetMangaRanking {
 
 #[derive(Debug, Serialize)]
 pub enum UserMangaListStatus {
+    #[serde(rename = "reading")]
     READING,
+    #[serde(rename = "completed")]
     COMPLETED,
+    #[serde(rename = "on_hold")]
     ONHOLD,
+    #[serde(rename = "dropped")]
     DROPPED,
+    #[serde(rename = "plan_to_read")]
     PLANTOREAD,
 }
 
 #[derive(Debug, Serialize)]
 pub enum UserMangaListSort {
+    #[serde(rename = "list_score")]
     LISTSCORE,
+    #[serde(rename = "list_updated_at")]
     LISTUPDATEDAT,
+    #[serde(rename = "manga_title")]
     MANGATITLE,
+    #[serde(rename = "manga_start_date")]
     MANGASTARTDATE,
-    MANGAID,
+    // TODO: This sort option is still under development according to MAL API reference
+    // #[serde(rename = "manga_id")]
+    // MANGAID,
 }
 
 #[derive(Debug, Serialize)]
 pub struct GetUserMangaList {
-    user_name: String,
+    #[serde(skip_serializing)]
+    pub(crate) user_name: String,
     status: UserMangaListStatus,
     sort: UserMangaListSort,
     limit: u16,
     offset: u32,
+    fields: String,
 }
 
 impl GetUserMangaList {
@@ -125,6 +138,7 @@ impl GetUserMangaList {
         sort: UserMangaListSort,
         limit: u16,
         offset: u32,
+        fields: &MangaFields,
     ) -> Result<Self, MangaApiError> {
         if limit < 1 || limit > 1000 {
             return Err(MangaApiError::new(
@@ -138,6 +152,7 @@ impl GetUserMangaList {
             sort,
             limit,
             offset,
+            fields: fields.into(),
         })
     }
 }
