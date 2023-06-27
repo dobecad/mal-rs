@@ -50,15 +50,15 @@ impl GetMangaDetails {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum MangaRankingType {
-    ALL,
-    MANGA,
-    NOVELS,
-    ONESHOTS,
-    DOUJIN,
-    MANHWA,
-    MANHUA,
-    BYPOPULARITY,
-    FAVORITE,
+    All,
+    Manga,
+    Novels,
+    Oneshots,
+    Doujin,
+    Manhwa,
+    Manhua,
+    ByPopularity,
+    Favorite,
 }
 
 #[derive(Debug, Serialize)]
@@ -92,32 +92,24 @@ impl GetMangaRanking {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum UserMangaListStatus {
-    #[serde(rename = "reading")]
-    READING,
-    #[serde(rename = "completed")]
-    COMPLETED,
-    #[serde(rename = "on_hold")]
-    ONHOLD,
-    #[serde(rename = "dropped")]
-    DROPPED,
-    #[serde(rename = "plan_to_read")]
-    PLANTOREAD,
+    Reading,
+    Completed,
+    OnHold,
+    Dropped,
+    PlanToRead,
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum UserMangaListSort {
-    #[serde(rename = "list_score")]
-    LISTSCORE,
-    #[serde(rename = "list_updated_at")]
-    LISTUPDATEDAT,
-    #[serde(rename = "manga_title")]
-    MANGATITLE,
-    #[serde(rename = "manga_start_date")]
-    MANGASTARTDATE,
+    ListScore,
+    ListUpdatedAt,
+    MangaTitle,
+    MangaStartDate,
     // TODO: This sort option is still under development according to MAL API reference
-    // #[serde(rename = "manga_id")]
-    // MANGAID,
+    // MangaId,
 }
 
 #[derive(Debug, Serialize)]

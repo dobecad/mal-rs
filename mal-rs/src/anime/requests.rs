@@ -37,6 +37,7 @@ impl GetAnimeList {
 
 #[derive(Debug, Serialize)]
 pub struct GetAnimeDetails {
+    #[serde(skip_serializing)]
     pub(crate) anime_id: u32,
     fields: String, // TODO: Create Enum for fields?
 }
@@ -51,25 +52,17 @@ impl GetAnimeDetails {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum RankingType {
-    #[serde(rename = "all")]
-    ALL,
-    #[serde(rename = "airing")]
-    AIRING,
-    #[serde(rename = "upcoming")]
-    UPCOMING,
-    #[serde(rename = "tv")]
-    TV,
-    #[serde(rename = "ova")]
-    OVA,
-    #[serde(rename = "movie")]
-    MOVIE,
-    #[serde(rename = "special")]
-    SPECIAL,
-    #[serde(rename = "bypopularity")]
-    BYPOPULARITY,
-    #[serde(rename = "favorite")]
-    FAVORITE,
+    All,
+    Airing,
+    Upcoming,
+    Tv,
+    Ova,
+    Movie,
+    Special,
+    ByPopularity,
+    Favorite,
 }
 
 #[derive(Debug, Serialize)]
@@ -103,30 +96,27 @@ impl GetAnimeRanking {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "lowercase")]
 pub enum Season {
-    #[serde(rename = "winter")]
-    WINTER,
-    #[serde(rename = "spring")]
-    SPRING,
-    #[serde(rename = "summer")]
-    SUMMER,
-    #[serde(rename = "fall")]
-    FALL,
+    Winter,
+    Spring,
+    Summer,
+    Fall,
 }
 
 impl std::fmt::Display for Season {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::WINTER => {
+            Self::Winter => {
                 write!(f, "winter")
             }
-            Self::FALL => {
+            Self::Fall => {
                 write!(f, "fall")
             }
-            Self::SUMMER => {
+            Self::Summer => {
                 write!(f, "summer")
             }
-            Self::SPRING => {
+            Self::Spring => {
                 write!(f, "spring")
             }
         }
@@ -134,16 +124,17 @@ impl std::fmt::Display for Season {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum SeasonalAnimeSort {
-    #[serde(rename = "anime_score")]
-    ANIMESCORE,
-    #[serde(rename = "anime_num_list_users")]
-    ANIMENUMLISTUSERS,
+    AnimeScore,
+    AnimeNumListUsers,
 }
 
 #[derive(Debug, Serialize)]
 pub struct GetSeasonalAnime {
+    #[serde(skip_serializing)]
     pub(crate) year: u16,
+    #[serde(skip_serializing)]
     pub(crate) season: Season,
     sort: SeasonalAnimeSort,
     limit: u16,
@@ -201,31 +192,24 @@ impl GetSuggestedAnime {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "snake_case")]
 pub enum AnimeStatus {
-    #[serde(rename = "watching")]
-    WATCHING,
-    #[serde(rename = "completed")]
-    COMPLETED,
-    #[serde(rename = "on_hold")]
-    ONHOLD,
-    #[serde(rename = "dropped")]
-    DROPPED,
-    #[serde(rename = "plan_to_watch")]
-    PLANTOWATCH,
+    Watching,
+    Completed,
+    OnHold,
+    Dropped,
+    PlanToWatch,
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum UserAnimeListSort {
-    #[serde(rename = "list_score")]
-    LISTSCORE,
-    #[serde(rename = "list_updated_at")]
-    LISTUPDATEDAT,
-    #[serde(rename = "anime_title")]
-    ANIMETITLE,
-    #[serde(rename = "anime_start_date")]
-    ANIMESTARTDATE,
-    #[serde(rename = "anime_id")]
-    ANIMEID,
+    ListScore,
+    ListUpdatedAt,
+    AnimeTitle,
+    AnimeStartDate,
+    // TODO: This sort option is still under development according to MAL API reference
+    // AnimeId,
 }
 
 #[derive(Debug, Serialize)]
