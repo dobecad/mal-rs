@@ -40,31 +40,23 @@ pub struct AnimePicture {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum MediaType {
-    #[serde(rename = "unknown")]
-    UNKNOWN,
-    #[serde(rename = "tv")]
-    TV,
-    #[serde(rename = "ova")]
-    OVA,
-    #[serde(rename = "movie")]
-    MOVIE,
-    #[serde(rename = "special")]
-    SPECIAL,
-    #[serde(rename = "ona")]
-    ONA,
-    #[serde(rename = "music")]
-    MUSIC,
+    Unknown,
+    Tv,
+    Ova,
+    Movie,
+    Special,
+    Ona,
+    Music,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Status {
-    #[serde(rename = "finished_airing")]
-    FINISHEDAIRING,
-    #[serde(rename = "currently_airing")]
-    CURRENTLYAIRING,
-    #[serde(rename = "not_yet_aired")]
-    NOTYETAIRED,
+    FinishedAiring,
+    CurrentlyAiring,
+    NotYetAired,
 }
 
 #[derive(Debug, Deserialize)]
@@ -96,52 +88,36 @@ pub struct Broadcast {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Source {
-    #[serde(rename = "other")]
-    OTHER,
-    #[serde(rename = "original")]
-    ORIGINAL,
-    #[serde(rename = "manga")]
-    MANGA,
+    Other,
+    Original,
+    Manga,
     #[serde(rename = "4_koma_manga")]
-    KOMAMANGA,
-    #[serde(rename = "web_manga")]
-    WEBMANGA,
-    #[serde(rename = "digital_manga")]
-    DIGITALMANGA,
-    #[serde(rename = "novel")]
-    NOVEL,
-    #[serde(rename = "light_novel")]
-    LIGHTNOVEL,
-    #[serde(rename = "visual_novel")]
-    VISUALNOVEL,
-    #[serde(rename = "game")]
-    GAME,
-    #[serde(rename = "card_game")]
-    CARDGAME,
-    #[serde(rename = "book")]
-    BOOK,
-    #[serde(rename = "picture_book")]
-    PICTUREBOOK,
-    #[serde(rename = "radio")]
-    RADIO,
-    #[serde(rename = "music")]
-    MUSIC,
+    KomaManga,
+    WebManga,
+    DigitalMedia,
+    Novel,
+    LightNovel,
+    VisualNovel,
+    Game,
+    CardGame,
+    Book,
+    PictureBook,
+    Radio,
+    Music,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Rating {
-    #[serde(rename = "g")]
     G,
-    #[serde(rename = "pg")]
     PG,
     #[serde(rename = "pg_13")]
     PG13,
-    #[serde(rename = "r")]
     R,
     #[serde(rename = "r+")]
     RR,
-    #[serde(rename = "rx")]
     RX,
 }
 

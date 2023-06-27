@@ -47,33 +47,24 @@ pub struct MangaFields {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum MediaType {
-    #[serde(rename = "unknown")]
-    UNKNOWN,
-    #[serde(rename = "manga")]
-    MANGA,
-    #[serde(rename = "novel")]
-    NOVEL,
-    #[serde(rename = "oneshot")]
-    ONESHOT,
-    #[serde(rename = "doujinshi")]
-    DOUJINSHI,
-    #[serde(rename = "manhwa")]
-    MANHWA,
-    #[serde(rename = "manhua")]
-    MANHUA,
-    #[serde(rename = "oel")]
-    OEL,
+    Unknown,
+    Manga,
+    Novel,
+    Oneshot,
+    Doujinshi,
+    Manhwa,
+    Manhua,
+    Oel,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Status {
-    #[serde(rename = "finished")]
-    FINISHED,
-    #[serde(rename = "currently_published")]
-    CURRENTLYPUBLISHING,
-    #[serde(rename = "not_yet_published")]
-    NOTYETPUBLISHED,
+    Finished,
+    CurrentlyPublished,
+    NotYetPublished,
 }
 
 #[derive(Debug, Deserialize)]
@@ -90,17 +81,13 @@ pub struct AuthorDetails {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum ListStatus {
-    #[serde(rename = "reading")]
-    READING,
-    #[serde(rename = "completed")]
-    COMPLETED,
-    #[serde(rename = "on_hold")]
-    ONHOLD,
-    #[serde(rename = "dropped")]
-    DROPPED,
-    #[serde(rename = "plan_to_read")]
-    PLANTOREAD,
+    Reading,
+    Completed,
+    OnHold,
+    Dropped,
+    PlanToRead,
 }
 
 #[derive(Debug, Deserialize)]
