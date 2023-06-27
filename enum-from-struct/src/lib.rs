@@ -1,5 +1,4 @@
 use quote::quote;
-use strum_macros::EnumIter;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
 
 #[proc_macro_derive(EnumFromStruct)]
