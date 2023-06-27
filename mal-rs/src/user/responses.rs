@@ -1,8 +1,11 @@
 // Structs for deserializing User Endpoint responses
 #![allow(dead_code)]
 
-use serde::Deserialize;
 use enum_from_struct::EnumFromStruct;
+use serde::Deserialize;
+
+// This is imported for the `enum-from-struct` proc macro
+use strum_macros::EnumIter;
 
 #[derive(Debug, Deserialize, EnumFromStruct)]
 pub struct User {

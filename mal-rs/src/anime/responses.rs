@@ -7,6 +7,9 @@ use crate::common::{
 use enum_from_struct::EnumFromStruct;
 use serde::Deserialize;
 
+// This is imported for the `enum-from-struct` proc macro
+use strum_macros::EnumIter;
+
 #[derive(Debug, Deserialize)]
 pub struct AnimeList {
     data: Vec<AnimeListNode>,

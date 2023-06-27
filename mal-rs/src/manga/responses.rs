@@ -5,6 +5,9 @@ use crate::common::{AlternativeTitles, Genre, MainPicture, Paging, RelationType,
 use serde::Deserialize;
 use enum_from_struct::EnumFromStruct;
 
+// This is imported for the `enum-from-struct` proc macro
+use strum_macros::EnumIter;
+
 #[derive(Debug, Deserialize)]
 pub struct MangaList {
     data: Vec<MangaListNode>,
