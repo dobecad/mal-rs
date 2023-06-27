@@ -66,7 +66,7 @@ pub enum MediaType {
 #[serde(rename_all = "snake_case")]
 pub enum Status {
     Finished,
-    CurrentlyPublished,
+    CurrentlyPublishing,
     NotYetPublished,
 }
 
@@ -79,8 +79,8 @@ pub struct Author {
 #[derive(Debug, Deserialize)]
 pub struct AuthorDetails {
     id: u32,
-    first_name: String,
-    last_name: String,
+    first_name: Option<String>,
+    last_name: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

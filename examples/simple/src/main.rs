@@ -32,11 +32,7 @@ async fn main() {
 
     // Mangag API example
     let api_client = MangaApiClient::from(&client_id);
-    let fields = MangaFields(vec![
-        MangaFieldsEnum::id,
-        MangaFieldsEnum::num_chapters,
-        MangaFieldsEnum::title,
-    ]);
+    let fields = mal_rs::manga::all_fields();
     let query = GetMangaList::new("one".to_string(), 5, 0, &fields).unwrap();
     let result = api_client.get_manga_list(query).await.unwrap();
     println!("Result: {:?}", result);
