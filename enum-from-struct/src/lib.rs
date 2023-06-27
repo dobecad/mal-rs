@@ -1,4 +1,5 @@
 use quote::quote;
+use strum_macros::EnumIter;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
 
 #[proc_macro_derive(EnumFromStruct)]
@@ -26,7 +27,7 @@ pub fn enum_from_struct(input: proc_macro::TokenStream) -> proc_macro::TokenStre
     });
 
     let expanded = quote! {
-        #[derive(Debug)]
+        #[derive(Debug, EnumIter)]
         #[allow(non_camel_case_types)]
         pub enum #enum_name {
             #(#enum_variants,)*
