@@ -102,7 +102,7 @@ pub struct MyListStatus {
     is_rereading: bool,
     start_date: Option<String>,
     finish_date: Option<String>,
-    priority: u32,
+    priority: u8,
     num_times_reread: u32,
     reread_value: u32,
     tags: Vec<String>,

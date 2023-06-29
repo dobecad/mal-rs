@@ -7,8 +7,8 @@ use oauth2::ClientId;
 use serde::Serialize;
 use std::marker::PhantomData;
 
-use crate::MANGA_URL;
-use crate::USER_URL;
+use crate::manga::requests::{DeleteMyMangaListItem, UpdateMyMangaListStatus};
+use crate::{MANGA_URL, USER_URL};
 use std::error::Error;
 
 use super::{
@@ -81,18 +81,7 @@ impl Request for MangaApiClient<Client> {
             .send()
             .await?;
 
-        match response.status() {
-            reqwest::StatusCode::OK => {
-                let content = response.text().await.map_err(|err| {
-                    MangaApiError::new(format!("Failed to get content from response: {}", err))
-                })?;
-                Ok(content)
-            }
-            _ => Err(Box::new(MangaApiError::new(format!(
-                "Did not recieve OK response: {}",
-                response.status()
-            )))),
-        }
+        handle_response(response).await
     }
 
     async fn get_details(&self, query: GetMangaDetails) -> Result<String, Box<dyn Error>> {
@@ -104,18 +93,7 @@ impl Request for MangaApiClient<Client> {
             .send()
             .await?;
 
-        match response.status() {
-            reqwest::StatusCode::OK => {
-                let content = response.text().await.map_err(|err| {
-                    MangaApiError::new(format!("Failed to get content from response: {}", err))
-                })?;
-                Ok(content)
-            }
-            _ => Err(Box::new(MangaApiError::new(format!(
-                "Did not recieve OK response: {}",
-                response.status()
-            )))),
-        }
+        handle_response(response).await
     }
 
     async fn get_user(&self, query: GetUserMangaList) -> Result<String, Box<dyn Error>> {
@@ -127,18 +105,7 @@ impl Request for MangaApiClient<Client> {
             .send()
             .await?;
 
-        match response.status() {
-            reqwest::StatusCode::OK => {
-                let content = response.text().await.map_err(|err| {
-                    MangaApiError::new(format!("Failed to get content from response: {}", err))
-                })?;
-                Ok(content)
-            }
-            _ => Err(Box::new(MangaApiError::new(format!(
-                "Did not recieve OK response: {}",
-                response.status()
-            )))),
-        }
+        handle_response(response).await
     }
 }
 
@@ -156,18 +123,7 @@ impl Request for MangaApiClient<Oauth> {
             .send()
             .await?;
 
-        match response.status() {
-            reqwest::StatusCode::OK => {
-                let content = response.text().await.map_err(|err| {
-                    MangaApiError::new(format!("Failed to get content from response: {}", err))
-                })?;
-                Ok(content)
-            }
-            _ => Err(Box::new(MangaApiError::new(format!(
-                "Did not recieve OK response: {}",
-                response.status()
-            )))),
-        }
+        handle_response(response).await
     }
 
     async fn get_details(&self, query: GetMangaDetails) -> Result<String, Box<dyn Error>> {
@@ -179,18 +135,7 @@ impl Request for MangaApiClient<Oauth> {
             .send()
             .await?;
 
-        match response.status() {
-            reqwest::StatusCode::OK => {
-                let content = response.text().await.map_err(|err| {
-                    MangaApiError::new(format!("Failed to get content from response: {}", err))
-                })?;
-                Ok(content)
-            }
-            _ => Err(Box::new(MangaApiError::new(format!(
-                "Did not recieve OK response: {}",
-                response.status()
-            )))),
-        }
+        handle_response(response).await
     }
 
     async fn get_user(&self, query: GetUserMangaList) -> Result<String, Box<dyn Error>> {
@@ -202,18 +147,7 @@ impl Request for MangaApiClient<Oauth> {
             .send()
             .await?;
 
-        match response.status() {
-            reqwest::StatusCode::OK => {
-                let content = response.text().await.map_err(|err| {
-                    MangaApiError::new(format!("Failed to get content from response: {}", err))
-                })?;
-                Ok(content)
-            }
-            _ => Err(Box::new(MangaApiError::new(format!(
-                "Did not recieve OK response: {}",
-                response.status()
-            )))),
-        }
+        handle_response(response).await
     }
 }
 
@@ -296,5 +230,51 @@ impl MangaApi for MangaApiClient<Oauth> {
             MangaApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
         Ok(result)
+    }
+}
+
+impl MangaApiClient<Oauth> {
+    pub async fn update_manga_list_status(
+        &self,
+        query: UpdateMyMangaListStatus,
+    ) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .patch(format!("{}/{}/my_list_status", MANGA_URL, query.manga_id))
+            .bearer_auth(&self.access_token.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        handle_response(response).await
+    }
+
+    pub async fn delete_manga_list_item(
+        &self,
+        query: DeleteMyMangaListItem,
+    ) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .delete(format!("{}/{}/my_list_status", MANGA_URL, query.manga_id))
+            .bearer_auth(&self.access_token.as_ref().unwrap())
+            .send()
+            .await?;
+
+        handle_response(response).await
+    }
+}
+
+async fn handle_response(response: reqwest::Response) -> Result<String, Box<dyn Error>> {
+    match response.status() {
+        reqwest::StatusCode::OK => {
+            let content = response.text().await.map_err(|err| {
+                MangaApiError::new(format!("Failed to get content from response: {}", err))
+            })?;
+            Ok(content)
+        }
+        _ => Err(Box::new(MangaApiError::new(format!(
+            "Did not recieve OK response: {}",
+            response.status()
+        )))),
     }
 }

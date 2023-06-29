@@ -1,6 +1,6 @@
 // Structs for crafting Manga Endpoint requests
 use super::{error::MangaApiError, responses::MangaFieldsEnum};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize)]
 pub struct GetMangaList {
@@ -146,6 +146,79 @@ impl GetUserMangaList {
             offset,
             fields: fields.into(),
         })
+    }
+}
+
+#[derive(Debug, Serialize)]
+pub struct UpdateMyMangaListStatus {
+    #[serde(skip_serializing)]
+    pub(crate) manga_id: u32,
+    status: UserMangaListStatus,
+    is_rereading: bool,
+    score: u8,
+    num_volumes_read: u32,
+    num_chapters_read: u32,
+    priority: u8,
+    num_times_reread: u32,
+    reread_value: u8,
+    tags: String,
+    comments: String,
+}
+
+impl UpdateMyMangaListStatus {
+    pub fn new(
+        manga_id: u32,
+        status: UserMangaListStatus,
+        is_rereading: bool,
+        score: u8,
+        num_volumes_read: u32,
+        num_chapters_read: u32,
+        priority: u8,
+        num_times_reread: u32,
+        reread_value: u8,
+        tags: String,
+        comments: String,
+    ) -> Result<Self, MangaApiError> {
+        if score < 0 || score > 10 {
+            return Err(MangaApiError::new(
+                "Score must be between 0 and 10 inclusive".to_string(),
+            ));
+        }
+        if priority < 0 || priority > 2 {
+            return Err(MangaApiError::new(
+                "Priority must be between 0 and 2 inclusive".to_string(),
+            ));
+        }
+        if reread_value < 0 || reread_value > 5 {
+            return Err(MangaApiError::new(
+                "Reread value must be between 0 and 5 inclusive".to_string(),
+            ));
+        }
+
+        Ok(Self {
+            manga_id,
+            status,
+            is_rereading,
+            score,
+            num_volumes_read,
+            num_chapters_read,
+            priority,
+            num_times_reread,
+            reread_value,
+            tags,
+            comments,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct DeleteMyMangaListItem {
+    pub(crate) manga_id: u32,
+}
+
+impl DeleteMyMangaListItem {
+    pub fn new(manga_id: u32) -> Self {
+        Self { manga_id }
     }
 }
 
