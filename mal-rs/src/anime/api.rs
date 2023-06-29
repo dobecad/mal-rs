@@ -1,16 +1,18 @@
 // Wrapper for Anime API endpoint
 use super::error::AnimeApiError;
+use super::requests::DeleteMyAnimeListItem;
 use super::requests::GetUserAnimeList;
+use super::requests::UpdateMyAnimeListStatus;
 use async_trait::async_trait;
 use oauth2::AccessToken;
 use oauth2::ClientId;
-use serde::Serialize;
 use serde::de::DeserializeOwned;
+use serde::Serialize;
 use std::marker::PhantomData;
 
+use crate::common::PagingIter;
 use crate::ANIME_URL;
 use crate::USER_URL;
-use crate::common::PagingIter;
 use std::error::Error;
 
 use super::{
@@ -120,27 +122,31 @@ pub trait AnimeApi {
         Ok(result)
     }
 
-    async fn next<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>> 
+    async fn next<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>>
     where
         T: DeserializeOwned,
-        U: PagingIter + Sync + Send
+        U: PagingIter + Sync + Send,
     {
-        let response = self.get_self().get_next_or_prev(response.next_page()).await?;
-        let result: T = serde_json::from_str(response.as_str()).map_err(|err| {
-            AnimeApiError::new(format!("Failed to fetch next page: {}", err))
-        })?;
+        let response = self
+            .get_self()
+            .get_next_or_prev(response.next_page())
+            .await?;
+        let result: T = serde_json::from_str(response.as_str())
+            .map_err(|err| AnimeApiError::new(format!("Failed to fetch next page: {}", err)))?;
         Ok(result)
     }
 
-    async fn prev<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>> 
+    async fn prev<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>>
     where
         T: DeserializeOwned,
-        U: PagingIter + Sync + Send
+        U: PagingIter + Sync + Send,
     {
-        let response = self.get_self().get_next_or_prev(response.prev_page()).await?;
-        let result: T = serde_json::from_str(response.as_str()).map_err(|err| {
-            AnimeApiError::new(format!("Failed to fetch next page: {}", err))
-        })?;
+        let response = self
+            .get_self()
+            .get_next_or_prev(response.prev_page())
+            .await?;
+        let result: T = serde_json::from_str(response.as_str())
+            .map_err(|err| AnimeApiError::new(format!("Failed to fetch next page: {}", err)))?;
         Ok(result)
     }
 
@@ -211,10 +217,12 @@ impl Request for AnimeApiClient<Client> {
                 .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
                 .send()
                 .await?;
-    
+
             handle_response(response).await
         } else {
-            Err(Box::new(AnimeApiError::new("Page does not exist".to_string())))
+            Err(Box::new(AnimeApiError::new(
+                "Page does not exist".to_string(),
+            )))
         }
     }
 }
@@ -283,10 +291,12 @@ impl Request for AnimeApiClient<Oauth> {
                 .bearer_auth(&self.access_token.as_ref().unwrap())
                 .send()
                 .await?;
-    
+
             handle_response(response).await
         } else {
-            Err(Box::new(AnimeApiError::new("Page does not exist".to_string())))
+            Err(Box::new(AnimeApiError::new(
+                "Page does not exist".to_string(),
+            )))
         }
     }
 }
@@ -348,6 +358,35 @@ impl AnimeApiClient<Oauth> {
             AnimeApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
         Ok(result)
+    }
+
+    pub async fn update_anime_list_status(
+        &self,
+        query: UpdateMyAnimeListStatus,
+    ) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .patch(format!("{}/{}/my_list_status", ANIME_URL, query.anime_id))
+            .bearer_auth(&self.access_token.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        handle_response(response).await
+    }
+
+    pub async fn delete_anime_list_item(
+        &self,
+        query: DeleteMyAnimeListItem,
+    ) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .delete(format!("{}/{}/my_list_status", ANIME_URL, query.anime_id))
+            .bearer_auth(&self.access_token.as_ref().unwrap())
+            .send()
+            .await?;
+
+        handle_response(response).await
     }
 }
 

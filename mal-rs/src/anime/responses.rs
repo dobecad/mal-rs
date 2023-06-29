@@ -64,15 +64,15 @@ pub enum Status {
 
 #[derive(Debug, Deserialize)]
 pub struct ListStatus {
-    status: Option<super::requests::AnimeStatus>,
+    status: Option<super::requests::UserAnimeListStatus>,
     score: u8,
     num_episodes_watched: u32,
     is_rewatching: bool,
     start_date: Option<String>,
     finish_date: Option<String>,
-    priority: u16,
+    priority: u8,
     num_times_rewatched: u32,
-    rewatch_value: u32,
+    rewatch_value: u8,
     tags: Vec<String>,
     comments: String,
     updated_at: String,

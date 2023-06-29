@@ -193,7 +193,7 @@ impl GetSuggestedAnime {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
-pub enum AnimeStatus {
+pub enum UserAnimeListStatus {
     Watching,
     Completed,
     OnHold,
@@ -216,7 +216,7 @@ pub enum UserAnimeListSort {
 pub struct GetUserAnimeList {
     #[serde(skip_serializing)]
     pub(crate) user_name: String,
-    status: AnimeStatus,
+    status: UserAnimeListStatus,
     sort: UserAnimeListSort,
     limit: u16,
     offset: u32,
@@ -227,7 +227,7 @@ impl GetUserAnimeList {
     /// Note: `user_name` should be the targets user name, or `@me` as a shortcut for yourself
     pub fn new(
         user_name: String,
-        status: AnimeStatus,
+        status: UserAnimeListStatus,
         sort: UserAnimeListSort,
         limit: u16,
         offset: u32,
@@ -247,6 +247,76 @@ impl GetUserAnimeList {
             offset,
             fields: fields.into(),
         })
+    }
+}
+
+#[derive(Debug, Serialize)]
+pub struct UpdateMyAnimeListStatus {
+    #[serde(skip_serializing)]
+    pub(crate) anime_id: u32,
+    status: UserAnimeListStatus,
+    is_rewatching: bool,
+    score: u8,
+    num_watched_episodes: u32,
+    priority: u8,
+    num_times_rewatched: u32,
+    rewatch_value: u8,
+    tags: String,
+    comments: String,
+}
+
+impl UpdateMyAnimeListStatus {
+    pub fn new(
+        anime_id: u32,
+        status: UserAnimeListStatus,
+        is_rewatching: bool,
+        score: u8,
+        num_watched_episodes: u32,
+        priority: u8,
+        num_times_rewatched: u32,
+        rewatch_value: u8,
+        tags: String,
+        comments: String,
+    ) -> Result<Self, AnimeApiError> {
+        if score < 0 || score > 10 {
+            return Err(AnimeApiError::new(
+                "Score must be between 0 and 10 inclusive".to_string(),
+            ));
+        }
+        if priority < 0 || priority > 2 {
+            return Err(AnimeApiError::new(
+                "Priority must be between 0 and 2 inclusive".to_string(),
+            ));
+        }
+        if rewatch_value < 0 || rewatch_value > 5 {
+            return Err(AnimeApiError::new(
+                "Rewatch value must be between 0 and 5 inclusive".to_string(),
+            ));
+        }
+
+        Ok(Self {
+            anime_id,
+            status,
+            is_rewatching,
+            score,
+            num_watched_episodes,
+            priority,
+            num_times_rewatched,
+            rewatch_value,
+            tags,
+            comments,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct DeleteMyAnimeListItem {
+    pub(crate) anime_id: u32,
+}
+
+impl DeleteMyAnimeListItem {
+    pub fn new(anime_id: u32) -> Self {
+        Self { anime_id }
     }
 }
 
