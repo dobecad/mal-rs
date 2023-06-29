@@ -58,18 +58,18 @@ impl From<&ClientId> for MangaApiClient<Client> {
 
 #[async_trait]
 pub trait Request {
-    async fn request<T>(&self, query: T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync;
 
-    async fn request_details(&self, query: GetMangaDetails) -> Result<String, Box<dyn Error>>;
+    async fn get_details(&self, query: GetMangaDetails) -> Result<String, Box<dyn Error>>;
 
-    async fn request_user(&self, query: GetUserMangaList) -> Result<String, Box<dyn Error>>;
+    async fn get_user(&self, query: GetUserMangaList) -> Result<String, Box<dyn Error>>;
 }
 
 #[async_trait]
 impl Request for MangaApiClient<Client> {
-    async fn request<T>(&self, query: T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync,
     {
@@ -95,7 +95,7 @@ impl Request for MangaApiClient<Client> {
         }
     }
 
-    async fn request_details(&self, query: GetMangaDetails) -> Result<String, Box<dyn Error>> {
+    async fn get_details(&self, query: GetMangaDetails) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/{}", MANGA_URL, query.manga_id))
@@ -118,7 +118,7 @@ impl Request for MangaApiClient<Client> {
         }
     }
 
-    async fn request_user(&self, query: GetUserMangaList) -> Result<String, Box<dyn Error>> {
+    async fn get_user(&self, query: GetUserMangaList) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/{}/mangalist", USER_URL, query.user_name))
@@ -144,7 +144,7 @@ impl Request for MangaApiClient<Client> {
 
 #[async_trait]
 impl Request for MangaApiClient<Oauth> {
-    async fn request<T>(&self, query: T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync,
     {
@@ -170,7 +170,7 @@ impl Request for MangaApiClient<Oauth> {
         }
     }
 
-    async fn request_details(&self, query: GetMangaDetails) -> Result<String, Box<dyn Error>> {
+    async fn get_details(&self, query: GetMangaDetails) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/{}", MANGA_URL, query.manga_id))
@@ -193,7 +193,7 @@ impl Request for MangaApiClient<Oauth> {
         }
     }
 
-    async fn request_user(&self, query: GetUserMangaList) -> Result<String, Box<dyn Error>> {
+    async fn get_user(&self, query: GetUserMangaList) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/{}/mangalist", USER_URL, query.user_name))
@@ -222,7 +222,7 @@ pub trait MangaApi {
     type State: Request + Send + Sync;
 
     async fn get_manga_list(&self, query: GetMangaList) -> Result<MangaList, Box<dyn Error>> {
-        let response = self.get_self().request(query).await?;
+        let response = self.get_self().get(query).await?;
         let result: MangaList = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse MangaList result: {}", err))
         })?;
@@ -233,7 +233,7 @@ pub trait MangaApi {
         &self,
         query: GetMangaDetails,
     ) -> Result<MangaDetails, Box<dyn Error>> {
-        let response = self.get_self().request_details(query).await?;
+        let response = self.get_self().get_details(query).await?;
         let result: MangaDetails = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse MangaList result: {}", err))
         })?;
@@ -244,7 +244,7 @@ pub trait MangaApi {
         &self,
         query: GetMangaRanking,
     ) -> Result<MangaRanking, Box<dyn Error>> {
-        let response = self.get_self().request(query).await?;
+        let response = self.get_self().get(query).await?;
         let result: MangaRanking = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse MangaList result: {}", err))
         })?;
@@ -260,7 +260,7 @@ pub trait MangaApi {
                 "You can only get your list via an Oauth client".to_string(),
             )));
         }
-        let response = self.get_self().request_user(query).await?;
+        let response = self.get_self().get_user(query).await?;
         let result: MangaList = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
@@ -291,7 +291,7 @@ impl MangaApi for MangaApiClient<Oauth> {
         &self,
         query: GetUserMangaList,
     ) -> Result<MangaList, Box<dyn Error>> {
-        let response = self.get_self().request_user(query).await?;
+        let response = self.get_self().get_user(query).await?;
         let result: MangaList = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;

@@ -22,7 +22,7 @@ impl From<&AccessToken> for UserApiClient {
 }
 
 impl UserApiClient {
-    async fn request<T>(&self, query: T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize,
     {
@@ -41,7 +41,7 @@ impl UserApiClient {
         &self,
         query: GetUserInformation,
     ) -> Result<User, Box<dyn Error>> {
-        let response = self.request(query).await?;
+        let response = self.get(query).await?;
         let result: User = serde_json::from_str(response.as_str()).map_err(|err| {
             UserApiError::new(format!("Failed to parse AnimeList result: {}", err))
         })?;

@@ -62,17 +62,17 @@ impl From<&ClientId> for AnimeApiClient<Client> {
 
 #[async_trait]
 pub trait Request {
-    async fn request<T>(&self, query: T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync;
 
-    async fn request_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>>;
+    async fn get_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>>;
 
-    async fn request_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>>;
+    async fn get_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>>;
 
-    async fn request_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>>;
+    async fn get_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>>;
 
-    async fn request_next_or_prev(&self, query: &Option<String>) -> Result<String, Box<dyn Error>>;
+    async fn get_next_or_prev(&self, query: &Option<String>) -> Result<String, Box<dyn Error>>;
 }
 
 #[async_trait]
@@ -80,7 +80,7 @@ pub trait AnimeApi {
     type State: Request + Send + Sync;
 
     async fn get_anime_list(&self, query: GetAnimeList) -> Result<AnimeList, Box<dyn Error>> {
-        let response = self.get_self().request(query).await?;
+        let response = self.get_self().get(query).await?;
         let result: AnimeList = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
@@ -91,7 +91,7 @@ pub trait AnimeApi {
         &self,
         query: GetAnimeDetails,
     ) -> Result<AnimeDetails, Box<dyn Error>> {
-        let response = self.get_self().request_details(query).await?;
+        let response = self.get_self().get_details(query).await?;
         let result: AnimeDetails = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Anime Details result: {}", err))
         })?;
@@ -102,7 +102,7 @@ pub trait AnimeApi {
         &self,
         query: GetAnimeRanking,
     ) -> Result<AnimeRanking, Box<dyn Error>> {
-        let response = self.get_self().request(query).await?;
+        let response = self.get_self().get(query).await?;
         let result: AnimeRanking = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Anime Ranking result: {}", err))
         })?;
@@ -113,7 +113,7 @@ pub trait AnimeApi {
         &self,
         query: GetSeasonalAnime,
     ) -> Result<SeasonalAnime, Box<dyn Error>> {
-        let response = self.get_self().request(query).await?;
+        let response = self.get_self().get(query).await?;
         let result: SeasonalAnime = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Seasonal Anime result: {}", err))
         })?;
@@ -125,7 +125,7 @@ pub trait AnimeApi {
         T: DeserializeOwned,
         U: PagingIter + Sync + Send
     {
-        let response = self.get_self().request_next_or_prev(response.next_page()).await?;
+        let response = self.get_self().get_next_or_prev(response.next_page()).await?;
         let result: T = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to fetch next page: {}", err))
         })?;
@@ -137,7 +137,7 @@ pub trait AnimeApi {
         T: DeserializeOwned,
         U: PagingIter + Sync + Send
     {
-        let response = self.get_self().request_next_or_prev(response.prev_page()).await?;
+        let response = self.get_self().get_next_or_prev(response.prev_page()).await?;
         let result: T = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to fetch next page: {}", err))
         })?;
@@ -149,7 +149,7 @@ pub trait AnimeApi {
 
 #[async_trait]
 impl Request for AnimeApiClient<Client> {
-    async fn request<T>(&self, query: T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync,
     {
@@ -164,7 +164,7 @@ impl Request for AnimeApiClient<Client> {
         handle_response(response).await
     }
 
-    async fn request_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>> {
+    async fn get_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/{}", ANIME_URL, query.anime_id))
@@ -176,7 +176,7 @@ impl Request for AnimeApiClient<Client> {
         handle_response(response).await
     }
 
-    async fn request_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
+    async fn get_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!(
@@ -191,7 +191,7 @@ impl Request for AnimeApiClient<Client> {
         handle_response(response).await
     }
 
-    async fn request_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>> {
+    async fn get_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/{}/animelist", USER_URL, query.user_name))
@@ -203,7 +203,7 @@ impl Request for AnimeApiClient<Client> {
         handle_response(response).await
     }
 
-    async fn request_next_or_prev(&self, query: &Option<String>) -> Result<String, Box<dyn Error>> {
+    async fn get_next_or_prev(&self, query: &Option<String>) -> Result<String, Box<dyn Error>> {
         if let Some(itr) = query {
             let response = self
                 .client
@@ -221,7 +221,7 @@ impl Request for AnimeApiClient<Client> {
 
 #[async_trait]
 impl Request for AnimeApiClient<Oauth> {
-    async fn request<T>(&self, query: T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync,
     {
@@ -236,7 +236,7 @@ impl Request for AnimeApiClient<Oauth> {
         handle_response(response).await
     }
 
-    async fn request_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>> {
+    async fn get_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/{}", ANIME_URL, query.anime_id))
@@ -248,7 +248,7 @@ impl Request for AnimeApiClient<Oauth> {
         handle_response(response).await
     }
 
-    async fn request_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
+    async fn get_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!(
@@ -263,7 +263,7 @@ impl Request for AnimeApiClient<Oauth> {
         handle_response(response).await
     }
 
-    async fn request_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>> {
+    async fn get_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/{}/animelist", USER_URL, query.user_name))
@@ -275,7 +275,7 @@ impl Request for AnimeApiClient<Oauth> {
         handle_response(response).await
     }
 
-    async fn request_next_or_prev(&self, query: &Option<String>) -> Result<String, Box<dyn Error>> {
+    async fn get_next_or_prev(&self, query: &Option<String>) -> Result<String, Box<dyn Error>> {
         if let Some(itr) = query {
             let response = self
                 .client
@@ -310,7 +310,7 @@ impl AnimeApiClient<Client> {
                 "You can only get your list via an Oauth client".to_string(),
             )));
         }
-        let response = self.get_self().request_user(query).await?;
+        let response = self.get_self().get_user(query).await?;
         let result: AnimeList = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
@@ -332,7 +332,7 @@ impl AnimeApiClient<Oauth> {
         &self,
         query: GetSuggestedAnime,
     ) -> Result<SuggestedAnime, Box<dyn Error>> {
-        let response = self.request(query).await?;
+        let response = self.get(query).await?;
         let result: SuggestedAnime = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Suggested Anime result: {}", err))
         })?;
@@ -343,7 +343,7 @@ impl AnimeApiClient<Oauth> {
         &self,
         query: GetUserAnimeList,
     ) -> Result<AnimeList, Box<dyn Error>> {
-        let response = self.get_self().request_user(query).await?;
+        let response = self.get_self().get_user(query).await?;
         let result: AnimeList = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
