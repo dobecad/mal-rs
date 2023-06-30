@@ -1,11 +1,13 @@
+use crate::common::limit_check;
+
 // Structs for crafting Manga Endpoint requests
 use super::{error::MangaApiError, responses::MangaFieldsEnum};
-use serde::{Serialize};
+use serde::Serialize;
 
 #[derive(Debug, Serialize)]
 pub struct GetMangaList {
     q: String,
-    limit: u8,
+    limit: u16,
     offset: u32,
     fields: Option<String>,
 }
@@ -13,20 +15,18 @@ pub struct GetMangaList {
 impl GetMangaList {
     pub fn new(
         q: String,
-        limit: u8,
-        offset: u32,
+        limit: Option<u16>,
+        offset: Option<u32>,
         fields: Option<&MangaFields>,
     ) -> Result<Self, MangaApiError> {
-        if limit > 100 || limit < 1 {
-            return Err(MangaApiError::new(
-                "Limit must be between 1 and 100 inclusive".to_string(),
-            ));
-        }
+        limit_check(limit, 1, 100).map_err(|_| {
+            MangaApiError::new("Limit must be between 1 and 100 inclusive".to_string())
+        })?;
 
         Ok(Self {
             q,
-            limit,
-            offset,
+            limit: limit.unwrap_or(100),
+            offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
     }
@@ -72,20 +72,18 @@ pub struct GetMangaRanking {
 impl GetMangaRanking {
     pub fn new(
         ranking_type: MangaRankingType,
-        limit: u16,
-        offset: u32,
+        limit: Option<u16>,
+        offset: Option<u32>,
         fields: Option<&MangaFields>,
     ) -> Result<Self, MangaApiError> {
-        if limit < 1 || limit > 500 {
-            return Err(MangaApiError::new(
-                "Limit must be between 1 and 500 inclusive".to_string(),
-            ));
-        }
+        limit_check(limit, 1, 500).map_err(|_| {
+            MangaApiError::new("Limit must be between 1 and 500 inclusive".to_string())
+        })?;
 
         Ok(Self {
             ranking_type,
-            limit,
-            offset,
+            limit: limit.unwrap_or(100),
+            offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
     }
@@ -128,22 +126,20 @@ impl GetUserMangaList {
         user_name: String,
         status: UserMangaListStatus,
         sort: UserMangaListSort,
-        limit: u16,
-        offset: u32,
+        limit: Option<u16>,
+        offset: Option<u32>,
         fields: Option<&MangaFields>,
     ) -> Result<Self, MangaApiError> {
-        if limit < 1 || limit > 1000 {
-            return Err(MangaApiError::new(
-                "Limit must be between 1 and 1000 inclusive".to_string(),
-            ));
-        }
+        limit_check(limit, 1, 1000).map_err(|_| {
+            MangaApiError::new("Limit must be between 1 and 1000 inclusive".to_string())
+        })?;
 
         Ok(Self {
             user_name,
             status,
             sort,
-            limit,
-            offset,
+            limit: limit.unwrap_or(100),
+            offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
     }
