@@ -19,7 +19,7 @@ async fn main() {
         AnimeFieldsEnum::num_episodes,
         AnimeFieldsEnum::title,
     );
-    let query = GetAnimeList::new("one".to_string(), 5, 0, Some(&fields)).unwrap();
+    let query = GetAnimeList::new("one".to_string(), Some(5), None, Some(&fields)).unwrap();
     let result = api_client.get_anime_list(query).await.unwrap();
     println!("Result: {:?}", &result);
 
