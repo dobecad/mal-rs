@@ -1,13 +1,13 @@
 // Structs for crafting Manga Endpoint requests
 use super::{error::MangaApiError, responses::MangaFieldsEnum};
-use serde::{Deserialize, Serialize};
+use serde::{Serialize};
 
 #[derive(Debug, Serialize)]
 pub struct GetMangaList {
     q: String,
     limit: u8,
     offset: u32,
-    fields: String,
+    fields: Option<String>,
 }
 
 impl GetMangaList {
@@ -15,7 +15,7 @@ impl GetMangaList {
         q: String,
         limit: u8,
         offset: u32,
-        fields: &MangaFields,
+        fields: Option<&MangaFields>,
     ) -> Result<Self, MangaApiError> {
         if limit > 100 || limit < 1 {
             return Err(MangaApiError::new(
@@ -27,7 +27,7 @@ impl GetMangaList {
             q,
             limit,
             offset,
-            fields: fields.into(),
+            fields: fields.map(|f| f.into()),
         })
     }
 }
@@ -35,14 +35,14 @@ impl GetMangaList {
 #[derive(Debug, Serialize)]
 pub struct GetMangaDetails {
     pub(crate) manga_id: u32,
-    fields: String,
+    fields: Option<String>,
 }
 
 impl GetMangaDetails {
-    pub fn new(manga_id: u32, fields: &MangaFields) -> Self {
+    pub fn new(manga_id: u32, fields: Option<&MangaFields>) -> Self {
         Self {
             manga_id,
-            fields: fields.into(),
+            fields: fields.map(|f| f.into()),
         }
     }
 }
@@ -66,7 +66,7 @@ pub struct GetMangaRanking {
     ranking_type: MangaRankingType,
     limit: u16,
     offset: u32,
-    fields: String,
+    fields: Option<String>,
 }
 
 impl GetMangaRanking {
@@ -74,7 +74,7 @@ impl GetMangaRanking {
         ranking_type: MangaRankingType,
         limit: u16,
         offset: u32,
-        fields: &MangaFields,
+        fields: Option<&MangaFields>,
     ) -> Result<Self, MangaApiError> {
         if limit < 1 || limit > 500 {
             return Err(MangaApiError::new(
@@ -86,7 +86,7 @@ impl GetMangaRanking {
             ranking_type,
             limit,
             offset,
-            fields: fields.into(),
+            fields: fields.map(|f| f.into()),
         })
     }
 }
@@ -120,7 +120,7 @@ pub struct GetUserMangaList {
     sort: UserMangaListSort,
     limit: u16,
     offset: u32,
-    fields: String,
+    fields: Option<String>,
 }
 
 impl GetUserMangaList {
@@ -130,7 +130,7 @@ impl GetUserMangaList {
         sort: UserMangaListSort,
         limit: u16,
         offset: u32,
-        fields: &MangaFields,
+        fields: Option<&MangaFields>,
     ) -> Result<Self, MangaApiError> {
         if limit < 1 || limit > 1000 {
             return Err(MangaApiError::new(
@@ -144,7 +144,7 @@ impl GetUserMangaList {
             sort,
             limit,
             offset,
-            fields: fields.into(),
+            fields: fields.map(|f| f.into()),
         })
     }
 }
@@ -179,17 +179,17 @@ impl UpdateMyMangaListStatus {
         tags: String,
         comments: String,
     ) -> Result<Self, MangaApiError> {
-        if score < 0 || score > 10 {
+        if score > 10 {
             return Err(MangaApiError::new(
                 "Score must be between 0 and 10 inclusive".to_string(),
             ));
         }
-        if priority < 0 || priority > 2 {
+        if priority > 2 {
             return Err(MangaApiError::new(
                 "Priority must be between 0 and 2 inclusive".to_string(),
             ));
         }
-        if reread_value < 0 || reread_value > 5 {
+        if reread_value > 5 {
             return Err(MangaApiError::new(
                 "Reread value must be between 0 and 5 inclusive".to_string(),
             ));

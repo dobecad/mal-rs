@@ -10,7 +10,7 @@ pub struct GetAnimeList {
     q: String,
     limit: u8,
     offset: u32,
-    fields: String,
+    fields: Option<String>,
 }
 
 impl GetAnimeList {
@@ -18,9 +18,9 @@ impl GetAnimeList {
         q: String,
         limit: u8,
         offset: u32,
-        fields: &AnimeFields,
+        fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
-        if limit > 100 || limit < 1 {
+        if limit < 1 || limit > 100 {
             return Err(AnimeApiError::new(
                 "Limit must be between 1 and 100 inclusive".to_string(),
             ));
@@ -30,7 +30,7 @@ impl GetAnimeList {
             q,
             limit,
             offset,
-            fields: fields.into(),
+            fields: fields.map(|f| f.into())
         })
     }
 }
@@ -39,14 +39,14 @@ impl GetAnimeList {
 pub struct GetAnimeDetails {
     #[serde(skip_serializing)]
     pub(crate) anime_id: u32,
-    fields: String, // TODO: Create Enum for fields?
+    fields: Option<String>, // TODO: Create Enum for fields?
 }
 
 impl GetAnimeDetails {
-    pub fn new(anime_id: u32, fields: &AnimeFields) -> Self {
+    pub fn new(anime_id: u32, fields: Option<&AnimeFields>) -> Self {
         Self {
             anime_id,
-            fields: fields.into(),
+            fields: fields.map(|f| f.into()),
         }
     }
 }
@@ -70,7 +70,7 @@ pub struct GetAnimeRanking {
     ranking_type: RankingType,
     limit: u16,
     offset: u32,
-    fields: String,
+    fields: Option<String>,
 }
 
 impl GetAnimeRanking {
@@ -78,7 +78,7 @@ impl GetAnimeRanking {
         ranking_type: RankingType,
         limit: u16,
         offset: u32,
-        fields: &AnimeFields,
+        fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
         if limit < 1 || limit > 500 {
             return Err(AnimeApiError::new(
@@ -90,7 +90,7 @@ impl GetAnimeRanking {
             ranking_type,
             limit,
             offset,
-            fields: fields.into(),
+            fields: fields.map(|f| f.into()),
         })
     }
 }
@@ -139,7 +139,7 @@ pub struct GetSeasonalAnime {
     sort: SeasonalAnimeSort,
     limit: u16,
     offset: u32,
-    fields: String,
+    fields: Option<String>,
 }
 
 impl GetSeasonalAnime {
@@ -149,7 +149,7 @@ impl GetSeasonalAnime {
         sort: SeasonalAnimeSort,
         limit: u16,
         offset: u32,
-        fields: &AnimeFields,
+        fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
         if limit < 1 || limit > 500 {
             return Err(AnimeApiError::new(
@@ -163,7 +163,7 @@ impl GetSeasonalAnime {
             sort,
             limit,
             offset,
-            fields: fields.into(),
+            fields: fields.map(|f| f.into()),
         })
     }
 }
@@ -172,11 +172,11 @@ impl GetSeasonalAnime {
 pub struct GetSuggestedAnime {
     limit: u16,
     offset: u32,
-    fields: String,
+    fields: Option<String>,
 }
 
 impl GetSuggestedAnime {
-    pub fn new(limit: u16, offset: u32, fields: &AnimeFields) -> Result<Self, AnimeApiError> {
+    pub fn new(limit: u16, offset: u32, fields: Option<&AnimeFields>) -> Result<Self, AnimeApiError> {
         if limit < 1 || limit > 100 {
             return Err(AnimeApiError::new(
                 "Limit must be between 1 and 100 inclusive".to_string(),
@@ -186,7 +186,7 @@ impl GetSuggestedAnime {
         Ok(Self {
             limit,
             offset,
-            fields: fields.into(),
+            fields: fields.map(|f| f.into()),
         })
     }
 }
@@ -220,7 +220,7 @@ pub struct GetUserAnimeList {
     sort: UserAnimeListSort,
     limit: u16,
     offset: u32,
-    fields: String,
+    fields: Option<String>,
 }
 
 impl GetUserAnimeList {
@@ -231,7 +231,7 @@ impl GetUserAnimeList {
         sort: UserAnimeListSort,
         limit: u16,
         offset: u32,
-        fields: &AnimeFields,
+        fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
         if limit < 1 || limit > 1000 {
             return Err(AnimeApiError::new(
@@ -245,7 +245,7 @@ impl GetUserAnimeList {
             sort,
             limit,
             offset,
-            fields: fields.into(),
+            fields: fields.map(|f| f.into()),
         })
     }
 }
@@ -278,17 +278,17 @@ impl UpdateMyAnimeListStatus {
         tags: String,
         comments: String,
     ) -> Result<Self, AnimeApiError> {
-        if score < 0 || score > 10 {
+        if score > 10 {
             return Err(AnimeApiError::new(
                 "Score must be between 0 and 10 inclusive".to_string(),
             ));
         }
-        if priority < 0 || priority > 2 {
+        if priority > 2 {
             return Err(AnimeApiError::new(
                 "Priority must be between 0 and 2 inclusive".to_string(),
             ));
         }
-        if rewatch_value < 0 || rewatch_value > 5 {
+        if rewatch_value > 5 {
             return Err(AnimeApiError::new(
                 "Rewatch value must be between 0 and 5 inclusive".to_string(),
             ));

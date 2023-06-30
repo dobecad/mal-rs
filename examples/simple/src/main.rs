@@ -19,21 +19,21 @@ async fn main() {
         AnimeFieldsEnum::num_episodes,
         AnimeFieldsEnum::title,
     );
-    let query = GetAnimeList::new("one".to_string(), 5, 0, &fields).unwrap();
+    let query = GetAnimeList::new("one".to_string(), 5, 0, Some(&fields)).unwrap();
     let result = api_client.get_anime_list(query).await.unwrap();
     println!("Result: {:?}", &result);
 
-    // Example iterating through pages
-    let result: Result<AnimeList, _> = api_client.next(&result).await;
-    println!("\nNext result: {:?}", &result);
+    // // Example iterating through pages
+    // let result: Result<AnimeList, _> = api_client.next(&result).await;
+    // println!("\nNext result: {:?}", &result);
 
-    let result: Result<AnimeList, _> = api_client.prev(&result.unwrap()).await;
-    println!("\nPrev result: {:?}", &result);
+    // let result: Result<AnimeList, _> = api_client.prev(&result.unwrap()).await;
+    // println!("\nPrev result: {:?}", &result);
 
-    // Mangag API example
-    let api_client = MangaApiClient::from(&client_id);
-    let fields = mal_rs::manga::all_fields();
-    let query = GetMangaList::new("one".to_string(), 5, 0, &fields).unwrap();
-    let result = api_client.get_manga_list(query).await.unwrap();
-    println!("Result: {:?}", result);
+    // // Mangag API example
+    // let api_client = MangaApiClient::from(&client_id);
+    // let fields = mal_rs::manga::all_fields();
+    // let query = GetMangaList::new("one".to_string(), 5, 0, &fields).unwrap();
+    // let result = api_client.get_manga_list(query).await.unwrap();
+    // println!("Result: {:?}", result);
 }
