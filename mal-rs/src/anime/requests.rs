@@ -3,12 +3,14 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::common::limit_check;
+
 use super::{error::AnimeApiError, responses::AnimeFieldsEnum};
 
 #[derive(Debug, Serialize)]
 pub struct GetAnimeList {
     q: String,
-    limit: u8,
+    limit: u16,
     offset: u32,
     fields: Option<String>,
 }
@@ -16,21 +18,19 @@ pub struct GetAnimeList {
 impl GetAnimeList {
     pub fn new(
         q: String,
-        limit: u8,
-        offset: u32,
+        limit: Option<u16>,
+        offset: Option<u32>,
         fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
-        if limit < 1 || limit > 100 {
-            return Err(AnimeApiError::new(
-                "Limit must be between 1 and 100 inclusive".to_string(),
-            ));
-        }
+        limit_check(limit, 1, 100).map_err(|_| {
+            AnimeApiError::new("Limit must be between 1 and 100 inclusive".to_string())
+        })?;
 
         Ok(Self {
             q,
-            limit,
-            offset,
-            fields: fields.map(|f| f.into())
+            limit: limit.unwrap_or(100),
+            offset: offset.unwrap_or(0),
+            fields: fields.map(|f| f.into()),
         })
     }
 }
@@ -76,20 +76,18 @@ pub struct GetAnimeRanking {
 impl GetAnimeRanking {
     pub fn new(
         ranking_type: RankingType,
-        limit: u16,
-        offset: u32,
+        limit: Option<u16>,
+        offset: Option<u32>,
         fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
-        if limit < 1 || limit > 500 {
-            return Err(AnimeApiError::new(
-                "Limit must be between 1 and 500 inclusive".to_string(),
-            ));
-        }
+        limit_check(limit, 1, 500).map_err(|_| {
+            AnimeApiError::new("Limit must be between 1 and 500 inclusive".to_string())
+        })?;
 
         Ok(Self {
             ranking_type,
-            limit,
-            offset,
+            limit: limit.unwrap_or(100),
+            offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
     }
@@ -147,22 +145,20 @@ impl GetSeasonalAnime {
         year: u16,
         season: Season,
         sort: SeasonalAnimeSort,
-        limit: u16,
-        offset: u32,
+        limit: Option<u16>,
+        offset: Option<u32>,
         fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
-        if limit < 1 || limit > 500 {
-            return Err(AnimeApiError::new(
-                "Limit must be between 1 and 500 inclusive".to_string(),
-            ));
-        }
+        limit_check(limit, 1, 500).map_err(|_| {
+            AnimeApiError::new("Limit must be between 1 and 500 inclusive".to_string())
+        })?;
 
         Ok(Self {
             year,
             season,
             sort,
-            limit,
-            offset,
+            limit: limit.unwrap_or(100),
+            offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
     }
@@ -176,16 +172,18 @@ pub struct GetSuggestedAnime {
 }
 
 impl GetSuggestedAnime {
-    pub fn new(limit: u16, offset: u32, fields: Option<&AnimeFields>) -> Result<Self, AnimeApiError> {
-        if limit < 1 || limit > 100 {
-            return Err(AnimeApiError::new(
-                "Limit must be between 1 and 100 inclusive".to_string(),
-            ));
-        }
+    pub fn new(
+        limit: Option<u16>,
+        offset: Option<u32>,
+        fields: Option<&AnimeFields>,
+    ) -> Result<Self, AnimeApiError> {
+        limit_check(limit, 1, 100).map_err(|_| {
+            AnimeApiError::new("Limit must be between 1 and 100 inclusive".to_string())
+        })?;
 
         Ok(Self {
-            limit,
-            offset,
+            limit: limit.unwrap_or(100),
+            offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
     }
@@ -229,22 +227,20 @@ impl GetUserAnimeList {
         user_name: String,
         status: UserAnimeListStatus,
         sort: UserAnimeListSort,
-        limit: u16,
-        offset: u32,
+        limit: Option<u16>,
+        offset: Option<u32>,
         fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
-        if limit < 1 || limit > 1000 {
-            return Err(AnimeApiError::new(
-                "Limit must be between 1 and 1000 inclusive".to_string(),
-            ));
-        }
+        limit_check(limit, 1, 1000).map_err(|_| {
+            AnimeApiError::new("Limit must be between 1 and 1000 inclusive".to_string())
+        })?;
 
         Ok(Self {
             user_name,
             status,
             sort,
-            limit,
-            offset,
+            limit: limit.unwrap_or(100),
+            offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
     }
