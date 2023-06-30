@@ -5,13 +5,13 @@ use super::responses::UserEnum;
 
 #[derive(Debug, Serialize)]
 pub struct GetUserInformation {
-    fields: String,
+    fields: Option<String>,
 }
 
 impl GetUserInformation {
-    pub fn new(fields: UserFields) -> Self {
+    pub fn new(fields: Option<&UserFields>) -> Self {
         Self {
-            fields: fields.into()
+            fields: fields.map(|f| f.into())
         }
     }
 }
@@ -19,11 +19,11 @@ impl GetUserInformation {
 
 pub struct UserFields(pub Vec<UserEnum>);
 
-impl Into<String> for UserFields {
+impl Into<String> for &UserFields {
     fn into(self) -> String {
         let result = self
             .0
-            .into_iter()
+            .iter()
             .map(|e| format!("{:?}", e))
             .collect::<Vec<String>>()
             .join(",");
