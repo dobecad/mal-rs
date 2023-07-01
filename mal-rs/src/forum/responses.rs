@@ -1,97 +1,121 @@
 use serde::Deserialize;
 
-use crate::common::Paging;
+use crate::common::{Paging, PagingIter};
 
 #[derive(Debug, Deserialize)]
 pub struct ForumBoards {
-    categories: Vec<Category>,
+    pub categories: Vec<Category>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Category {
-    title: String,
-    boards: Vec<Board>,
+    pub title: String,
+    pub boards: Vec<Board>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Board {
-    id: u32,
-    title: String,
-    description: String,
-    subboards: Vec<Subboard>,
+    pub id: u32,
+    pub title: String,
+    pub description: String,
+    pub subboards: Vec<Subboard>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Subboard {
-    id: u32,
-    title: String,
+    pub id: u32,
+    pub title: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ForumTopicDetail {
-    data: Vec<TopicDetail>,
-    paging: Paging,
+    pub data: Vec<TopicDetail>,
+    pub paging: Paging,
+}
+
+impl PagingIter for ForumTopicDetail {
+    type Item = Self;
+
+    fn next_page(&self) -> &Option<String> {
+        &self.paging.next
+    }
+
+    fn prev_page(&self) -> &Option<String> {
+        &self.paging.previous
+    }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct TopicDetail {
-    title: String,
-    posts: Vec<Post>,
-    poll: Poll,
+    pub title: String,
+    pub posts: Vec<Post>,
+    pub poll: Poll,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Post {
-    id: u32,
-    number: u32,
-    created_at: String,
-    created_by: ForumTopicPostCreatedBy,
-    body: String,
-    signature: String,
+    pub id: u32,
+    pub number: u32,
+    pub created_at: String,
+    pub created_by: ForumTopicPostCreatedBy,
+    pub body: String,
+    pub signature: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ForumTopicPostCreatedBy {
-    id: u32,
-    name: String,
-    forum_avator: String,
+    pub id: u32,
+    pub name: String,
+    pub forum_avator: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Poll {
-    id: u32,
-    question: String,
-    close: bool,
-    options: PollOptions,
+    pub id: u32,
+    pub question: String,
+    pub close: bool,
+    pub options: PollOptions,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct PollOptions {
-    id: u32,
-    text: String,
-    votes: u32,
+    pub id: u32,
+    pub text: String,
+    pub votes: u32,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ForumTopics {
-    data: Vec<ForumTopic>,
-    paging: Paging,
+    pub data: Vec<ForumTopic>,
+    pub paging: Paging,
+}
+
+impl PagingIter for ForumTopics {
+    type Item = Self;
+
+    fn next_page(&self) -> &Option<String> {
+        &self.paging.next
+    }
+
+    fn prev_page(&self) -> &Option<String> {
+        &self.paging.previous
+    }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ForumTopic {
-    id: u32,
-    title: String,
-    created_at: String,
-    created_by: ForumTopicUser,
-    number_of_posts: u32,
-    last_post_created_at: String,
-    last_post_created_by: ForumTopicUser,
-    is_locked: bool,
+    pub id: u32,
+    pub title: String,
+    pub created_at: String,
+    pub created_by: ForumTopicUser,
+    pub number_of_posts: u32,
+    pub last_post_created_at: String,
+    pub last_post_created_by: ForumTopicUser,
+    pub is_locked: bool,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ForumTopicUser {
-    id: u32,
-    name: String,
+    pub id: u32,
+    pub name: String,
 }
