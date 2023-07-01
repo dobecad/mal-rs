@@ -12,8 +12,8 @@ use strum_macros::EnumIter;
 
 #[derive(Debug, Deserialize)]
 pub struct AnimeList {
-    data: Vec<AnimeListNode>,
-    paging: Paging,
+    pub data: Vec<AnimeListNode>,
+    pub paging: Paging,
 }
 
 impl PagingIter for AnimeList {
@@ -76,6 +76,19 @@ pub struct ListStatus {
     pub tags: Vec<String>,
     pub comments: String,
     pub updated_at: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct MyListStatus {
+    pub status: Option<super::requests::UserAnimeListStatus>,
+    pub is_rewatching: bool,
+    pub score: u8,
+    pub num_watched_episodes: u32,
+    pub priority: u8,
+    pub num_times_rewatched: u32,
+    pub rewatch_value: u8,
+    pub tags: String,
+    pub comments: String,
 }
 
 #[derive(Debug, Deserialize)]
