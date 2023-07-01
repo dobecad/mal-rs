@@ -30,16 +30,16 @@ impl PagingIter for AnimeList {
 
 #[derive(Debug, Deserialize)]
 pub struct AnimeListNode {
-    node: AnimeFields,
+    pub node: AnimeFields,
 
     /// This field is only present when querying for a User's anime list
-    list_status: Option<ListStatus>,
+    pub list_status: Option<ListStatus>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct AnimePicture {
-    medium: String,
-    large: String,
+    pub medium: String,
+    pub large: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -64,30 +64,30 @@ pub enum Status {
 
 #[derive(Debug, Deserialize)]
 pub struct ListStatus {
-    status: Option<super::requests::UserAnimeListStatus>,
-    score: u8,
-    num_episodes_watched: u32,
-    is_rewatching: bool,
-    start_date: Option<String>,
-    finish_date: Option<String>,
-    priority: u8,
-    num_times_rewatched: u32,
-    rewatch_value: u8,
-    tags: Vec<String>,
-    comments: String,
-    updated_at: String,
+    pub status: Option<super::requests::UserAnimeListStatus>,
+    pub score: u8,
+    pub num_episodes_watched: u32,
+    pub is_rewatching: bool,
+    pub start_date: Option<String>,
+    pub finish_date: Option<String>,
+    pub priority: u8,
+    pub num_times_rewatched: u32,
+    pub rewatch_value: u8,
+    pub tags: Vec<String>,
+    pub comments: String,
+    pub updated_at: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct StartSeason {
-    year: u32,
-    season: super::requests::Season,
+    pub year: u32,
+    pub season: super::requests::Season,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Broadcast {
-    day_of_the_week: String,
-    start_time: Option<String>,
+    pub day_of_the_week: String,
+    pub start_time: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -126,118 +126,154 @@ pub enum Rating {
 
 #[derive(Debug, Deserialize)]
 pub struct Studio {
-    id: u32,
-    name: String,
+    pub id: u32,
+    pub name: String,
 }
 
 // Wrap everything in Options since user controls what fields should be returned
 #[derive(Debug, Deserialize, EnumFromStruct)]
 pub struct AnimeFields {
-    id: Option<u32>,
-    title: Option<String>,
-    main_picture: Option<MainPicture>,
-    alternative_titles: Option<AlternativeTitles>,
-    start_date: Option<String>,
-    end_date: Option<String>,
-    synopsis: Option<String>,
-    mean: Option<f32>,
-    rank: Option<u32>,
-    popularity: Option<u32>,
-    num_list_users: Option<u32>,
-    num_scoring_users: Option<u32>,
-    nsfw: Option<NSFW>,
-    genres: Option<Vec<Genre>>,
-    created_at: Option<String>,
-    updated_at: Option<String>,
-    media_type: Option<MediaType>,
-    status: Option<Status>,
-    my_list_status: Option<ListStatus>,
-    num_episodes: Option<u32>,
-    start_season: Option<StartSeason>,
-    broadcast: Option<Broadcast>,
-    source: Option<Source>,
-    average_episode_duration: Option<u32>,
-    rating: Option<Rating>,
-    studios: Option<Vec<Studio>>,
+    pub id: Option<u32>,
+    pub title: Option<String>,
+    pub main_picture: Option<MainPicture>,
+    pub alternative_titles: Option<AlternativeTitles>,
+    pub start_date: Option<String>,
+    pub end_date: Option<String>,
+    pub synopsis: Option<String>,
+    pub mean: Option<f32>,
+    pub rank: Option<u32>,
+    pub popularity: Option<u32>,
+    pub num_list_users: Option<u32>,
+    pub num_scoring_users: Option<u32>,
+    pub nsfw: Option<NSFW>,
+    pub genres: Option<Vec<Genre>>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
+    pub media_type: Option<MediaType>,
+    pub status: Option<Status>,
+    pub my_list_status: Option<ListStatus>,
+    pub num_episodes: Option<u32>,
+    pub start_season: Option<StartSeason>,
+    pub broadcast: Option<Broadcast>,
+    pub source: Option<Source>,
+    pub average_episode_duration: Option<u32>,
+    pub rating: Option<Rating>,
+    pub studios: Option<Vec<Studio>>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct RelatedAnime {
-    node: AnimeFields,
-    relation_type: RelationType,
-    relation_type_formatted: String,
+    pub node: AnimeFields,
+    pub relation_type: RelationType,
+    pub relation_type_formatted: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Recommendations {
-    node: AnimeFields,
-    num_recommendations: u32,
+    pub node: AnimeFields,
+    pub num_recommendations: u32,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Statistics {
-    num_list_users: u32,
-    status: StatisticsStatus,
+    pub num_list_users: u32,
+    pub status: StatisticsStatus,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct StatisticsStatus {
-    watching: u32,
-    completed: u32,
-    on_hold: u32,
-    dropped: u32,
-    plan_to_watch: u32,
+    pub watching: u32,
+    pub completed: u32,
+    pub on_hold: u32,
+    pub dropped: u32,
+    pub plan_to_watch: u32,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct AnimeDetails {
     #[serde(flatten)]
-    shared_fields: AnimeFields,
+    pub shared_fields: AnimeFields,
 
-    pictures: Option<Vec<AnimePicture>>,
-    background: Option<String>,
-    related_anime: Vec<RelatedAnime>,
-    related_manga: Option<Vec<crate::manga::responses::RelatedManga>>, // TODO: Add this once Manga structs done
-    recommendations: Vec<Recommendations>,
-    statistics: Option<Statistics>,
+    pub pictures: Option<Vec<AnimePicture>>,
+    pub background: Option<String>,
+    pub related_anime: Vec<RelatedAnime>,
+    pub related_manga: Option<Vec<crate::manga::responses::RelatedManga>>, // TODO: Add this once Manga structs done
+    pub recommendations: Vec<Recommendations>,
+    pub statistics: Option<Statistics>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Ranking {
-    rank: u32,
-    previous_rank: Option<u32>,
+    pub rank: u32,
+    pub previous_rank: Option<u32>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct AnimeRanking {
-    data: Vec<AnimeRankingNode>,
-    paging: Paging,
+    pub data: Vec<AnimeRankingNode>,
+    pub paging: Paging,
+}
+
+impl PagingIter for AnimeRanking {
+    type Item = Self;
+
+    fn next_page(&self) -> &Option<String> {
+        &self.paging.next
+    }
+
+    fn prev_page(&self) -> &Option<String> {
+        &self.paging.previous
+    }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct AnimeRankingNode {
-    node: AnimeFields,
-    ranking: Ranking,
+    pub node: AnimeFields,
+    pub ranking: Ranking,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct SeasonalAnime {
-    data: Vec<SeasonalAnimeNode>,
-    paging: Paging,
+    pub data: Vec<SeasonalAnimeNode>,
+    pub paging: Paging,
+}
+
+impl PagingIter for SeasonalAnime {
+    type Item = Self;
+
+    fn next_page(&self) -> &Option<String> {
+        &self.paging.next
+    }
+
+    fn prev_page(&self) -> &Option<String> {
+        &self.paging.previous
+    }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct SeasonalAnimeNode {
-    node: AnimeFields,
+    pub node: AnimeFields,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct SuggestedAnime {
-    data: Vec<SuggestedAnimeNode>,
-    paging: Paging,
+    pub data: Vec<SuggestedAnimeNode>,
+    pub paging: Paging,
+}
+
+impl PagingIter for SuggestedAnime {
+    type Item = Self;
+
+    fn next_page(&self) -> &Option<String> {
+        &self.paging.next
+    }
+
+    fn prev_page(&self) -> &Option<String> {
+        &self.paging.previous
+    }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct SuggestedAnimeNode {
-    node: AnimeFields,
+    pub node: AnimeFields,
 }
