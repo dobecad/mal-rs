@@ -29,15 +29,15 @@ pub struct Paging {
 
 #[derive(Debug, Deserialize)]
 pub struct MainPicture {
-    medium: String,
-    large: String,
+    pub medium: String,
+    pub large: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct AlternativeTitles {
-    synonyms: Option<Vec<String>>,
-    en: Option<String>,
-    ja: Option<String>,
+    pub synonyms: Option<Vec<String>>,
+    pub en: Option<String>,
+    pub ja: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -52,28 +52,21 @@ pub enum NSFW {
 
 #[derive(Debug, Deserialize)]
 pub struct Genre {
-    id: u32,
-    name: String,
+    pub id: u32,
+    pub name: String,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum RelationType {
-    #[serde(rename = "sequel")]
-    SEQUEL,
-    #[serde(rename = "prequel")]
-    PREQUEL,
-    #[serde(rename = "alternative_setting")]
-    ALTERNATIVESETTING,
-    #[serde(rename = "alternative_version")]
-    ALTERNATIVEVERSION,
-    #[serde(rename = "side_story")]
-    SIDESTORY,
-    #[serde(rename = "parent_story")]
-    PARENTSTORY,
-    #[serde(rename = "summary")]
-    SUMMARY,
-    #[serde(rename = "full_story")]
-    FULLSTORY,
+    Sequel,
+    Prequel,
+    AlternativeSetting,
+    AlternativeVersion,
+    SideStory,
+    ParentStory,
+    Summary,
+    FullStory,
 }
 
 pub(crate) fn limit_check(value: Option<u16>, lowerbound: u16, upperbound: u16) -> Result<(), CommonError> {
