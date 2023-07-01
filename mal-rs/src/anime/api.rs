@@ -19,7 +19,7 @@ use super::{
     requests::{
         GetAnimeDetails, GetAnimeList, GetAnimeRanking, GetSeasonalAnime, GetSuggestedAnime,
     },
-    responses::{AnimeDetails, AnimeList, AnimeRanking, SeasonalAnime, SuggestedAnime},
+    responses::{AnimeDetails, AnimeList, AnimeRanking, MyListStatus, SeasonalAnime, SuggestedAnime},
 };
 use reqwest;
 
@@ -363,7 +363,7 @@ impl AnimeApiClient<Oauth> {
     pub async fn update_anime_list_status(
         &self,
         query: UpdateMyAnimeListStatus,
-    ) -> Result<String, Box<dyn Error>> {
+    ) -> Result<MyListStatus, Box<dyn Error>> {
         let response = self
             .client
             .patch(format!("{}/{}/my_list_status", ANIME_URL, query.anime_id))
@@ -372,13 +372,17 @@ impl AnimeApiClient<Oauth> {
             .send()
             .await?;
 
-        handle_response(response).await
+        let response = handle_response(response).await?;
+        let result: MyListStatus = serde_json::from_str(response.as_str()).map_err(|err| {
+            AnimeApiError::new(format!("Failed to parse Anime List result: {}", err))
+        })?;
+        Ok(result)
     }
 
     pub async fn delete_anime_list_item(
         &self,
         query: DeleteMyAnimeListItem,
-    ) -> Result<String, Box<dyn Error>> {
+    ) -> Result<(), Box<dyn Error>> {
         let response = self
             .client
             .delete(format!("{}/{}/my_list_status", ANIME_URL, query.anime_id))
@@ -386,7 +390,13 @@ impl AnimeApiClient<Oauth> {
             .send()
             .await?;
 
-        handle_response(response).await
+        match response.status() {
+            reqwest::StatusCode::OK => Ok(()),
+            _ => Err(Box::new(AnimeApiError::new(format!(
+                "Did not recieve OK response: {}",
+                response.status()
+            )))),
+        }
     }
 }
 
