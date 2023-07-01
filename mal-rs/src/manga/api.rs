@@ -13,7 +13,7 @@ use std::error::Error;
 
 use super::{
     requests::{GetMangaDetails, GetMangaList, GetMangaRanking},
-    responses::{MangaDetails, MangaList, MangaRanking},
+    responses::{MangaDetails, MangaList, MangaRanking, MyListStatus},
 };
 use reqwest;
 
@@ -237,7 +237,7 @@ impl MangaApiClient<Oauth> {
     pub async fn update_manga_list_status(
         &self,
         query: UpdateMyMangaListStatus,
-    ) -> Result<String, Box<dyn Error>> {
+    ) -> Result<MyListStatus, Box<dyn Error>> {
         let response = self
             .client
             .patch(format!("{}/{}/my_list_status", MANGA_URL, query.manga_id))
@@ -246,13 +246,17 @@ impl MangaApiClient<Oauth> {
             .send()
             .await?;
 
-        handle_response(response).await
+        let response = handle_response(response).await?;
+        let result: MyListStatus = serde_json::from_str(response.as_str()).map_err(|err| {
+            MangaApiError::new(format!("Failed to parse Anime List result: {}", err))
+        })?;
+        Ok(result)
     }
 
     pub async fn delete_manga_list_item(
         &self,
         query: DeleteMyMangaListItem,
-    ) -> Result<String, Box<dyn Error>> {
+    ) -> Result<(), Box<dyn Error>> {
         let response = self
             .client
             .delete(format!("{}/{}/my_list_status", MANGA_URL, query.manga_id))
@@ -260,7 +264,13 @@ impl MangaApiClient<Oauth> {
             .send()
             .await?;
 
-        handle_response(response).await
+        match response.status() {
+            reqwest::StatusCode::OK => Ok(()),
+            _ => Err(Box::new(MangaApiError::new(format!(
+                "Did not recieve OK response: {}",
+                response.status()
+            )))),
+        }
     }
 }
 

@@ -2,7 +2,7 @@ use crate::common::limit_check;
 
 // Structs for crafting Manga Endpoint requests
 use super::{error::MangaApiError, responses::MangaFieldsEnum};
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize)]
 pub struct GetMangaList {
@@ -89,7 +89,7 @@ impl GetMangaRanking {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UserMangaListStatus {
     Reading,

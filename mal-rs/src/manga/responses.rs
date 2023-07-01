@@ -1,7 +1,7 @@
 // Structs for deserializing Manga Endpoint responses
 #![allow(dead_code)]
 
-use crate::common::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW};
+use crate::common::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW, PagingIter};
 use serde::Deserialize;
 use enum_from_struct::EnumFromStruct;
 
@@ -10,43 +10,55 @@ use strum_macros::EnumIter;
 
 #[derive(Debug, Deserialize)]
 pub struct MangaList {
-    data: Vec<MangaListNode>,
-    paging: Paging,
+    pub data: Vec<MangaListNode>,
+    pub paging: Paging,
+}
+
+impl PagingIter for MangaList {
+    type Item = Self;
+
+    fn next_page(&self) -> &Option<String> {
+        &self.paging.next
+    }
+
+    fn prev_page(&self) -> &Option<String> {
+        &self.paging.previous
+    }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct MangaListNode {
-    node: MangaFields,
+    pub node: MangaFields,
 
     /// This field is only present when querying for a User's anime list
-    list_status: Option<ListStatus>,
+    pub list_status: Option<ListStatus>,
 }
 
 // Wrap everything in Options since user controls what fields should be returned
 #[derive(Debug, Deserialize, EnumFromStruct)]
 pub struct MangaFields {
-    id: Option<u32>,
-    title: Option<String>,
-    main_picture: Option<MainPicture>,
-    alternative_titles: Option<AlternativeTitles>,
-    start_date: Option<String>,
-    end_date: Option<String>,
-    synopsis: Option<String>,
-    mean: Option<f32>,
-    rank: Option<u32>,
-    popularity: Option<u32>,
-    num_list_users: Option<u32>,
-    num_scoring_users: Option<u32>,
-    nsfw: Option<NSFW>,
-    genres: Option<Vec<Genre>>,
-    created_at: Option<String>,
-    updated_at: Option<String>,
-    media_type: Option<MediaType>,
-    status: Option<Status>,
-    my_list_status: Option<MyListStatus>,
-    num_volumes: Option<u32>,
-    num_chapters: Option<u32>,
-    authors: Option<Vec<Author>>,
+    pub id: Option<u32>,
+    pub title: Option<String>,
+    pub main_picture: Option<MainPicture>,
+    pub alternative_titles: Option<AlternativeTitles>,
+    pub start_date: Option<String>,
+    pub end_date: Option<String>,
+    pub synopsis: Option<String>,
+    pub mean: Option<f32>,
+    pub rank: Option<u32>,
+    pub popularity: Option<u32>,
+    pub num_list_users: Option<u32>,
+    pub num_scoring_users: Option<u32>,
+    pub nsfw: Option<NSFW>,
+    pub genres: Option<Vec<Genre>>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
+    pub media_type: Option<MediaType>,
+    pub status: Option<Status>,
+    pub my_list_status: Option<ListStatus>,
+    pub num_volumes: Option<u32>,
+    pub num_chapters: Option<u32>,
+    pub authors: Option<Vec<Author>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -72,102 +84,119 @@ pub enum Status {
 
 #[derive(Debug, Deserialize)]
 pub struct Author {
-    node: AuthorDetails,
-    role: String,
+    pub node: AuthorDetails,
+    pub role: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct AuthorDetails {
-    id: u32,
-    first_name: Option<String>,
-    last_name: Option<String>,
+    pub id: u32,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
 }
 
+
 #[derive(Debug, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ListStatus {
-    Reading,
-    Completed,
-    OnHold,
-    Dropped,
-    PlanToRead,
+pub struct ListStatus {
+    pub status: Option<super::requests::UserMangaListStatus>,
+    pub score: u8,
+    pub num_volumes_read: u32,
+    pub num_chapters_read: u32,
+    pub is_rereading: bool,
+    pub start_date: Option<String>,
+    pub finish_date: Option<String>,
+    pub priority: u8,
+    pub num_times_reread: u32,
+    pub reread_value: u8,
+    pub tags: Vec<String>,
+    pub comments: String,
+    pub updated_at: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct MyListStatus {
-    status: Option<ListStatus>,
-    score: u8,
-    num_volumes_read: u32,
-    num_chapters_read: u32,
-    is_rereading: bool,
-    start_date: Option<String>,
-    finish_date: Option<String>,
-    priority: u8,
-    num_times_reread: u32,
-    reread_value: u32,
-    tags: Vec<String>,
-    comments: String,
-    updated_at: String,
+    pub status: Option<super::requests::UserMangaListStatus>,
+    pub is_rereading: bool,
+    pub score: u8,
+    pub num_volumes_read: u32,
+    pub num_chapters_read: u32,
+    pub priority: u8,
+    pub num_times_reread: u32,
+    pub reread_value: u8,
+    pub tags: String,
+    pub comments: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct MangaPicture {
-    medium: String,
-    large: String,
+    pub medium: String,
+    pub large: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct RelatedManga {
-    node: MangaFields,
-    relation_type: RelationType,
-    relation_type_formatted: String,
+    pub node: MangaFields,
+    pub relation_type: RelationType,
+    pub relation_type_formatted: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Recommendation {
-    node: MangaFields,
-    num_recommendations: u32,
+    pub node: MangaFields,
+    pub num_recommendations: u32,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Serialization {
-    node: SerializationNode,
-    role: String,
+    pub node: SerializationNode,
+    pub role: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct SerializationNode {
-    id: u32,
-    name: String,
+    pub id: u32,
+    pub name: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct MangaDetails {
     #[serde(flatten)]
-    shared_fields: MangaFields,
+    pub shared_fields: MangaFields,
 
-    pictures: Option<Vec<MangaPicture>>,
-    background: Option<String>,
-    related_anime: Option<Vec<crate::anime::responses::RelatedAnime>>,
-    related_manga: Option<Vec<RelatedManga>>,
-    recommendations: Option<Vec<Recommendation>>,
-    serialization: Option<Vec<Serialization>>,
+    pub pictures: Option<Vec<MangaPicture>>,
+    pub background: Option<String>,
+    pub related_anime: Option<Vec<crate::anime::responses::RelatedAnime>>,
+    pub related_manga: Option<Vec<RelatedManga>>,
+    pub recommendations: Option<Vec<Recommendation>>,
+    pub serialization: Option<Vec<Serialization>>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct MangaRanking {
-    data: Vec<MangaRankingNode>,
-    paging: Paging,
+    pub data: Vec<MangaRankingNode>,
+    pub paging: Paging,
+}
+
+impl PagingIter for MangaRanking {
+    type Item = Self;
+
+    fn next_page(&self) -> &Option<String> {
+        &self.paging.next
+    }
+
+    fn prev_page(&self) -> &Option<String> {
+        &self.paging.previous
+    }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct MangaRankingNode {
-    node: MangaFields,
-    ranking: Ranking,
+    pub node: MangaFields,
+    pub ranking: Ranking,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Ranking {
-    rank: u32,
-    previous_rank: Option<u32>,
+    pub rank: u32,
+    pub previous_rank: Option<u32>,
 }
