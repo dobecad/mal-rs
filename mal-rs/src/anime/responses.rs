@@ -1,5 +1,4 @@
 // Structs for deserializing Anime Endpoint responses
-#![allow(dead_code)]
 
 use crate::common::{
     AlternativeTitles, Genre, MainPicture, Paging, PagingIter, RelationType, NSFW,
