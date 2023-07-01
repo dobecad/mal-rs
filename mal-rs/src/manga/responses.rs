@@ -1,16 +1,26 @@
 // Structs for deserializing Manga Endpoint responses
 
-use crate::common::{AlternativeTitles, Genre, MainPicture, Paging, RelationType, NSFW, PagingIter};
-use serde::Deserialize;
+use std::fmt::Display;
+
+use crate::common::{
+    AlternativeTitles, Genre, MainPicture, Paging, PagingIter, RelationType, NSFW,
+};
 use enum_from_struct::EnumFromStruct;
+use serde::{Deserialize, Serialize};
 
 // This is imported for the `enum-from-struct` proc macro
 use strum_macros::EnumIter;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct MangaList {
     pub data: Vec<MangaListNode>,
     pub paging: Paging,
+}
+
+impl Display for MangaList {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
 }
 
 impl PagingIter for MangaList {
@@ -25,7 +35,7 @@ impl PagingIter for MangaList {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct MangaListNode {
     pub node: MangaFields,
 
@@ -33,8 +43,14 @@ pub struct MangaListNode {
     pub list_status: Option<ListStatus>,
 }
 
+impl Display for MangaListNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
 // Wrap everything in Options since user controls what fields should be returned
-#[derive(Debug, Deserialize, EnumFromStruct)]
+#[derive(Debug, Deserialize, EnumFromStruct, Serialize)]
 pub struct MangaFields {
     pub id: Option<u32>,
     pub title: Option<String>,
@@ -60,7 +76,13 @@ pub struct MangaFields {
     pub authors: Option<Vec<Author>>,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for MangaFields {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum MediaType {
     Unknown,
@@ -73,7 +95,7 @@ pub enum MediaType {
     Oel,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Status {
     Finished,
@@ -81,21 +103,32 @@ pub enum Status {
     NotYetPublished,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Author {
     pub node: AuthorDetails,
     pub role: String,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for Author {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AuthorDetails {
     pub id: u32,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
 }
 
+impl Display for AuthorDetails {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ListStatus {
     pub status: Option<super::requests::UserMangaListStatus>,
     pub score: u8,
@@ -112,7 +145,13 @@ pub struct ListStatus {
     pub updated_at: String,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for ListStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct MyListStatus {
     pub status: Option<super::requests::UserMangaListStatus>,
     pub is_rereading: bool,
@@ -126,38 +165,74 @@ pub struct MyListStatus {
     pub comments: String,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for MyListStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct MangaPicture {
     pub medium: String,
     pub large: String,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for MangaPicture {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct RelatedManga {
     pub node: MangaFields,
     pub relation_type: RelationType,
     pub relation_type_formatted: String,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for RelatedManga {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Recommendation {
     pub node: MangaFields,
     pub num_recommendations: u32,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for Recommendation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Serialization {
     pub node: SerializationNode,
     pub role: String,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for Serialization {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct SerializationNode {
     pub id: u32,
     pub name: String,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for SerializationNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct MangaDetails {
     #[serde(flatten)]
     pub shared_fields: MangaFields,
@@ -170,10 +245,22 @@ pub struct MangaDetails {
     pub serialization: Option<Vec<Serialization>>,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for MangaDetails {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct MangaRanking {
     pub data: Vec<MangaRankingNode>,
     pub paging: Paging,
+}
+
+impl Display for MangaRanking {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
 }
 
 impl PagingIter for MangaRanking {
@@ -188,14 +275,26 @@ impl PagingIter for MangaRanking {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct MangaRankingNode {
     pub node: MangaFields,
     pub ranking: Ranking,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for MangaRankingNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Ranking {
     pub rank: u32,
     pub previous_rank: Option<u32>,
+}
+
+impl Display for Ranking {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
 }

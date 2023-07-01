@@ -1,15 +1,18 @@
 // Structs for deserializing Anime Endpoint responses
 
+use std::fmt::Display;
+
 use crate::common::{
     AlternativeTitles, Genre, MainPicture, Paging, PagingIter, RelationType, NSFW,
 };
 use enum_from_struct::EnumFromStruct;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use serde_json;
 
 // This is imported for the `enum-from-struct` proc macro
 use strum_macros::EnumIter;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AnimeList {
     pub data: Vec<AnimeListNode>,
     pub paging: Paging,
@@ -27,7 +30,13 @@ impl PagingIter for AnimeList {
     }
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for AnimeList {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AnimeListNode {
     pub node: AnimeFields,
 
@@ -35,13 +44,25 @@ pub struct AnimeListNode {
     pub list_status: Option<ListStatus>,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for AnimeListNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AnimePicture {
     pub medium: String,
     pub large: String,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for AnimePicture {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum MediaType {
     Unknown,
@@ -53,7 +74,7 @@ pub enum MediaType {
     Music,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Status {
     FinishedAiring,
@@ -61,7 +82,7 @@ pub enum Status {
     NotYetAired,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ListStatus {
     pub status: Option<super::requests::UserAnimeListStatus>,
     pub score: u8,
@@ -77,7 +98,13 @@ pub struct ListStatus {
     pub updated_at: String,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for ListStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct MyListStatus {
     pub status: Option<super::requests::UserAnimeListStatus>,
     pub is_rewatching: bool,
@@ -90,19 +117,37 @@ pub struct MyListStatus {
     pub comments: String,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for MyListStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct StartSeason {
     pub year: u32,
     pub season: super::requests::Season,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for StartSeason {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Broadcast {
     pub day_of_the_week: String,
     pub start_time: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for Broadcast {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Source {
     Other,
@@ -123,7 +168,7 @@ pub enum Source {
     Music,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Rating {
     G,
@@ -132,18 +177,24 @@ pub enum Rating {
     PG13,
     R,
     #[serde(rename = "r+")]
-    RR,
+    RP,
     RX,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Studio {
     pub id: u32,
     pub name: String,
 }
 
+impl Display for Studio {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
 // Wrap everything in Options since user controls what fields should be returned
-#[derive(Debug, Deserialize, EnumFromStruct)]
+#[derive(Debug, Deserialize, EnumFromStruct, Serialize)]
 pub struct AnimeFields {
     pub id: Option<u32>,
     pub title: Option<String>,
@@ -173,26 +224,50 @@ pub struct AnimeFields {
     pub studios: Option<Vec<Studio>>,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for AnimeFields {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct RelatedAnime {
     pub node: AnimeFields,
     pub relation_type: RelationType,
     pub relation_type_formatted: String,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for RelatedAnime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Recommendations {
     pub node: AnimeFields,
     pub num_recommendations: u32,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for Recommendations {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Statistics {
     pub num_list_users: u32,
     pub status: StatisticsStatus,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for Statistics {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct StatisticsStatus {
     pub watching: u32,
     pub completed: u32,
@@ -201,7 +276,13 @@ pub struct StatisticsStatus {
     pub plan_to_watch: u32,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for StatisticsStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AnimeDetails {
     #[serde(flatten)]
     pub shared_fields: AnimeFields,
@@ -214,16 +295,34 @@ pub struct AnimeDetails {
     pub statistics: Option<Statistics>,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for AnimeDetails {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Ranking {
     pub rank: u32,
     pub previous_rank: Option<u32>,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for Ranking {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AnimeRanking {
     pub data: Vec<AnimeRankingNode>,
     pub paging: Paging,
+}
+
+impl Display for AnimeRanking {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
 }
 
 impl PagingIter for AnimeRanking {
@@ -238,16 +337,28 @@ impl PagingIter for AnimeRanking {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AnimeRankingNode {
     pub node: AnimeFields,
     pub ranking: Ranking,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for AnimeRankingNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct SeasonalAnime {
     pub data: Vec<SeasonalAnimeNode>,
     pub paging: Paging,
+}
+
+impl Display for SeasonalAnime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
 }
 
 impl PagingIter for SeasonalAnime {
@@ -262,15 +373,27 @@ impl PagingIter for SeasonalAnime {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct SeasonalAnimeNode {
     pub node: AnimeFields,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for SeasonalAnimeNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct SuggestedAnime {
     pub data: Vec<SuggestedAnimeNode>,
     pub paging: Paging,
+}
+
+impl Display for SuggestedAnime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
 }
 
 impl PagingIter for SuggestedAnime {
@@ -285,7 +408,13 @@ impl PagingIter for SuggestedAnime {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct SuggestedAnimeNode {
     pub node: AnimeFields,
+}
+
+impl Display for SuggestedAnimeNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
 }
