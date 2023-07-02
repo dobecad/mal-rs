@@ -26,6 +26,10 @@ impl GetAnimeList {
             AnimeApiError::new("Limit must be between 1 and 100 inclusive".to_string())
         })?;
 
+        if q.is_empty() {
+            return Err(AnimeApiError::new("Query cannot be empty".to_string()))
+        }
+
         Ok(Self {
             q,
             limit: limit.unwrap_or(100),
