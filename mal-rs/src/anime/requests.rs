@@ -12,6 +12,7 @@ pub struct GetAnimeList {
     q: String,
     limit: u16,
     offset: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     fields: Option<String>,
 }
 
@@ -27,7 +28,7 @@ impl GetAnimeList {
         })?;
 
         if q.is_empty() {
-            return Err(AnimeApiError::new("Query cannot be empty".to_string()))
+            return Err(AnimeApiError::new("Query cannot be empty".to_string()));
         }
 
         Ok(Self {
@@ -43,7 +44,8 @@ impl GetAnimeList {
 pub struct GetAnimeDetails {
     #[serde(skip_serializing)]
     pub(crate) anime_id: u32,
-    fields: Option<String>, // TODO: Create Enum for fields?
+    #[serde(skip_serializing_if = "Option::is_none")]
+    fields: Option<String>,
 }
 
 impl GetAnimeDetails {
@@ -55,7 +57,7 @@ impl GetAnimeDetails {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum RankingType {
     All,
@@ -74,6 +76,7 @@ pub struct GetAnimeRanking {
     ranking_type: RankingType,
     limit: u16,
     offset: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     fields: Option<String>,
 }
 
@@ -125,7 +128,7 @@ impl std::fmt::Display for Season {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum SeasonalAnimeSort {
     AnimeScore,
@@ -138,7 +141,8 @@ pub struct GetSeasonalAnime {
     pub(crate) year: u16,
     #[serde(skip_serializing)]
     pub(crate) season: Season,
-    sort: SeasonalAnimeSort,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sort: Option<SeasonalAnimeSort>,
     limit: u16,
     offset: u32,
     fields: Option<String>,
@@ -148,7 +152,7 @@ impl GetSeasonalAnime {
     pub fn new(
         year: u16,
         season: Season,
-        sort: SeasonalAnimeSort,
+        sort: Option<SeasonalAnimeSort>,
         limit: Option<u16>,
         offset: Option<u32>,
         fields: Option<&AnimeFields>,
@@ -172,6 +176,7 @@ impl GetSeasonalAnime {
 pub struct GetSuggestedAnime {
     limit: u16,
     offset: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     fields: Option<String>,
 }
 
@@ -218,10 +223,13 @@ pub enum UserAnimeListSort {
 pub struct GetUserAnimeList {
     #[serde(skip_serializing)]
     pub(crate) user_name: String,
-    status: UserAnimeListStatus,
-    sort: UserAnimeListSort,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    status: Option<UserAnimeListStatus>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sort: Option<UserAnimeListSort>,
     limit: u16,
     offset: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     fields: Option<String>,
 }
 
@@ -229,8 +237,8 @@ impl GetUserAnimeList {
     /// Note: `user_name` should be the targets user name, or `@me` as a shortcut for yourself
     pub fn new(
         user_name: String,
-        status: UserAnimeListStatus,
-        sort: UserAnimeListSort,
+        status: Option<UserAnimeListStatus>,
+        sort: Option<UserAnimeListSort>,
         limit: Option<u16>,
         offset: Option<u32>,
         fields: Option<&AnimeFields>,
@@ -254,43 +262,74 @@ impl GetUserAnimeList {
 pub struct UpdateMyAnimeListStatus {
     #[serde(skip_serializing)]
     pub(crate) anime_id: u32,
-    status: UserAnimeListStatus,
-    is_rewatching: bool,
-    score: u8,
-    num_watched_episodes: u32,
-    priority: u8,
-    num_times_rewatched: u32,
-    rewatch_value: u8,
-    tags: String,
-    comments: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    status: Option<UserAnimeListStatus>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    is_rewatching: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    score: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    num_watched_episodes: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    priority: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    num_times_rewatched: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    rewatch_value: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tags: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    comments: Option<String>,
 }
 
 impl UpdateMyAnimeListStatus {
     pub fn new(
         anime_id: u32,
-        status: UserAnimeListStatus,
-        is_rewatching: bool,
-        score: u8,
-        num_watched_episodes: u32,
-        priority: u8,
-        num_times_rewatched: u32,
-        rewatch_value: u8,
-        tags: String,
-        comments: String,
+        status: Option<UserAnimeListStatus>,
+        is_rewatching: Option<bool>,
+        score: Option<u8>,
+        num_watched_episodes: Option<u32>,
+        priority: Option<u8>,
+        num_times_rewatched: Option<u32>,
+        rewatch_value: Option<u8>,
+        tags: Option<String>,
+        comments: Option<String>,
     ) -> Result<Self, AnimeApiError> {
-        if score > 10 {
-            return Err(AnimeApiError::new(
-                "Score must be between 0 and 10 inclusive".to_string(),
-            ));
+        if let Some(score) = score {
+            if score > 10 {
+                return Err(AnimeApiError::new(
+                    "Score must be between 0 and 10 inclusive".to_string(),
+                ));
+            }
         }
-        if priority > 2 {
-            return Err(AnimeApiError::new(
-                "Priority must be between 0 and 2 inclusive".to_string(),
-            ));
+        if let Some(priority) = priority {
+            if priority > 2 {
+                return Err(AnimeApiError::new(
+                    "Priority must be between 0 and 2 inclusive".to_string(),
+                ));
+            }
         }
-        if rewatch_value > 5 {
+        if let Some(rewatch_value) = rewatch_value {
+            if rewatch_value > 5 {
+                return Err(AnimeApiError::new(
+                    "Rewatch value must be between 0 and 5 inclusive".to_string(),
+                ));
+            }
+        }
+
+        // TODO: Abstract this logic to make it re-useable
+        if !(status.is_some()
+            || is_rewatching.is_some()
+            || score.is_some()
+            || num_watched_episodes.is_some()
+            || priority.is_some()
+            || num_times_rewatched.is_some()
+            || rewatch_value.is_some()
+            || tags.is_some()
+            || comments.is_some())
+        {
             return Err(AnimeApiError::new(
-                "Rewatch value must be between 0 and 5 inclusive".to_string(),
+                "At least one of the optional arguments must be Some".to_string(),
             ));
         }
 

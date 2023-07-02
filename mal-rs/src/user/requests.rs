@@ -5,6 +5,7 @@ use super::responses::UserEnum;
 
 #[derive(Debug, Serialize)]
 pub struct GetUserInformation {
+    #[serde(skip_serializing_if = "Option::is_none")]
     fields: Option<String>,
 }
 

@@ -32,30 +32,47 @@ impl GetForumTopicDetail {
 
 #[derive(Debug, Serialize)]
 pub struct GetForumTopics {
-    board_id: u32,
-    subboard_id: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    q: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    board_id: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    subboard_id: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    topic_user_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    user_name: Option<String>,
     limit: u16,
     offset: u32,
-    q: String,
-    topic_user_name: String,
-    user_name: String,
     // TODO: Support additional sorting methods once MAL add them
     sort: String,
 }
 
 impl GetForumTopics {
     pub fn new(
-        board_id: u32,
-        subboard_id: u32,
+        q: Option<String>,
+        board_id: Option<u32>,
+        subboard_id: Option<u32>,
+        topic_user_name: Option<String>,
+        user_name: Option<String>,
         limit: Option<u16>,
         offset: Option<u32>,
-        q: String,
-        topic_user_name: String,
-        user_name: String,
     ) -> Result<Self, ForumApiError> {
         limit_check(limit, 1, 100).map_err(|_| {
             ForumApiError::new("Limit must be between 1 and 100 inclusive".to_string())
         })?;
+
+        if !(q.is_some()
+            || board_id.is_some()
+            || subboard_id.is_some()
+            || topic_user_name.is_some()
+            || user_name.is_some())
+        {
+            return Err(ForumApiError::new(
+                "At least one of the optional arguments must be Some, excluding limit and offset"
+                    .to_string(),
+            ));
+        }
 
         Ok(Self {
             board_id,

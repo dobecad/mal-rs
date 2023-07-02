@@ -2,13 +2,14 @@ use crate::common::limit_check;
 
 // Structs for crafting Manga Endpoint requests
 use super::{error::MangaApiError, responses::MangaFieldsEnum};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize)]
 pub struct GetMangaList {
     q: String,
     limit: u16,
     offset: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     fields: Option<String>,
 }
 
@@ -23,6 +24,10 @@ impl GetMangaList {
             MangaApiError::new("Limit must be between 1 and 100 inclusive".to_string())
         })?;
 
+        if q.is_empty() {
+            return Err(MangaApiError::new("Query cannot be empty".to_string()));
+        }
+
         Ok(Self {
             q,
             limit: limit.unwrap_or(100),
@@ -34,7 +39,9 @@ impl GetMangaList {
 
 #[derive(Debug, Serialize)]
 pub struct GetMangaDetails {
+    #[serde(skip_serializing)]
     pub(crate) manga_id: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     fields: Option<String>,
 }
 
@@ -66,6 +73,7 @@ pub struct GetMangaRanking {
     ranking_type: MangaRankingType,
     limit: u16,
     offset: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     fields: Option<String>,
 }
 
@@ -114,18 +122,21 @@ pub enum UserMangaListSort {
 pub struct GetUserMangaList {
     #[serde(skip_serializing)]
     pub(crate) user_name: String,
-    status: UserMangaListStatus,
-    sort: UserMangaListSort,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    status: Option<UserMangaListStatus>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sort: Option<UserMangaListSort>,
     limit: u16,
     offset: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     fields: Option<String>,
 }
 
 impl GetUserMangaList {
     pub fn new(
         user_name: String,
-        status: UserMangaListStatus,
-        sort: UserMangaListSort,
+        status: Option<UserMangaListStatus>,
+        sort: Option<UserMangaListSort>,
         limit: Option<u16>,
         offset: Option<u32>,
         fields: Option<&MangaFields>,
@@ -149,45 +160,77 @@ impl GetUserMangaList {
 pub struct UpdateMyMangaListStatus {
     #[serde(skip_serializing)]
     pub(crate) manga_id: u32,
-    status: UserMangaListStatus,
-    is_rereading: bool,
-    score: u8,
-    num_volumes_read: u32,
-    num_chapters_read: u32,
-    priority: u8,
-    num_times_reread: u32,
-    reread_value: u8,
-    tags: String,
-    comments: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    status: Option<UserMangaListStatus>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    is_rereading: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    score: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    num_volumes_read: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    num_chapters_read: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    priority: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    num_times_reread: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    reread_value: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tags: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    comments: Option<String>,
 }
 
 impl UpdateMyMangaListStatus {
     pub fn new(
         manga_id: u32,
-        status: UserMangaListStatus,
-        is_rereading: bool,
-        score: u8,
-        num_volumes_read: u32,
-        num_chapters_read: u32,
-        priority: u8,
-        num_times_reread: u32,
-        reread_value: u8,
-        tags: String,
-        comments: String,
+        status: Option<UserMangaListStatus>,
+        is_rereading: Option<bool>,
+        score: Option<u8>,
+        num_volumes_read: Option<u32>,
+        num_chapters_read: Option<u32>,
+        priority: Option<u8>,
+        num_times_reread: Option<u32>,
+        reread_value: Option<u8>,
+        tags: Option<String>,
+        comments: Option<String>,
     ) -> Result<Self, MangaApiError> {
-        if score > 10 {
-            return Err(MangaApiError::new(
-                "Score must be between 0 and 10 inclusive".to_string(),
-            ));
+        if let Some(score) = score {
+            if score > 10 {
+                return Err(MangaApiError::new(
+                    "Score must be between 0 and 10 inclusive".to_string(),
+                ));
+            }
         }
-        if priority > 2 {
-            return Err(MangaApiError::new(
-                "Priority must be between 0 and 2 inclusive".to_string(),
-            ));
+        if let Some(priority) = priority {
+            if priority > 2 {
+                return Err(MangaApiError::new(
+                    "Priority must be between 0 and 2 inclusive".to_string(),
+                ));
+            }
         }
-        if reread_value > 5 {
+        if let Some(reread_value) = reread_value {
+            if reread_value > 5 {
+                return Err(MangaApiError::new(
+                    "Reread value must be between 0 and 5 inclusive".to_string(),
+                ));
+            }
+        }
+
+        if !(status.is_some()
+            || is_rereading.is_some()
+            || score.is_some()
+            || num_chapters_read.is_some()
+            || num_volumes_read.is_some()
+            || priority.is_some()
+            || num_times_reread.is_some()
+            || reread_value.is_some()
+            || tags.is_some()
+            || comments.is_some())
+        {
             return Err(MangaApiError::new(
-                "Reread value must be between 0 and 5 inclusive".to_string(),
+                "At least one of the optional arguments must be Some".to_string(),
             ));
         }
 
