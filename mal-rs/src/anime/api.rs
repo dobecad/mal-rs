@@ -74,7 +74,7 @@ pub trait Request {
 
     async fn get_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>>;
 
-    async fn get_next_or_prev(&self, query: &Option<String>) -> Result<String, Box<dyn Error>>;
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>>;
 }
 
 #[async_trait]
@@ -209,7 +209,7 @@ impl Request for AnimeApiClient<Client> {
         handle_response(response).await
     }
 
-    async fn get_next_or_prev(&self, query: &Option<String>) -> Result<String, Box<dyn Error>> {
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>> {
         if let Some(itr) = query {
             let response = self
                 .client
@@ -283,7 +283,7 @@ impl Request for AnimeApiClient<Oauth> {
         handle_response(response).await
     }
 
-    async fn get_next_or_prev(&self, query: &Option<String>) -> Result<String, Box<dyn Error>> {
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>> {
         if let Some(itr) = query {
             let response = self
                 .client

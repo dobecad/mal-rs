@@ -26,12 +26,12 @@ impl Display for MangaList {
 impl PagingIter for MangaList {
     type Item = Self;
 
-    fn next_page(&self) -> &Option<String> {
-        &self.paging.next
+    fn next_page(&self) -> Option<&String> {
+        self.paging.next.as_ref()
     }
 
-    fn prev_page(&self) -> &Option<String> {
-        &self.paging.previous
+    fn prev_page(&self) -> Option<&String> {
+        self.paging.previous.as_ref()
     }
 }
 
@@ -266,12 +266,12 @@ impl Display for MangaRanking {
 impl PagingIter for MangaRanking {
     type Item = Self;
 
-    fn next_page(&self) -> &Option<String> {
-        &self.paging.next
+    fn next_page(&self) -> Option<&String> {
+        self.paging.next.as_ref()
     }
 
-    fn prev_page(&self) -> &Option<String> {
-        &self.paging.previous
+    fn prev_page(&self) -> Option<&String> {
+        self.paging.previous.as_ref()
     }
 }
 

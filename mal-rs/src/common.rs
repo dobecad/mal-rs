@@ -106,7 +106,7 @@ pub(crate) fn limit_check(value: Option<u16>, lowerbound: u16, upperbound: u16) 
 pub trait PagingIter {
     type Item;
 
-    fn next_page(&self) -> &Option<String>;
+    fn next_page(&self) -> Option<&String>;
 
-    fn prev_page(&self) -> &Option<String>;
+    fn prev_page(&self) -> Option<&String>;
 }

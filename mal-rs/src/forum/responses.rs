@@ -68,12 +68,12 @@ impl Display for ForumTopicDetail {
 impl PagingIter for ForumTopicDetail {
     type Item = Self;
 
-    fn next_page(&self) -> &Option<String> {
-        &self.paging.next
+    fn next_page(&self) -> Option<&String> {
+        self.paging.next.as_ref()
     }
 
-    fn prev_page(&self) -> &Option<String> {
-        &self.paging.previous
+    fn prev_page(&self) -> Option<&String> {
+        self.paging.previous.as_ref()
     }
 }
 
@@ -161,12 +161,12 @@ impl Display for ForumTopics {
 impl PagingIter for ForumTopics {
     type Item = Self;
 
-    fn next_page(&self) -> &Option<String> {
-        &self.paging.next
+    fn next_page(&self) -> Option<&String> {
+        self.paging.next.as_ref()
     }
 
-    fn prev_page(&self) -> &Option<String> {
-        &self.paging.previous
+    fn prev_page(&self) -> Option<&String> {
+        self.paging.previous.as_ref()
     }
 }
 

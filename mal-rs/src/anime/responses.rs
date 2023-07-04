@@ -21,12 +21,12 @@ pub struct AnimeList {
 impl PagingIter for AnimeList {
     type Item = Self;
 
-    fn next_page(&self) -> &Option<String> {
-        &self.paging.next
+    fn next_page(&self) -> Option<&String> {
+        self.paging.next.as_ref()
     }
 
-    fn prev_page(&self) -> &Option<String> {
-        &self.paging.previous
+    fn prev_page(&self) -> Option<&String> {
+        self.paging.previous.as_ref()
     }
 }
 
@@ -328,12 +328,12 @@ impl Display for AnimeRanking {
 impl PagingIter for AnimeRanking {
     type Item = Self;
 
-    fn next_page(&self) -> &Option<String> {
-        &self.paging.next
+    fn next_page(&self) -> Option<&String> {
+        self.paging.next.as_ref()
     }
 
-    fn prev_page(&self) -> &Option<String> {
-        &self.paging.previous
+    fn prev_page(&self) -> Option<&String> {
+        self.paging.previous.as_ref()
     }
 }
 
@@ -364,12 +364,12 @@ impl Display for SeasonalAnime {
 impl PagingIter for SeasonalAnime {
     type Item = Self;
 
-    fn next_page(&self) -> &Option<String> {
-        &self.paging.next
+    fn next_page(&self) -> Option<&String> {
+        self.paging.next.as_ref()
     }
 
-    fn prev_page(&self) -> &Option<String> {
-        &self.paging.previous
+    fn prev_page(&self) -> Option<&String> {
+        self.paging.previous.as_ref()
     }
 }
 
@@ -399,12 +399,12 @@ impl Display for SuggestedAnime {
 impl PagingIter for SuggestedAnime {
     type Item = Self;
 
-    fn next_page(&self) -> &Option<String> {
-        &self.paging.next
+    fn next_page(&self) -> Option<&String> {
+        self.paging.next.as_ref()
     }
 
-    fn prev_page(&self) -> &Option<String> {
-        &self.paging.previous
+    fn prev_page(&self) -> Option<&String> {
+        self.paging.previous.as_ref()
     }
 }
 
