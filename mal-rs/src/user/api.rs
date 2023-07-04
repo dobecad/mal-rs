@@ -22,7 +22,7 @@ impl From<&AccessToken> for UserApiClient {
 }
 
 impl UserApiClient {
-    async fn get<T>(&self, query: T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize,
     {
@@ -39,7 +39,7 @@ impl UserApiClient {
 
     pub async fn get_my_user_information(
         &self,
-        query: GetUserInformation,
+        query: &GetUserInformation,
     ) -> Result<User, Box<dyn Error>> {
         let response = self.get(query).await?;
         let result: User = serde_json::from_str(response.as_str()).map_err(|err| {

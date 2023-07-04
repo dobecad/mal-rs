@@ -20,7 +20,7 @@ async fn main() {
         AnimeFieldsEnum::title,
     );
     let query = GetAnimeList::new("one".to_string(), Some(5), None, Some(&fields)).unwrap();
-    let result = api_client.get_anime_list(query).await.unwrap();
+    let result = api_client.get_anime_list(&query).await.unwrap();
     println!("Result: {}", &result);
 
     // Example iterating through pages
@@ -34,6 +34,6 @@ async fn main() {
     let api_client = MangaApiClient::from(&client_id);
     let fields = mal_rs::manga::all_fields();
     let query = GetMangaList::new("one".to_string(), Some(5), None, Some(&fields)).unwrap();
-    let result = api_client.get_manga_list(query).await.unwrap();
+    let result = api_client.get_manga_list(&query).await.unwrap();
     println!("Result: {}", result);
 }

@@ -54,9 +54,9 @@ impl From<&ClientId> for ForumApiClient<Client> {
 pub trait Request {
     async fn get(&self) -> Result<String, Box<dyn Error>>;
 
-    async fn get_detail(&self, query: GetForumTopicDetail) -> Result<String, Box<dyn Error>>;
+    async fn get_detail(&self, query: &GetForumTopicDetail) -> Result<String, Box<dyn Error>>;
 
-    async fn get_topics(&self, query: GetForumTopics) -> Result<String, Box<dyn Error>>;
+    async fn get_topics(&self, query: &GetForumTopics) -> Result<String, Box<dyn Error>>;
 }
 
 #[async_trait]
@@ -73,7 +73,7 @@ pub trait ForumApi {
 
     async fn get_forum_topic_detail(
         &self,
-        query: GetForumTopicDetail,
+        query: &GetForumTopicDetail,
     ) -> Result<ForumTopicDetail, Box<dyn Error>> {
         let response = self.get_self().get_detail(query).await?;
         let result: ForumTopicDetail = serde_json::from_str(response.as_str()).map_err(|err| {
@@ -85,7 +85,7 @@ pub trait ForumApi {
         Ok(result)
     }
 
-    async fn get_forum_topics(&self, query: GetForumTopics) -> Result<ForumTopics, Box<dyn Error>> {
+    async fn get_forum_topics(&self, query: &GetForumTopics) -> Result<ForumTopics, Box<dyn Error>> {
         let response = self.get_self().get_topics(query).await?;
         let result: ForumTopics = serde_json::from_str(response.as_str()).map_err(|err| {
             ForumApiError::new(format!("Failed to parse Forum Topics result: {}", err))
@@ -109,7 +109,7 @@ impl Request for ForumApiClient<Client> {
         handle_response(response).await
     }
 
-    async fn get_detail(&self, query: GetForumTopicDetail) -> Result<String, Box<dyn Error>> {
+    async fn get_detail(&self, query: &GetForumTopicDetail) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/topic/{}", FORUM_URL, query.topic_id))
@@ -120,7 +120,7 @@ impl Request for ForumApiClient<Client> {
         handle_response(response).await
     }
 
-    async fn get_topics(&self, query: GetForumTopics) -> Result<String, Box<dyn Error>> {
+    async fn get_topics(&self, query: &GetForumTopics) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/topics", FORUM_URL))
@@ -146,7 +146,7 @@ impl Request for ForumApiClient<Oauth> {
         handle_response(response).await
     }
 
-    async fn get_detail(&self, query: GetForumTopicDetail) -> Result<String, Box<dyn Error>> {
+    async fn get_detail(&self, query: &GetForumTopicDetail) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/topic/{}", FORUM_URL, query.topic_id))
@@ -157,7 +157,7 @@ impl Request for ForumApiClient<Oauth> {
         handle_response(response).await
     }
 
-    async fn get_topics(&self, query: GetForumTopics) -> Result<String, Box<dyn Error>> {
+    async fn get_topics(&self, query: &GetForumTopics) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/topics", FORUM_URL))

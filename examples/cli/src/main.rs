@@ -38,7 +38,7 @@ async fn main() {
     let api_client = UserApiClient::from(token);
     let fields = UserFields(vec![UserEnum::id, UserEnum::name, UserEnum::is_supporter]);
     let query = GetUserInformation::new(Some(&fields));
-    let response = api_client.get_my_user_information(query).await.unwrap();
+    let response = api_client.get_my_user_information(&query).await.unwrap();
     println!("Information about yourself: {:?}", response);
     
 }

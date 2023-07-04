@@ -66,15 +66,15 @@ impl From<&ClientId> for AnimeApiClient<Client> {
 
 #[async_trait]
 pub trait Request {
-    async fn get<T>(&self, query: T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync;
 
-    async fn get_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>>;
+    async fn get_details(&self, query: &GetAnimeDetails) -> Result<String, Box<dyn Error>>;
 
-    async fn get_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>>;
+    async fn get_seasonal(&self, query: &GetSeasonalAnime) -> Result<String, Box<dyn Error>>;
 
-    async fn get_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>>;
+    async fn get_user(&self, query: &GetUserAnimeList) -> Result<String, Box<dyn Error>>;
 
     async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>>;
 }
@@ -83,7 +83,7 @@ pub trait Request {
 pub trait AnimeApi {
     type State: Request + Send + Sync;
 
-    async fn get_anime_list(&self, query: GetAnimeList) -> Result<AnimeList, Box<dyn Error>> {
+    async fn get_anime_list(&self, query: &GetAnimeList) -> Result<AnimeList, Box<dyn Error>> {
         let response = self.get_self().get(query).await?;
         let result: AnimeList = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Anime List result: {}", err))
@@ -93,7 +93,7 @@ pub trait AnimeApi {
 
     async fn get_anime_details(
         &self,
-        query: GetAnimeDetails,
+        query: &GetAnimeDetails,
     ) -> Result<AnimeDetails, Box<dyn Error>> {
         let response = self.get_self().get_details(query).await?;
         let result: AnimeDetails = serde_json::from_str(response.as_str()).map_err(|err| {
@@ -104,7 +104,7 @@ pub trait AnimeApi {
 
     async fn get_anime_ranking(
         &self,
-        query: GetAnimeRanking,
+        query: &GetAnimeRanking,
     ) -> Result<AnimeRanking, Box<dyn Error>> {
         let response = self.get_self().get(query).await?;
         let result: AnimeRanking = serde_json::from_str(response.as_str()).map_err(|err| {
@@ -115,7 +115,7 @@ pub trait AnimeApi {
 
     async fn get_seasonal_anime(
         &self,
-        query: GetSeasonalAnime,
+        query: &GetSeasonalAnime,
     ) -> Result<SeasonalAnime, Box<dyn Error>> {
         let response = self.get_self().get(query).await?;
         let result: SeasonalAnime = serde_json::from_str(response.as_str()).map_err(|err| {
@@ -157,7 +157,7 @@ pub trait AnimeApi {
 
 #[async_trait]
 impl Request for AnimeApiClient<Client> {
-    async fn get<T>(&self, query: T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync,
     {
@@ -172,7 +172,7 @@ impl Request for AnimeApiClient<Client> {
         handle_response(response).await
     }
 
-    async fn get_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>> {
+    async fn get_details(&self, query: &GetAnimeDetails) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/{}", ANIME_URL, query.anime_id))
@@ -184,7 +184,7 @@ impl Request for AnimeApiClient<Client> {
         handle_response(response).await
     }
 
-    async fn get_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
+    async fn get_seasonal(&self, query: &GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!(
@@ -199,7 +199,7 @@ impl Request for AnimeApiClient<Client> {
         handle_response(response).await
     }
 
-    async fn get_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>> {
+    async fn get_user(&self, query: &GetUserAnimeList) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/{}/animelist", USER_URL, query.user_name))
@@ -231,7 +231,7 @@ impl Request for AnimeApiClient<Client> {
 
 #[async_trait]
 impl Request for AnimeApiClient<Oauth> {
-    async fn get<T>(&self, query: T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
     where
         T: Serialize + std::marker::Send + std::marker::Sync,
     {
@@ -246,7 +246,7 @@ impl Request for AnimeApiClient<Oauth> {
         handle_response(response).await
     }
 
-    async fn get_details(&self, query: GetAnimeDetails) -> Result<String, Box<dyn Error>> {
+    async fn get_details(&self, query: &GetAnimeDetails) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/{}", ANIME_URL, query.anime_id))
@@ -258,7 +258,7 @@ impl Request for AnimeApiClient<Oauth> {
         handle_response(response).await
     }
 
-    async fn get_seasonal(&self, query: GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
+    async fn get_seasonal(&self, query: &GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!(
@@ -273,7 +273,7 @@ impl Request for AnimeApiClient<Oauth> {
         handle_response(response).await
     }
 
-    async fn get_user(&self, query: GetUserAnimeList) -> Result<String, Box<dyn Error>> {
+    async fn get_user(&self, query: &GetUserAnimeList) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
             .get(format!("{}/{}/animelist", USER_URL, query.user_name))
@@ -315,7 +315,7 @@ impl AnimeApi for AnimeApiClient<Client> {
 impl AnimeApiClient<Client> {
     pub async fn get_user_anime_list(
         &self,
-        query: GetUserAnimeList,
+        query: &GetUserAnimeList,
     ) -> Result<AnimeList, Box<dyn Error>> {
         if query.user_name == "@me".to_string() {
             return Err(Box::new(AnimeApiError::new(
@@ -342,7 +342,7 @@ impl AnimeApi for AnimeApiClient<Oauth> {
 impl AnimeApiClient<Oauth> {
     pub async fn get_suggested_anime(
         &self,
-        query: GetSuggestedAnime,
+        query: &GetSuggestedAnime,
     ) -> Result<SuggestedAnime, Box<dyn Error>> {
         let response = self.get(query).await?;
         let result: SuggestedAnime = serde_json::from_str(response.as_str()).map_err(|err| {
@@ -353,7 +353,7 @@ impl AnimeApiClient<Oauth> {
 
     pub async fn get_user_anime_list(
         &self,
-        query: GetUserAnimeList,
+        query: &GetUserAnimeList,
     ) -> Result<AnimeList, Box<dyn Error>> {
         let response = self.get_self().get_user(query).await?;
         let result: AnimeList = serde_json::from_str(response.as_str()).map_err(|err| {
