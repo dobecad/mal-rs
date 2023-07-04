@@ -1,6 +1,13 @@
 use dotenv;
-use mal_rs::{oauth::{OauthClient, RedirectResponse}, user::{api::UserApiClient, requests::{UserFields, GetUserInformation}, responses::UserEnum}};
-use std::{io, vec};
+use mal_rs::{
+    oauth::{OauthClient, RedirectResponse},
+    user::{
+        api::UserApiClient,
+        requests::{GetUserInformation, UserFields},
+        responses::UserEnum,
+    }, user_fields,
+};
+use std::io;
 
 #[tokio::main]
 async fn main() {
@@ -36,9 +43,8 @@ async fn main() {
     // Using Oauth token to interact with User API
     let token = result.get_access_token();
     let api_client = UserApiClient::from(token);
-    let fields = UserFields(vec![UserEnum::id, UserEnum::name, UserEnum::is_supporter]);
+    let fields = user_fields![UserEnum::id, UserEnum::name, UserEnum::is_supporter];
     let query = GetUserInformation::new(Some(&fields));
     let response = api_client.get_my_user_information(&query).await.unwrap();
     println!("Information about yourself: {:?}", response);
-    
 }
