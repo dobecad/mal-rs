@@ -19,7 +19,9 @@ use super::{
     requests::{
         GetAnimeDetails, GetAnimeList, GetAnimeRanking, GetSeasonalAnime, GetSuggestedAnime,
     },
-    responses::{AnimeDetails, AnimeList, AnimeRanking, MyListStatus, SeasonalAnime, SuggestedAnime},
+    responses::{
+        AnimeDetails, AnimeList, AnimeRanking, MyListStatus, SeasonalAnime, SuggestedAnime,
+    },
 };
 use reqwest;
 
