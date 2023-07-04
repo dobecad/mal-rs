@@ -23,3 +23,16 @@ macro_rules! manga_fields {
         }
     };
 }
+
+#[macro_export]
+macro_rules! user_fields {
+    ($($variant:path),* $(,)?) => {
+        {
+            let mut v = Vec::new();
+            $(
+                v.push($variant);
+            )*
+            UserFields(v)
+        }
+    };
+}
