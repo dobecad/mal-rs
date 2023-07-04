@@ -20,7 +20,7 @@ strum_macros = "0.25.0"
 
 [features]
 default = ["anime", "manga"]
-all = ["anime", "manga", "forum", "user"]
+full = ["anime", "manga", "forum", "user"]
 anime = []
 manga = []
 forum = []

@@ -1,11 +1,10 @@
 [package]
-name = "simple"
+name = "forum"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dotenv = "0.15.0"
 tokio = { version = "1.28.2", features = ["macros", "rt-multi-thread"] }
-mal-rs = { path = "../../mal-rs", features = ["anime", "manga"] }
+mal-rs = { path = "../../mal-rs", features = ["forum"]}

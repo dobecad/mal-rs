@@ -31,12 +31,6 @@ pub fn enum_from_struct(input: proc_macro::TokenStream) -> proc_macro::TokenStre
         pub enum #enum_name {
             #(#enum_variants,)*
         }
-
-        impl From<#struct_name> for #enum_name {
-            fn from(_s: #struct_name) -> Self {
-                unimplemented!()
-            }
-        }
     };
 
     expanded.into()

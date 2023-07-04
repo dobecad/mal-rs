@@ -208,6 +208,7 @@ const MANGA_URL: &'static str = "https://api.myanimelist.net/v2/manga";
 #[cfg(feature = "forum")]
 const FORUM_URL: &'static str = "https://api.myanimelist.net/v2/forum";
 
+#[cfg(any(feature = "anime", feature = "manga", feature = "user"))]
 const USER_URL: &'static str = "https://api.myanimelist.net/v2/users";
 
 pub mod prelude {
