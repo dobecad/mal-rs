@@ -1,3 +1,4 @@
+#[cfg(feature = "anime")]
 #[macro_export]
 macro_rules! anime_fields {
     ($($variant:path),* $(,)?) => {
@@ -11,6 +12,7 @@ macro_rules! anime_fields {
     };
 }
 
+#[cfg(feature = "manga")]
 #[macro_export]
 macro_rules! manga_fields {
     ($($variant:path),* $(,)?) => {
@@ -24,6 +26,7 @@ macro_rules! manga_fields {
     };
 }
 
+#[cfg(feature = "user")]
 #[macro_export]
 macro_rules! user_fields {
     ($($variant:path),* $(,)?) => {

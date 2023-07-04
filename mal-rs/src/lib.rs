@@ -138,38 +138,38 @@
 //!     }, user_fields,
 //! };
 //! use std::io;
-//! 
+//!
 //! #[tokio::main]
 //! async fn main() {
 //!     dotenv::dotenv().ok();
-//! 
+//!
 //!     let mut oauth_client = OauthClient::new();
 //!     println!(
 //!         "Visit this URL: {}\n",
 //!         oauth_client.generate_readonly_auth_url()
 //!     );
-//! 
+//!
 //!     println!("After authorizing, please enter the URL you were redirected to: ");
 //!     let mut input = String::new();
 //!     io::stdin()
 //!         .read_line(&mut input)
 //!         .expect("Failed to read user input");
-//! 
+//!
 //!     let response = RedirectResponse::try_from(input).unwrap();
-//! 
+//!
 //!     // Authenticate to get an Authenticated oauth_client back
 //!     let result = oauth_client.authenticate(response).await;
 //!     let result = match result {
 //!         Ok(t) => {
 //!             println!("Got token: {:?}\n", t.get_access_token().secret());
-//! 
+//!
 //!             let t = t.refresh().await.unwrap();
 //!             println!("Refreshed token: {:?}", t.get_access_token().secret());
 //!             t
 //!         }
 //!         Err(e) => panic!("Failed: {}", e),
 //!     };
-//! 
+//!
 //!     // Using Oauth token to interact with User API
 //!     let token = result.get_access_token();
 //!     let api_client = UserApiClient::from(token);
@@ -180,33 +180,54 @@
 //! }
 //! ```
 
+#[cfg(feature = "anime")]
 pub mod anime;
-pub mod common;
-pub mod forum;
-pub mod macros;
+
+#[cfg(feature = "manga")]
 pub mod manga;
-pub mod oauth;
+
+#[cfg(feature = "forum")]
+pub mod forum;
+
+#[cfg(feature = "user")]
 pub mod user;
+
+pub mod common;
+pub mod macros;
+pub mod oauth;
 
 const OAUTH_URL: &'static str = "https://myanimelist.net/v1/oauth2/authorize";
 const OAUTH_TOKEN_URL: &'static str = "https://myanimelist.net/v1/oauth2/token";
+
+#[cfg(feature = "anime")]
 const ANIME_URL: &'static str = "https://api.myanimelist.net/v2/anime";
+
+#[cfg(feature = "manga")]
 const MANGA_URL: &'static str = "https://api.myanimelist.net/v2/manga";
-const USER_URL: &'static str = "https://api.myanimelist.net/v2/users";
+
+#[cfg(feature = "forum")]
 const FORUM_URL: &'static str = "https://api.myanimelist.net/v2/forum";
 
+const USER_URL: &'static str = "https://api.myanimelist.net/v2/users";
+
 pub mod prelude {
+    #[cfg(feature = "anime")]
     pub use crate::anime::api::*;
+
+    #[cfg(feature = "anime")]
     pub use crate::anime::requests::*;
+
+    #[cfg(feature = "anime")]
     pub use crate::anime::responses::*;
+
+    #[cfg(feature = "manga")]
     pub use crate::manga::api::*;
+
+    #[cfg(feature = "manga")]
     pub use crate::manga::requests::*;
+
+    #[cfg(feature = "manga")]
     pub use crate::manga::responses::*;
 
     pub use oauth2::{AccessToken, ClientId};
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
 }
