@@ -10,13 +10,13 @@
 //! # Overview
 //!
 //! mal-rs library is a fully type-safe library
-//! that provides asynchronous functionality for interacting with the MyAnimeList (MAL)
+//! that provides asynchronous functionality for interacting with the [MyAnimeList](https://myanimelist.net/apiconfig/references/api/v2) (MAL)
 //! API. Built with Rust's async/await syntax and strong type system, this
 //! library ensures efficient and safe handling of API requests and responses
 //! while leveraging the benefits of asynchronous programming.
 //!
 //! With mal-rs, developers can confidently integrate MAL API
-//! functionality into their Rust applications, enabling them to retrieve, update,
+//! functionality into their applications, enabling them to retrieve, update,
 //! and manage anime and manga data effortlessly. The library offers a comprehensive
 //! set of API endpoints, allowing users to perform operations such as searching for
 //! anime, retrieving detailed information about specific titles, managing user
@@ -97,6 +97,8 @@
 //!
 //!     // Create AnimeApiClient from the client_id
 //!     let api_client = AnimeApiClient::from(&client_id);
+//!
+//!     // Specify the anime fields you want returned
 //!     let fields = anime_fields!(
 //!         AnimeFieldsEnum::id,
 //!         AnimeFieldsEnum::num_episodes,
@@ -173,7 +175,7 @@
 //!     // Using Oauth token to interact with User API
 //!     let token = result.get_access_token();
 //!     let api_client = UserApiClient::from(token);
-//!     let fields = user_fields![UserEnum::id, UserEnum::name, UserEnum::is_supporter];
+//!     let fields = user_fields!(UserEnum::id, UserEnum::name, UserEnum::is_supporter);
 //!     let query = GetUserInformation::new(Some(&fields));
 //!     let response = api_client.get_my_user_information(&query).await.unwrap();
 //!     println!("Information about yourself: {:?}", response);
@@ -213,22 +215,16 @@ const USER_URL: &'static str = "https://api.myanimelist.net/v2/users";
 
 pub mod prelude {
     #[cfg(feature = "anime")]
-    pub use crate::anime::api::*;
-
-    #[cfg(feature = "anime")]
-    pub use crate::anime::requests::*;
-
-    #[cfg(feature = "anime")]
-    pub use crate::anime::responses::*;
+    pub use crate::anime::{api::*, requests::*, responses::*};
 
     #[cfg(feature = "manga")]
-    pub use crate::manga::api::*;
+    pub use crate::manga::{api::*, requests::*, responses::*};
 
-    #[cfg(feature = "manga")]
-    pub use crate::manga::requests::*;
+    #[cfg(feature = "forum")]
+    pub use crate::forum::{api::*, requests::*, responses::*};
 
-    #[cfg(feature = "manga")]
-    pub use crate::manga::responses::*;
+    #[cfg(feature = "user")]
+    pub use crate::user::{api::*, requests::*, responses::*};
 
     pub use oauth2::{AccessToken, ClientId};
 }

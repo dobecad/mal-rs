@@ -43,7 +43,7 @@ async fn main() {
     // Using Oauth token to interact with User API
     let token = result.get_access_token();
     let api_client = UserApiClient::from(token);
-    let fields = user_fields![UserEnum::id, UserEnum::name, UserEnum::is_supporter];
+    let fields = user_fields!(UserEnum::id, UserEnum::name, UserEnum::is_supporter);
     let query = GetUserInformation::new(Some(&fields));
     let response = api_client.get_my_user_information(&query).await.unwrap();
     println!("Information about yourself: {:?}", response);

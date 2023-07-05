@@ -1,4 +1,7 @@
-use std::{error::Error, fmt::{self, Display}};
+use std::{
+    error::Error,
+    fmt::{self, Display},
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -93,11 +96,15 @@ pub enum RelationType {
     FullStory,
 }
 
-pub(crate) fn limit_check(value: Option<u16>, lowerbound: u16, upperbound: u16) -> Result<(), CommonError> {
+pub(crate) fn limit_check(
+    value: Option<u16>,
+    lowerbound: u16,
+    upperbound: u16,
+) -> Result<(), CommonError> {
     if value.is_some() {
         let value = value.unwrap();
         if value < lowerbound || value > upperbound {
-            return Err(CommonError::new("Given limit is out of range".to_string()))
+            return Err(CommonError::new("Given limit is out of range".to_string()));
         }
     }
     Ok(())
