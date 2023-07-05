@@ -1,13 +1,13 @@
 //! Module for interacting with the `forum` endpoints
 
-/// API client
+/// Forum API client
 pub mod api;
 
-/// API errors
+/// Forum API errors
 pub mod error;
 
-/// API request structs
+/// Forum API request structs
 pub mod requests;
 
-/// API responses
+/// Forum API responses
 pub mod responses;

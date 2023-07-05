@@ -3,16 +3,16 @@
 use self::{requests::MangaFields, responses::MangaFieldsEnum};
 use strum::IntoEnumIterator;
 
-/// API client
+/// Manga API client
 pub mod api;
 
-/// API errors
+/// Manga API errors
 pub mod error;
 
-/// API request structs
+/// Manga API request structs
 pub mod requests;
 
-/// API responses
+/// Manga API responses
 pub mod responses;
 
 

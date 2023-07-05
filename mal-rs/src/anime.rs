@@ -3,16 +3,16 @@
 use self::{requests::AnimeFields, responses::AnimeFieldsEnum};
 use strum::IntoEnumIterator;
 
-/// API client
+/// Anime API client
 pub mod api;
 
-/// API errors
+/// Anime API errors
 pub mod error;
 
-/// API request structs
+/// Anime API request structs
 pub mod requests;
 
-/// API responses
+/// Anime API responses
 pub mod responses;
 
 /// Return all of the possible Anime Fields

@@ -3,16 +3,16 @@
 use self::{requests::UserFields, responses::UserEnum};
 use strum::IntoEnumIterator;
 
-/// API client
+/// User API client
 pub mod api;
 
-/// API errors
+/// User API errors
 pub mod error;
 
-/// API requests
+/// User API request structs
 pub mod requests;
 
-/// API responses
+/// User API responses
 pub mod responses;
 
 /// Return all of the possible User Fields
