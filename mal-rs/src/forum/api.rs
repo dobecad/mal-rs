@@ -11,12 +11,15 @@ use super::{
     responses::{ForumBoards, ForumTopicDetail, ForumTopics},
 };
 
+#[doc(hidden)]
 #[derive(Debug)]
 pub struct Client {}
 
+#[doc(hidden)]
 #[derive(Debug)]
 pub struct Oauth {}
 
+#[doc(hidden)]
 #[derive(Debug)]
 pub struct None {}
 

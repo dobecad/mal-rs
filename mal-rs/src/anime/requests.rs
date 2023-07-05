@@ -7,6 +7,7 @@ use crate::common::limit_check;
 
 use super::{error::AnimeApiError, responses::AnimeFieldsEnum};
 
+/// Corresponds to the [Get anime list](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetAnimeList {
     q: String,
@@ -40,6 +41,7 @@ impl GetAnimeList {
     }
 }
 
+/// Corresponds to the [Get anime details](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetAnimeDetails {
     #[serde(skip_serializing)]
@@ -71,6 +73,7 @@ pub enum RankingType {
     Favorite,
 }
 
+/// Corresponds to the [Get anime ranking](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_ranking_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetAnimeRanking {
     ranking_type: RankingType,
@@ -135,6 +138,7 @@ pub enum SeasonalAnimeSort {
     AnimeNumListUsers,
 }
 
+/// Corresponds to the [Get seasonal anime](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_season_year_season_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetSeasonalAnime {
     #[serde(skip_serializing)]
@@ -172,6 +176,7 @@ impl GetSeasonalAnime {
     }
 }
 
+/// Corresponds to the [Get suggested anime](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetSuggestedAnime {
     limit: u16,
@@ -219,6 +224,7 @@ pub enum UserAnimeListSort {
     // AnimeId,
 }
 
+/// Corresponds to the [Get user anime list](https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetUserAnimeList {
     #[serde(skip_serializing)]
@@ -258,6 +264,7 @@ impl GetUserAnimeList {
     }
 }
 
+/// Corresponds to the [Update my anime list status](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put) endpoint
 #[derive(Debug, Serialize)]
 pub struct UpdateMyAnimeListStatus {
     #[serde(skip_serializing)]
@@ -348,6 +355,7 @@ impl UpdateMyAnimeListStatus {
     }
 }
 
+/// Corresponds to the [Delete my anime list item](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_delete) endpoint
 #[derive(Debug)]
 pub struct DeleteMyAnimeListItem {
     pub(crate) anime_id: u32,
@@ -359,6 +367,7 @@ impl DeleteMyAnimeListItem {
     }
 }
 
+/// Wrapper for a vector of valid Anime Fields
 #[derive(Debug)]
 pub struct AnimeFields(pub Vec<AnimeFieldsEnum>);
 

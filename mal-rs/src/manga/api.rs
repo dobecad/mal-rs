@@ -17,12 +17,15 @@ use super::{
 };
 use reqwest;
 
+#[doc(hidden)]
 #[derive(Debug)]
 pub struct Client {}
 
+#[doc(hidden)]
 #[derive(Debug)]
 pub struct Oauth {}
 
+#[doc(hidden)]
 #[derive(Debug)]
 pub struct None {}
 

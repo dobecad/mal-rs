@@ -1,4 +1,5 @@
-// Wrapper for Anime API endpoint
+//! Anime API Client
+
 use super::error::AnimeApiError;
 use super::requests::DeleteMyAnimeListItem;
 use super::requests::GetUserAnimeList;
@@ -25,15 +26,91 @@ use super::{
 };
 use reqwest;
 
+#[doc(hidden)]
 #[derive(Debug)]
 pub struct Client {}
 
+#[doc(hidden)]
 #[derive(Debug)]
 pub struct Oauth {}
 
+#[doc(hidden)]
 #[derive(Debug)]
 pub struct None {}
 
+/// The AnimeApiClient provides functions for interacting with the various
+/// `anime` and `user animelist` MAL API endpoints. The accessible endpoints
+/// vary depending on if the AnimeApiClient was constructed from a
+/// [ClientId] or an [AccessToken].
+///
+/// Keep in mind that constructing an AnimeApiClient from a [AccessToken] provides
+/// more access to the MAL API than from a [ClientId]. Check the MAL API documentation
+/// to view which endpoints require an [AccessToken] versus a [ClientId] to see which
+/// one is most appropriate for your use case.
+///
+/// # Examples
+///
+/// ## Using ClientId
+/// ```rust,no_run
+/// use std::env;
+///
+/// use dotenv;
+/// use mal_rs::prelude::*;
+///
+/// #[tokio::main]
+/// async fn main() {
+///     dotenv::dotenv().ok();
+///
+///     let client_id = ClientId::new(
+///         env::var("CLIENT_ID").expect("CLIENT_ID environment variable is not defined"),
+///     );
+///
+///     // Create AnimeApiClient from the ClientId
+///     let api_client = AnimeApiClient::from(&client_id);
+/// ```
+///
+/// ## Using AccessToken
+/// ```rust,no_run
+/// use dotenv;
+/// use mal_rs::{
+///     oauth::{OauthClient, RedirectResponse},
+///     user::{
+///         api::UserApiClient,
+///     },
+/// };
+/// use std::io;
+///
+/// #[tokio::main]
+/// async fn main() {
+///     dotenv::dotenv().ok();
+///
+///     let mut oauth_client = OauthClient::new();
+///     println!(
+///         "Visit this URL: {}\n",
+///         oauth_client.generate_readonly_auth_url()
+///     );
+///
+///     println!("After authorizing, please enter the URL you were redirected to: ");
+///     let mut input = String::new();
+///     io::stdin()
+///         .read_line(&mut input)
+///         .expect("Failed to read user input");
+///
+///     let response = RedirectResponse::try_from(input).unwrap();
+///
+///     // Authentication process
+///     let result = oauth_client.authenticate(response).await;
+///     let result = match result {
+///         Ok(t) => {
+///             println!("Got token: {:?}\n", t.get_access_token().secret());
+///
+///             let t = t.refresh().await.unwrap();
+///             println!("Refreshed token: {:?}", t.get_access_token().secret());
+///             t
+///         }
+///         Err(e) => panic!("Failed: {}", e),
+///     };
+/// ```
 #[derive(Debug, Clone)]
 pub struct AnimeApiClient<State = None> {
     client: reqwest::Client,
@@ -64,6 +141,8 @@ impl From<&ClientId> for AnimeApiClient<Client> {
     }
 }
 
+/// This trait defines the common request methods available to both
+/// Client and Oauth AnimeApiClients
 #[async_trait]
 pub trait Request {
     async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
@@ -79,10 +158,16 @@ pub trait Request {
     async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>>;
 }
 
+/// This trait defines the shared endpoints for Client and Oauth
+/// AnimeApiClients. It provides default implementations such that
+/// the Oauth AnimeApiClient can override them if needed.
 #[async_trait]
 pub trait AnimeApi {
     type State: Request + Send + Sync;
 
+    /// Get a list of Anime that are similar to the given query
+    ///
+    /// Corresponds to the [Get anime list](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get) endpoint
     async fn get_anime_list(&self, query: &GetAnimeList) -> Result<AnimeList, Box<dyn Error>> {
         let response = self.get_self().get(query).await?;
         let result: AnimeList = serde_json::from_str(response.as_str()).map_err(|err| {
@@ -91,6 +176,9 @@ pub trait AnimeApi {
         Ok(result)
     }
 
+    /// Get the details of an Anime that matches the given query
+    ///
+    /// Corresponds to the [Get anime details](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_get) endpoint
     async fn get_anime_details(
         &self,
         query: &GetAnimeDetails,
@@ -102,6 +190,9 @@ pub trait AnimeApi {
         Ok(result)
     }
 
+    /// Get the ranking of anime
+    ///
+    /// Corresponds to the [Get anime ranking](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_ranking_get) endpoint
     async fn get_anime_ranking(
         &self,
         query: &GetAnimeRanking,
@@ -113,6 +204,9 @@ pub trait AnimeApi {
         Ok(result)
     }
 
+    /// Get the seasonal anime that fall within the given query
+    ///
+    /// Corresponds to the [Get seasonal anime](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_season_year_season_get) endpoint
     async fn get_seasonal_anime(
         &self,
         query: &GetSeasonalAnime,
@@ -124,6 +218,7 @@ pub trait AnimeApi {
         Ok(result)
     }
 
+    /// Return the results of the next page, if possible
     async fn next<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>>
     where
         T: DeserializeOwned,
@@ -138,6 +233,7 @@ pub trait AnimeApi {
         Ok(result)
     }
 
+    /// Return the results of the previous page, if possible
     async fn prev<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>>
     where
         T: DeserializeOwned,
@@ -313,13 +409,18 @@ impl AnimeApi for AnimeApiClient<Client> {
 }
 
 impl AnimeApiClient<Client> {
+    /// Get a users Anime list
+    /// 
+    /// You **cannot** get the anime list of `@me` with a [ClientId] AnimeApiClient
+    /// 
+    /// Corresponds to the [Get user anime list](https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get) endpoint
     pub async fn get_user_anime_list(
         &self,
         query: &GetUserAnimeList,
     ) -> Result<AnimeList, Box<dyn Error>> {
         if query.user_name == "@me".to_string() {
             return Err(Box::new(AnimeApiError::new(
-                "You can only get your list via an Oauth client".to_string(),
+                "You can only get your '@me' list via an Oauth client".to_string(),
             )));
         }
         let response = self.get_self().get_user(query).await?;
@@ -340,6 +441,9 @@ impl AnimeApi for AnimeApiClient<Oauth> {
 }
 
 impl AnimeApiClient<Oauth> {
+    /// Get a list of suggested anime
+    /// 
+    /// Corresponds to the [Get suggested anime](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get) endpoint
     pub async fn get_suggested_anime(
         &self,
         query: &GetSuggestedAnime,
@@ -351,6 +455,11 @@ impl AnimeApiClient<Oauth> {
         Ok(result)
     }
 
+    /// Get a users Anime list
+    /// 
+    /// You **can** get the anime list of `@me` with a [Oauth] AnimeApiClient
+    /// 
+    /// Corresponds to the [Get user anime list](https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get) endpoint
     pub async fn get_user_anime_list(
         &self,
         query: &GetUserAnimeList,
@@ -362,6 +471,9 @@ impl AnimeApiClient<Oauth> {
         Ok(result)
     }
 
+    /// Update the OAuth user's anime list status
+    /// 
+    /// Corresponds to the [Update my anime list status](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put) endpoint
     pub async fn update_anime_list_status(
         &self,
         query: UpdateMyAnimeListStatus,
@@ -381,6 +493,9 @@ impl AnimeApiClient<Oauth> {
         Ok(result)
     }
 
+    /// Delete an anime entry from the OAuth user's anime list
+    /// 
+    /// Corresponds to the [Delete my anime list item](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_delete) endpoint
     pub async fn delete_anime_list_item(
         &self,
         query: DeleteMyAnimeListItem,
