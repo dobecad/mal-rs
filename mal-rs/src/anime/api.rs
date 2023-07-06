@@ -67,6 +67,7 @@ pub struct None {}
 ///
 ///     // Create AnimeApiClient from the ClientId
 ///     let api_client = AnimeApiClient::from(&client_id);
+/// }
 /// ```
 ///
 /// ## Using AccessToken
@@ -110,6 +111,7 @@ pub struct None {}
 ///         }
 ///         Err(e) => panic!("Failed: {}", e),
 ///     };
+/// }
 /// ```
 #[derive(Debug, Clone)]
 pub struct AnimeApiClient<State = None> {
