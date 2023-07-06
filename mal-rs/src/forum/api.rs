@@ -1,3 +1,5 @@
+//! Forum API Client
+
 use std::{error::Error, marker::PhantomData};
 
 use async_trait::async_trait;
@@ -23,6 +25,11 @@ pub struct Oauth {}
 #[derive(Debug)]
 pub struct None {}
 
+/// The ForumApiClient provides functions for interacting with the various
+/// `forum` MAL API endpoints. The accessible endpoints do not vary between
+/// [ClientId] or [AccessToken] clients.
+/// 
+/// # Examples
 #[derive(Debug, Clone)]
 pub struct ForumApiClient<State = None> {
     client: reqwest::Client,
@@ -53,6 +60,8 @@ impl From<&ClientId> for ForumApiClient<Client> {
     }
 }
 
+/// This trait defines the common request methods available to both
+/// Client and Oauth ForumApiClients
 #[async_trait]
 pub trait Request {
     async fn get(&self) -> Result<String, Box<dyn Error>>;
@@ -66,6 +75,9 @@ pub trait Request {
 pub trait ForumApi {
     type State: Request + Send + Sync;
 
+    /// Get a list of Forum boards
+    /// 
+    /// Corresponds to the [Get forum boards](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_boards_get) endpoint
     async fn get_forum_boards(&self) -> Result<ForumBoards, Box<dyn Error>> {
         let response = self.get_self().get().await?;
         let result: ForumBoards = serde_json::from_str(response.as_str()).map_err(|err| {
@@ -74,6 +86,9 @@ pub trait ForumApi {
         Ok(result)
     }
 
+    /// Get details about a topic detail matching the given query
+    /// 
+    /// Corresponds to the [Get forum topic detail](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topic_get) endpoint
     async fn get_forum_topic_detail(
         &self,
         query: &GetForumTopicDetail,
@@ -88,7 +103,13 @@ pub trait ForumApi {
         Ok(result)
     }
 
-    async fn get_forum_topics(&self, query: &GetForumTopics) -> Result<ForumTopics, Box<dyn Error>> {
+    /// Get a list of forum topics matching the given query
+    /// 
+    /// Corresponds to the [Get forum topics](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topics_get) endpoint
+    async fn get_forum_topics(
+        &self,
+        query: &GetForumTopics,
+    ) -> Result<ForumTopics, Box<dyn Error>> {
         let response = self.get_self().get_topics(query).await?;
         let result: ForumTopics = serde_json::from_str(response.as_str()).map_err(|err| {
             ForumApiError::new(format!("Failed to parse Forum Topics result: {}", err))

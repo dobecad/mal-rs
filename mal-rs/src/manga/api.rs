@@ -1,4 +1,5 @@
-// Wrapper for Manga API endpoint
+//! Manga API Client
+
 use super::error::MangaApiError;
 use super::requests::GetUserMangaList;
 use async_trait::async_trait;
@@ -29,6 +30,37 @@ pub struct Oauth {}
 #[derive(Debug)]
 pub struct None {}
 
+/// The MangaApiClient provides functions for interacting with the various
+/// `manga` and `user mangalist` MAL API endpoints. The accessible endpoints
+/// vary depending on if the MangaApiClient was constructed from a
+/// [ClientId] or an [AccessToken].
+///
+/// Keep in mind that constructing an MangaApiClient from a [AccessToken] provides
+/// more access to the MAL API than from a [ClientId]. Check the MAL API documentation
+/// to view which endpoints require an [AccessToken] versus a [ClientId] to see which
+/// one is most appropriate for your use case.
+///
+/// # Examples
+///
+/// ## Using ClientId
+/// ```rust,no_run
+/// use std::env;
+///
+/// use dotenv;
+/// use mal_rs::prelude::*;
+///
+/// #[tokio::main]
+/// async fn main() {
+///     dotenv::dotenv().ok();
+///
+///     let client_id = ClientId::new(
+///         env::var("CLIENT_ID").expect("CLIENT_ID environment variable is not defined"),
+///     );
+///
+///     // Create MangaApiClient from the ClientId
+///     let api_client = MangaApiClient::from(&client_id);
+/// }
+/// ```
 #[derive(Debug, Clone)]
 pub struct MangaApiClient<State = None> {
     client: reqwest::Client,
@@ -59,6 +91,8 @@ impl From<&ClientId> for MangaApiClient<Client> {
     }
 }
 
+/// This trait defines the common request methods available to both
+/// Client and Oauth MangaApiClients
 #[async_trait]
 pub trait Request {
     async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
@@ -158,6 +192,9 @@ impl Request for MangaApiClient<Oauth> {
 pub trait MangaApi {
     type State: Request + Send + Sync;
 
+    /// Get a list of manga that are similar to the given query
+    ///
+    /// Corresponds to the [Get manga list](https://myanimelist.net/apiconfig/references/api/v2#operation/manga_get) endpoint
     async fn get_manga_list(&self, query: &GetMangaList) -> Result<MangaList, Box<dyn Error>> {
         let response = self.get_self().get(query).await?;
         let result: MangaList = serde_json::from_str(response.as_str()).map_err(|err| {
@@ -166,6 +203,9 @@ pub trait MangaApi {
         Ok(result)
     }
 
+    /// Get the details of a manga that matches the given query
+    ///
+    /// Corresponds to the [Get manga details](https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_get) endpoint
     async fn get_manga_details(
         &self,
         query: &GetMangaDetails,
@@ -177,6 +217,9 @@ pub trait MangaApi {
         Ok(result)
     }
 
+    /// Get the ranking of manga
+    ///
+    /// Corresponds to the [Get manga ranking](https://myanimelist.net/apiconfig/references/api/v2#operation/manga_ranking_get) endpoint
     async fn get_manga_ranking(
         &self,
         query: &GetMangaRanking,
@@ -188,6 +231,11 @@ pub trait MangaApi {
         Ok(result)
     }
 
+    /// Get a users manga list
+    ///
+    /// You **cannot** get the manga list of `@me` with a [ClientId] MangaApiClient
+    ///
+    /// Corresponds to the [Get user mangalist](https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_mangalist_get) endpoint
     async fn get_user_manga_list(
         &self,
         query: &GetUserMangaList,
@@ -224,6 +272,11 @@ impl MangaApi for MangaApiClient<Oauth> {
         self
     }
 
+    /// Get a users manga list
+    ///
+    /// You **can** get the manga list of `@me` with an [Oauth] MangaApiClient
+    ///
+    /// Corresponds to the [Get user mangalist](https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_mangalist_get) endpoint
     async fn get_user_manga_list(
         &self,
         query: &GetUserMangaList,
@@ -237,13 +290,16 @@ impl MangaApi for MangaApiClient<Oauth> {
 }
 
 impl MangaApiClient<Oauth> {
+    /// Update the status of a manga for the OAuth user's manga list
+    ///
+    /// Correspoonds to the [Update manga list status](https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_put) endpoint
     pub async fn update_manga_list_status(
         &self,
         query: &UpdateMyMangaListStatus,
     ) -> Result<MyListStatus, Box<dyn Error>> {
         let response = self
             .client
-            .patch(format!("{}/{}/my_list_status", MANGA_URL, query.manga_id))
+            .put(format!("{}/{}/my_list_status", MANGA_URL, query.manga_id))
             .bearer_auth(&self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
@@ -256,6 +312,9 @@ impl MangaApiClient<Oauth> {
         Ok(result)
     }
 
+    /// Delete a manga entry from the OAuth user's manga list
+    ///
+    /// Corresponds to the [Delete my manga list item](https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_delete) endpoint
     pub async fn delete_manga_list_item(
         &self,
         query: &DeleteMyMangaListItem,

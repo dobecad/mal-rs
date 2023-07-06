@@ -4,6 +4,7 @@ use crate::common::limit_check;
 
 use super::error::ForumApiError;
 
+/// Corresponds to the [Get forum topic detail](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topic_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetForumTopicDetail {
     #[serde(skip_serializing)]
@@ -30,6 +31,7 @@ impl GetForumTopicDetail {
     }
 }
 
+/// Corresponds to the [Get forum topics](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topics_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetForumTopics {
     #[serde(skip_serializing_if = "Option::is_none")]

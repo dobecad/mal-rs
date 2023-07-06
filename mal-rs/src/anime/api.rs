@@ -167,7 +167,7 @@ pub trait Request {
 pub trait AnimeApi {
     type State: Request + Send + Sync;
 
-    /// Get a list of Anime that are similar to the given query
+    /// Get a list of anime that are similar to the given query
     ///
     /// Corresponds to the [Get anime list](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get) endpoint
     async fn get_anime_list(&self, query: &GetAnimeList) -> Result<AnimeList, Box<dyn Error>> {
@@ -178,7 +178,7 @@ pub trait AnimeApi {
         Ok(result)
     }
 
-    /// Get the details of an Anime that matches the given query
+    /// Get the details of an anime that matches the given query
     ///
     /// Corresponds to the [Get anime details](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_get) endpoint
     async fn get_anime_details(
@@ -411,10 +411,10 @@ impl AnimeApi for AnimeApiClient<Client> {
 }
 
 impl AnimeApiClient<Client> {
-    /// Get a users Anime list
-    /// 
+    /// Get a users anime list
+    ///
     /// You **cannot** get the anime list of `@me` with a [ClientId] AnimeApiClient
-    /// 
+    ///
     /// Corresponds to the [Get user anime list](https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get) endpoint
     pub async fn get_user_anime_list(
         &self,
@@ -444,7 +444,7 @@ impl AnimeApi for AnimeApiClient<Oauth> {
 
 impl AnimeApiClient<Oauth> {
     /// Get a list of suggested anime
-    /// 
+    ///
     /// Corresponds to the [Get suggested anime](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get) endpoint
     pub async fn get_suggested_anime(
         &self,
@@ -458,9 +458,9 @@ impl AnimeApiClient<Oauth> {
     }
 
     /// Get a users Anime list
-    /// 
-    /// You **can** get the anime list of `@me` with a [Oauth] AnimeApiClient
-    /// 
+    ///
+    /// You **can** get the anime list of `@me` with an [Oauth] AnimeApiClient
+    ///
     /// Corresponds to the [Get user anime list](https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get) endpoint
     pub async fn get_user_anime_list(
         &self,
@@ -473,8 +473,8 @@ impl AnimeApiClient<Oauth> {
         Ok(result)
     }
 
-    /// Update the OAuth user's anime list status
-    /// 
+    /// Update the status of an anime for the OAuth user's anime list
+    ///
     /// Corresponds to the [Update my anime list status](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put) endpoint
     pub async fn update_anime_list_status(
         &self,
@@ -482,7 +482,7 @@ impl AnimeApiClient<Oauth> {
     ) -> Result<MyListStatus, Box<dyn Error>> {
         let response = self
             .client
-            .patch(format!("{}/{}/my_list_status", ANIME_URL, query.anime_id))
+            .put(format!("{}/{}/my_list_status", ANIME_URL, query.anime_id))
             .bearer_auth(&self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
@@ -496,7 +496,7 @@ impl AnimeApiClient<Oauth> {
     }
 
     /// Delete an anime entry from the OAuth user's anime list
-    /// 
+    ///
     /// Corresponds to the [Delete my anime list item](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_delete) endpoint
     pub async fn delete_anime_list_item(
         &self,
