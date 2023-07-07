@@ -1,6 +1,5 @@
 use crate::common::limit_check;
 
-// Structs for crafting Manga Endpoint requests
 use super::{error::MangaApiError, responses::MangaFieldsEnum};
 use serde::{Deserialize, Serialize};
 

@@ -12,11 +12,10 @@ pub struct GetUserInformation {
 impl GetUserInformation {
     pub fn new(fields: Option<&UserFields>) -> Self {
         Self {
-            fields: fields.map(|f| f.into())
+            fields: fields.map(|f| f.into()),
         }
     }
 }
-
 
 pub struct UserFields(pub Vec<UserEnum>);
 

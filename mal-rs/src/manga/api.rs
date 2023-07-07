@@ -1,15 +1,14 @@
-use super::error::MangaApiError;
-use super::requests::GetUserMangaList;
+use super::{error::MangaApiError, requests::GetUserMangaList};
 use async_trait::async_trait;
-use oauth2::AccessToken;
-use oauth2::ClientId;
-use serde::Serialize;
-use serde::de::DeserializeOwned;
+use oauth2::{AccessToken, ClientId};
+use serde::{de::DeserializeOwned, Serialize};
 use std::marker::PhantomData;
 
-use crate::common::PagingIter;
-use crate::manga::requests::{DeleteMyMangaListItem, UpdateMyMangaListStatus};
-use crate::{MANGA_URL, USER_URL};
+use crate::{
+    common::PagingIter,
+    manga::requests::{DeleteMyMangaListItem, UpdateMyMangaListStatus},
+    MANGA_URL, USER_URL,
+};
 use std::error::Error;
 
 use super::{

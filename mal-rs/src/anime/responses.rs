@@ -1,5 +1,3 @@
-// Structs for deserializing Anime Endpoint responses
-
 use std::fmt::Display;
 
 use crate::common::{

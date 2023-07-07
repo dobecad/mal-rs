@@ -1,6 +1,3 @@
-// Structs for crafting Anime Endpoint requests
-#![allow(dead_code)]
-
 use serde::{Deserialize, Serialize};
 
 use crate::common::limit_check;

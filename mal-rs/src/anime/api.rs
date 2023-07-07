@@ -1,17 +1,13 @@
-use super::error::AnimeApiError;
-use super::requests::DeleteMyAnimeListItem;
-use super::requests::GetUserAnimeList;
-use super::requests::UpdateMyAnimeListStatus;
+use super::{
+    error::AnimeApiError,
+    requests::{DeleteMyAnimeListItem, GetUserAnimeList, UpdateMyAnimeListStatus},
+};
 use async_trait::async_trait;
-use oauth2::AccessToken;
-use oauth2::ClientId;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
-use std::marker::PhantomData;
+use oauth2::{AccessToken, ClientId};
+use serde::{de::DeserializeOwned, Serialize};
+use std::marker::{PhantomData, Send, Sync};
 
-use crate::common::PagingIter;
-use crate::ANIME_URL;
-use crate::USER_URL;
+use crate::{common::PagingIter, ANIME_URL, USER_URL};
 use std::error::Error;
 
 use super::{
@@ -147,7 +143,7 @@ impl From<&ClientId> for AnimeApiClient<Client> {
 pub trait Request {
     async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
     where
-        T: Serialize + std::marker::Send + std::marker::Sync;
+        T: Serialize + Send + Sync;
 
     async fn get_details(&self, query: &GetAnimeDetails) -> Result<String, Box<dyn Error>>;
 
@@ -256,7 +252,7 @@ pub trait AnimeApi {
 impl Request for AnimeApiClient<Client> {
     async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
     where
-        T: Serialize + std::marker::Send + std::marker::Sync,
+        T: Serialize + Send + Sync,
     {
         let response = self
             .client
@@ -330,7 +326,7 @@ impl Request for AnimeApiClient<Client> {
 impl Request for AnimeApiClient<Oauth> {
     async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
     where
-        T: Serialize + std::marker::Send + std::marker::Sync,
+        T: Serialize + Send + Sync,
     {
         let response = self
             .client

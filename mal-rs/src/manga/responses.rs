@@ -1,5 +1,3 @@
-// Structs for deserializing Manga Endpoint responses
-
 use std::fmt::Display;
 
 use crate::common::{
