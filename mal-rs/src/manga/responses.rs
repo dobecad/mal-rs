@@ -82,7 +82,7 @@ impl Display for MangaFields {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum MediaType {
     Unknown,
@@ -95,7 +95,7 @@ pub enum MediaType {
     Oel,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum Status {
     Finished,

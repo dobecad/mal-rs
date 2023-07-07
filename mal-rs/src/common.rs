@@ -63,7 +63,7 @@ impl Display for AlternativeTitles {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub enum NSFW {
     #[serde(rename = "white")]
     SFW,
@@ -73,7 +73,7 @@ pub enum NSFW {
     NSFW,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct Genre {
     pub id: u32,
     pub name: String,
@@ -85,7 +85,7 @@ impl Display for Genre {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum RelationType {
     Sequel,

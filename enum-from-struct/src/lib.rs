@@ -26,7 +26,7 @@ pub fn enum_from_struct(input: proc_macro::TokenStream) -> proc_macro::TokenStre
     });
 
     let expanded = quote! {
-        #[derive(Debug, EnumIter)]
+        #[derive(Debug, PartialEq, EnumIter)]
         #[allow(non_camel_case_types)]
         pub enum #enum_name {
             #(#enum_variants,)*

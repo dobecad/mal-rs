@@ -62,7 +62,7 @@ impl Display for AnimePicture {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum MediaType {
     Unknown,
@@ -74,7 +74,7 @@ pub enum MediaType {
     Music,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum Status {
     FinishedAiring,
@@ -147,7 +147,7 @@ impl Display for Broadcast {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum Source {
     Other,
@@ -168,7 +168,7 @@ pub enum Source {
     Music,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Rating {
     G,
