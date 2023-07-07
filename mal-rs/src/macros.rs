@@ -1,3 +1,6 @@
+//! Module for ease-of-use macros
+
+/// Macro for creating a vector of valid AnimeFields
 #[cfg(feature = "anime")]
 #[macro_export]
 macro_rules! anime_fields {
@@ -12,6 +15,7 @@ macro_rules! anime_fields {
     };
 }
 
+/// Macro for creating a vector of valid MangaFields
 #[cfg(feature = "manga")]
 #[macro_export]
 macro_rules! manga_fields {
@@ -26,6 +30,7 @@ macro_rules! manga_fields {
     };
 }
 
+/// Macro for creating a vector of valid UserFields
 #[cfg(feature = "user")]
 #[macro_export]
 macro_rules! user_fields {

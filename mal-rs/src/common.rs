@@ -1,3 +1,5 @@
+//! Module containing common request/response fields, traits, and functions
+
 use std::{
     error::Error,
     fmt::{self, Display},

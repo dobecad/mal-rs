@@ -1,3 +1,5 @@
+//! Module for working through MAL OAuth2 flow
+
 use crate::{OAUTH_TOKEN_URL, OAUTH_URL};
 use oauth2::basic::BasicClient;
 use oauth2::http::Uri;

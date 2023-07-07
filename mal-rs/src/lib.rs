@@ -213,6 +213,7 @@ const FORUM_URL: &'static str = "https://api.myanimelist.net/v2/forum";
 #[cfg(any(feature = "anime", feature = "manga", feature = "user"))]
 const USER_URL: &'static str = "https://api.myanimelist.net/v2/users";
 
+/// Module re-exports
 pub mod prelude {
     #[cfg(feature = "anime")]
     pub use crate::anime::{api::*, requests::*, responses::*};
