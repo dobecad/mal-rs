@@ -7,6 +7,9 @@ use crate::USER_URL;
 
 use super::{error::UserApiError, requests::GetUserInformation, responses::User};
 
+/// The UserApiClient provides functions for interacting with the various
+/// `anime` and `user animelist` MAL API endpoints. A UserApiClient
+/// can only be created from an [AccessToken].
 pub struct UserApiClient {
     client: reqwest::Client,
     access_token: String,
@@ -37,6 +40,9 @@ impl UserApiClient {
         handle_response(response).await
     }
 
+    /// Get information about the OAuth user
+    ///
+    /// Corresponds to the [Get my user information](https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_get) endpoint
     pub async fn get_my_user_information(
         &self,
         query: &GetUserInformation,
@@ -47,9 +53,7 @@ impl UserApiClient {
         })?;
         Ok(result)
     }
-
 }
-
 
 async fn handle_response(response: reqwest::Response) -> Result<String, Box<dyn Error>> {
     match response.status() {

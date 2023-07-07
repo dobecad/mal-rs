@@ -1,5 +1,3 @@
-//! Forum API Client
-
 use std::{error::Error, marker::PhantomData};
 
 use async_trait::async_trait;

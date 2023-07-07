@@ -1,5 +1,3 @@
-//! Manga API Client
-
 use super::error::MangaApiError;
 use super::requests::GetUserMangaList;
 use async_trait::async_trait;

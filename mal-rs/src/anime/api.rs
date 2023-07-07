@@ -1,5 +1,3 @@
-//! Anime API Client
-
 use super::error::AnimeApiError;
 use super::requests::DeleteMyAnimeListItem;
 use super::requests::GetUserAnimeList;
