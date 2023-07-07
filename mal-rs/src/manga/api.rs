@@ -4,8 +4,10 @@ use async_trait::async_trait;
 use oauth2::AccessToken;
 use oauth2::ClientId;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 use std::marker::PhantomData;
 
+use crate::common::PagingIter;
 use crate::manga::requests::{DeleteMyMangaListItem, UpdateMyMangaListStatus};
 use crate::{MANGA_URL, USER_URL};
 use std::error::Error;
@@ -100,6 +102,8 @@ pub trait Request {
     async fn get_details(&self, query: &GetMangaDetails) -> Result<String, Box<dyn Error>>;
 
     async fn get_user(&self, query: &GetUserMangaList) -> Result<String, Box<dyn Error>>;
+
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>>;
 }
 
 #[async_trait]
@@ -142,6 +146,23 @@ impl Request for MangaApiClient<Client> {
 
         handle_response(response).await
     }
+
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>> {
+        if let Some(itr) = query {
+            let response = self
+                .client
+                .get(itr)
+                .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+                .send()
+                .await?;
+
+            handle_response(response).await
+        } else {
+            Err(Box::new(MangaApiError::new(
+                "Page does not exist".to_string(),
+            )))
+        }
+    }
 }
 
 #[async_trait]
@@ -153,7 +174,7 @@ impl Request for MangaApiClient<Oauth> {
         let response = self
             .client
             .get(MANGA_URL)
-            .bearer_auth(&self.access_token.as_ref().unwrap())
+            .bearer_auth(self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
             .await?;
@@ -165,7 +186,7 @@ impl Request for MangaApiClient<Oauth> {
         let response = self
             .client
             .get(format!("{}/{}", MANGA_URL, query.manga_id))
-            .bearer_auth(self.client_id.as_ref().unwrap())
+            .bearer_auth(self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
             .await?;
@@ -177,12 +198,29 @@ impl Request for MangaApiClient<Oauth> {
         let response = self
             .client
             .get(format!("{}/{}/mangalist", USER_URL, query.user_name))
-            .bearer_auth(self.client_id.as_ref().unwrap())
+            .bearer_auth(self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
             .await?;
 
         handle_response(response).await
+    }
+
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>> {
+        if let Some(itr) = query {
+            let response = self
+                .client
+                .get(itr)
+                .bearer_auth(self.access_token.as_ref().unwrap())
+                .send()
+                .await?;
+
+            handle_response(response).await
+        } else {
+            Err(Box::new(MangaApiError::new(
+                "Page does not exist".to_string(),
+            )))
+        }
     }
 }
 
@@ -250,6 +288,36 @@ pub trait MangaApi {
         let result: MangaList = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
+        Ok(result)
+    }
+
+    /// Return the results of the next page, if possible
+    async fn next<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>>
+    where
+        T: DeserializeOwned,
+        U: PagingIter + Sync + Send,
+    {
+        let response = self
+            .get_self()
+            .get_next_or_prev(response.next_page())
+            .await?;
+        let result: T = serde_json::from_str(response.as_str())
+            .map_err(|err| MangaApiError::new(format!("Failed to fetch next page: {}", err)))?;
+        Ok(result)
+    }
+
+    /// Return the results of the previous page, if possible
+    async fn prev<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>>
+    where
+        T: DeserializeOwned,
+        U: PagingIter + Sync + Send,
+    {
+        let response = self
+            .get_self()
+            .get_next_or_prev(response.prev_page())
+            .await?;
+        let result: T = serde_json::from_str(response.as_str())
+            .map_err(|err| MangaApiError::new(format!("Failed to fetch next page: {}", err)))?;
         Ok(result)
     }
 

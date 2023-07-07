@@ -2,8 +2,9 @@ use std::{error::Error, marker::PhantomData};
 
 use async_trait::async_trait;
 use oauth2::{AccessToken, ClientId};
+use serde::de::DeserializeOwned;
 
-use crate::FORUM_URL;
+use crate::{FORUM_URL, common::PagingIter};
 
 use super::{
     error::ForumApiError,
@@ -67,6 +68,8 @@ pub trait Request {
     async fn get_detail(&self, query: &GetForumTopicDetail) -> Result<String, Box<dyn Error>>;
 
     async fn get_topics(&self, query: &GetForumTopics) -> Result<String, Box<dyn Error>>;
+
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>>;
 }
 
 /// This trait defines the shared endpoints for Client and Oauth
@@ -118,6 +121,36 @@ pub trait ForumApi {
         Ok(result)
     }
 
+    /// Return the results of the next page, if possible
+    async fn next<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>>
+    where
+        T: DeserializeOwned,
+        U: PagingIter + Sync + Send,
+    {
+        let response = self
+            .get_self()
+            .get_next_or_prev(response.next_page())
+            .await?;
+        let result: T = serde_json::from_str(response.as_str())
+            .map_err(|err| ForumApiError::new(format!("Failed to fetch next page: {}", err)))?;
+        Ok(result)
+    }
+
+    /// Return the results of the previous page, if possible
+    async fn prev<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>>
+    where
+        T: DeserializeOwned,
+        U: PagingIter + Sync + Send,
+    {
+        let response = self
+            .get_self()
+            .get_next_or_prev(response.prev_page())
+            .await?;
+        let result: T = serde_json::from_str(response.as_str())
+            .map_err(|err| ForumApiError::new(format!("Failed to fetch next page: {}", err)))?;
+        Ok(result)
+    }
+
     /// Utility method for API trait to use the appropriate request method
     fn get_self(&self) -> &Self::State;
 }
@@ -157,6 +190,23 @@ impl Request for ForumApiClient<Client> {
 
         handle_response(response).await
     }
+
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>> {
+        if let Some(itr) = query {
+            let response = self
+                .client
+                .get(itr)
+                .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+                .send()
+                .await?;
+
+            handle_response(response).await
+        } else {
+            Err(Box::new(ForumApiError::new(
+                "Page does not exist".to_string(),
+            )))
+        }
+    }
 }
 
 #[async_trait]
@@ -193,6 +243,23 @@ impl Request for ForumApiClient<Oauth> {
             .await?;
 
         handle_response(response).await
+    }
+
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>> {
+        if let Some(itr) = query {
+            let response = self
+                .client
+                .get(itr)
+                .bearer_auth(self.access_token.as_ref().unwrap())
+                .send()
+                .await?;
+
+            handle_response(response).await
+        } else {
+            Err(Box::new(ForumApiError::new(
+                "Page does not exist".to_string(),
+            )))
+        }
     }
 }
 
