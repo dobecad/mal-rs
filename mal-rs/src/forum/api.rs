@@ -69,6 +69,9 @@ pub trait Request {
     async fn get_topics(&self, query: &GetForumTopics) -> Result<String, Box<dyn Error>>;
 }
 
+/// This trait defines the shared endpoints for Client and Oauth
+/// ForumApiClients. It provides default implementations such that
+/// the Oauth ForumApiClient can override them if needed.
 #[async_trait]
 pub trait ForumApi {
     type State: Request + Send + Sync;
@@ -115,6 +118,7 @@ pub trait ForumApi {
         Ok(result)
     }
 
+    /// Utility method for API trait to use the appropriate request method
     fn get_self(&self) -> &Self::State;
 }
 

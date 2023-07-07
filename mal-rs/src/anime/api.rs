@@ -248,6 +248,7 @@ pub trait AnimeApi {
         Ok(result)
     }
 
+    /// Utility method for API trait to use the appropriate request method
     fn get_self(&self) -> &Self::State;
 }
 

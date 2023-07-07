@@ -186,6 +186,9 @@ impl Request for MangaApiClient<Oauth> {
     }
 }
 
+/// This trait defines the shared endpoints for Client and Oauth
+/// MangaApiClients. It provides default implementations such that
+/// the Oauth MangaApiClient can override them if needed.
 #[async_trait]
 pub trait MangaApi {
     type State: Request + Send + Sync;
@@ -250,6 +253,7 @@ pub trait MangaApi {
         Ok(result)
     }
 
+    /// Utility method for API trait to use the appropriate request method
     fn get_self(&self) -> &Self::State;
 }
 
