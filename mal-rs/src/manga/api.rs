@@ -294,7 +294,7 @@ impl MangaApi for MangaApiClient<Oauth> {
 impl MangaApiClient<Oauth> {
     /// Update the status of a manga for the OAuth user's manga list
     ///
-    /// Correspoonds to the [Update manga list status](https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_put) endpoint
+    /// Correspoonds to the [Update my manga list status](https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_put) endpoint
     pub async fn update_manga_list_status(
         &self,
         query: &UpdateMyMangaListStatus,
