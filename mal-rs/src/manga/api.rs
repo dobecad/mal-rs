@@ -7,6 +7,7 @@ use std::marker::PhantomData;
 use crate::{
     common::PagingIter,
     manga::requests::{DeleteMyMangaListItem, UpdateMyMangaListStatus},
+    oauth::{Authenticated, MalClientId, OauthClient},
     MANGA_URL, USER_URL,
 };
 use std::error::Error;
@@ -86,6 +87,28 @@ impl From<&ClientId> for MangaApiClient<Client> {
             client_id: Some(value.clone().to_string()),
             access_token: None,
             state: PhantomData::<Client>,
+        }
+    }
+}
+
+impl From<&MalClientId> for MangaApiClient<Client> {
+    fn from(value: &MalClientId) -> Self {
+        MangaApiClient::<Client> {
+            client: reqwest::Client::new(),
+            client_id: Some(value.0.to_string()),
+            access_token: None,
+            state: PhantomData::<Client>,
+        }
+    }
+}
+
+impl From<&OauthClient<Authenticated>> for MangaApiClient<Oauth> {
+    fn from(value: &OauthClient<Authenticated>) -> Self {
+        MangaApiClient {
+            client: reqwest::Client::new(),
+            client_id: None,
+            access_token: Some(value.get_access_token().secret().clone()),
+            state: PhantomData::<Oauth>,
         }
     }
 }

@@ -1,6 +1,5 @@
-use std::env;
-
 use dotenv;
+use mal_rs::oauth::MalClientId;
 use mal_rs::prelude::*;
 use mal_rs::{anime_fields, manga_fields};
 
@@ -8,9 +7,7 @@ use mal_rs::{anime_fields, manga_fields};
 async fn main() {
     dotenv::dotenv().ok();
 
-    let client_id = ClientId::new(
-        env::var("CLIENT_ID").expect("CLIENT_ID environment variable is not defined"),
-    );
+    let client_id = MalClientId::from_env().unwrap();
 
     // Anime API example
     let api_client = AnimeApiClient::from(&client_id);

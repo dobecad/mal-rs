@@ -3,7 +3,10 @@ use reqwest;
 use serde::Serialize;
 use std::error::Error;
 
-use crate::USER_URL;
+use crate::{
+    oauth::{Authenticated, OauthClient},
+    USER_URL,
+};
 
 use super::{error::UserApiError, requests::GetUserInformation, responses::User};
 
@@ -20,6 +23,15 @@ impl From<&AccessToken> for UserApiClient {
         Self {
             client: reqwest::Client::new(),
             access_token: value.secret().clone(),
+        }
+    }
+}
+
+impl From<&OauthClient<Authenticated>> for UserApiClient {
+    fn from(value: &OauthClient<Authenticated>) -> Self {
+        UserApiClient {
+            client: reqwest::Client::new(),
+            access_token: value.get_access_token().secret().clone(),
         }
     }
 }

@@ -61,9 +61,6 @@ impl MalClientId {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct MalAccessToken(pub AccessToken);
-
 /// State struct for separating an Authenticated and Unauthenticated OAuthClient
 #[derive(Debug)]
 pub struct Unauthenticated;
@@ -172,18 +169,27 @@ impl OauthClient<Unauthenticated> {
 }
 
 impl OauthClient<Authenticated> {
-    pub fn get_access_token(&self) -> &AccessToken {
+    /// Get the access token for the OauthClient
+    pub(crate) fn get_access_token(&self) -> &AccessToken {
         &self.access_token
     }
 
-    pub fn get_refresh_token(&self) -> &RefreshToken {
-        &self.refresh_token
+    /// Get the access token secret value
+    pub fn get_access_token_secret(&self) -> &String {
+        &self.access_token.secret()
     }
 
+    /// Get the refresh token secret value
+    pub fn get_refresh_token_secret(&self) -> &String {
+        &self.refresh_token.secret()
+    }
+
+    /// Get the expires in time
     pub fn get_expires_in(&self) -> &Duration {
         &self.expires_in
     }
 
+    /// Refresh the access token using the refresh token
     pub async fn refresh(self) -> Result<Self, Box<dyn Error>> {
         let refresh_result = self
             .client
@@ -210,6 +216,7 @@ pub struct RedirectResponse {
 }
 
 impl RedirectResponse {
+    /// Create a RedirectResponse from the given OAuth2 redirect result
     pub fn new(uri: &Uri) -> Result<RedirectResponse, OauthError> {
         let query_params: Option<Self> = uri.query().map(|query| {
             serde_urlencoded::from_str(query).expect("Failed to get code and state from response.")

@@ -4,7 +4,11 @@ use async_trait::async_trait;
 use oauth2::{AccessToken, ClientId};
 use serde::de::DeserializeOwned;
 
-use crate::{FORUM_URL, common::PagingIter};
+use crate::{
+    common::PagingIter,
+    oauth::{Authenticated, MalClientId, OauthClient},
+    FORUM_URL,
+};
 
 use super::{
     error::ForumApiError,
@@ -27,7 +31,7 @@ pub struct None {}
 /// The ForumApiClient provides functions for interacting with the various
 /// `forum` MAL API endpoints. The accessible endpoints do not vary between
 /// [ClientId] or [AccessToken] clients.
-/// 
+///
 /// # Examples
 #[derive(Debug, Clone)]
 pub struct ForumApiClient<State = None> {
@@ -59,6 +63,28 @@ impl From<&ClientId> for ForumApiClient<Client> {
     }
 }
 
+impl From<&MalClientId> for ForumApiClient<Client> {
+    fn from(value: &MalClientId) -> Self {
+        ForumApiClient::<Client> {
+            client: reqwest::Client::new(),
+            client_id: Some(value.0.to_string()),
+            access_token: None,
+            state: PhantomData::<Client>,
+        }
+    }
+}
+
+impl From<&OauthClient<Authenticated>> for ForumApiClient<Oauth> {
+    fn from(value: &OauthClient<Authenticated>) -> Self {
+        ForumApiClient {
+            client: reqwest::Client::new(),
+            client_id: None,
+            access_token: Some(value.get_access_token().secret().clone()),
+            state: PhantomData::<Oauth>,
+        }
+    }
+}
+
 /// This trait defines the common request methods available to both
 /// Client and Oauth ForumApiClients
 #[async_trait]
@@ -80,7 +106,7 @@ pub trait ForumApi {
     type State: Request + Send + Sync;
 
     /// Get a list of Forum boards
-    /// 
+    ///
     /// Corresponds to the [Get forum boards](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_boards_get) endpoint
     async fn get_forum_boards(&self) -> Result<ForumBoards, Box<dyn Error>> {
         let response = self.get_self().get().await?;
@@ -91,7 +117,7 @@ pub trait ForumApi {
     }
 
     /// Get details about a topic detail matching the given query
-    /// 
+    ///
     /// Corresponds to the [Get forum topic detail](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topic_get) endpoint
     async fn get_forum_topic_detail(
         &self,
@@ -108,7 +134,7 @@ pub trait ForumApi {
     }
 
     /// Get a list of forum topics matching the given query
-    /// 
+    ///
     /// Corresponds to the [Get forum topics](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topics_get) endpoint
     async fn get_forum_topics(
         &self,
