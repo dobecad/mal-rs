@@ -161,20 +161,21 @@
 //!
 //!     // Authenticate to get an Authenticated oauth_client back
 //!     let result = oauth_client.authenticate(response).await;
-//!     let result = match result {
+//!     let authenticated_oauth_client = match result {
 //!         Ok(t) => {
-//!             println!("Got token: {:?}\n", t.get_access_token().secret());
-//!
+//!             println!("Got token: {:?}\n", t.get_access_token_secret());
+//!     
 //!             let t = t.refresh().await.unwrap();
-//!             println!("Refreshed token: {:?}", t.get_access_token().secret());
+//!             println!("Refreshed token: {:?}", t.get_access_token_secret());
 //!             t
 //!         }
 //!         Err(e) => panic!("Failed: {}", e),
 //!     };
-//!
-//!     // Using Oauth token to interact with User API
-//!     let token = result.get_access_token();
-//!     let api_client = UserApiClient::from(token);
+//!     
+//!     // Create UserApiClient from the OauthClient
+//!     let api_client = UserApiClient::from(&authenticated_oauth_client);
+//! 
+//!     // Create fields that you want returned by the MAL API
 //!     let fields = user_fields!(UserEnum::id, UserEnum::name, UserEnum::is_supporter);
 //!     let query = GetUserInformation::new(Some(&fields));
 //!     let response = api_client.get_my_user_information(&query).await.unwrap();
@@ -227,5 +228,5 @@ pub mod prelude {
     #[cfg(feature = "user")]
     pub use crate::user::{api::*, requests::*, responses::*};
 
-    pub use oauth2::{AccessToken, ClientId};
+    pub use crate::oauth::{MalClientId, OauthClient};
 }
