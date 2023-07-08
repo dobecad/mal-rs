@@ -4,11 +4,11 @@ use crate::{OAUTH_TOKEN_URL, OAUTH_URL};
 use oauth2::basic::BasicClient;
 use oauth2::http::Uri;
 use oauth2::reqwest::async_http_client;
+pub use oauth2::ClientId;
 use oauth2::{
     AccessToken, AuthUrl, AuthorizationCode, ClientSecret, CsrfToken, PkceCodeChallenge,
     PkceCodeVerifier, RedirectUrl, RefreshToken, Scope, TokenResponse, TokenUrl,
 };
-pub use oauth2::ClientId;
 use serde::Deserialize;
 use std::env;
 use std::error::Error;
@@ -23,27 +23,52 @@ use std::fmt;
 const EXPIRATION_IN_SECONDS: u64 = 2419200;
 
 #[derive(Debug)]
-pub struct OauthResponseError {
+pub struct OauthError {
     pub message: String,
 }
 
-impl Error for OauthResponseError {}
+impl Error for OauthError {}
 
-impl fmt::Display for OauthResponseError {
+impl fmt::Display for OauthError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.message)
     }
 }
 
-impl OauthResponseError {
+impl OauthError {
     pub fn new(message: String) -> Self {
         Self { message }
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct MalClientId(pub ClientId);
+
+impl MalClientId {
+    /// Create a [MalClientId] by passing in your ClientId as a string
+    ///
+    /// Useful if you want to control how your program fetches your MAL `CLIENT_ID`
+    pub fn new(id: String) -> Self {
+        let client_id = ClientId::new(id);
+        Self(client_id)
+    }
+
+    /// Try to load your MAL ClientId from the environment variable `CLIENT_ID`
+    pub fn from_env() -> Result<Self, OauthError> {
+        let client_id = env::var("CLIENT_ID")
+            .map_err(|err| OauthError::new(format!("Failed to load CLIENT_ID: {}", err)))?;
+        Ok(Self(ClientId::new(client_id)))
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct MalAccessToken(pub AccessToken);
+
+/// State struct for separating an Authenticated and Unauthenticated OAuthClient
 #[derive(Debug)]
 pub struct Unauthenticated;
 
+/// State struct for separating an Authenticated and Unauthenticated OAuthClient
 #[derive(Debug)]
 pub struct Authenticated;
 
@@ -122,7 +147,7 @@ impl OauthClient<Unauthenticated> {
         authorization_response: RedirectResponse,
     ) -> Result<OauthClient<Authenticated>, Box<dyn Error>> {
         if authorization_response.state != *self.csrf.secret() {
-            return Err(Box::new(OauthResponseError::new(
+            return Err(Box::new(OauthError::new(
                 "State does not match".to_string(),
             )));
         }
@@ -185,14 +210,14 @@ pub struct RedirectResponse {
 }
 
 impl RedirectResponse {
-    pub fn new(uri: &Uri) -> Result<RedirectResponse, OauthResponseError> {
+    pub fn new(uri: &Uri) -> Result<RedirectResponse, OauthError> {
         let query_params: Option<Self> = uri.query().map(|query| {
             serde_urlencoded::from_str(query).expect("Failed to get code and state from response.")
         });
 
         match query_params {
             Some(q) => Ok(q),
-            None => Err(OauthResponseError::new(
+            None => Err(OauthError::new(
                 "Failed to get code and state from authorization redirect".to_string(),
             )),
         }
@@ -200,19 +225,18 @@ impl RedirectResponse {
 }
 
 impl TryFrom<String> for RedirectResponse {
-    type Error = OauthResponseError;
+    type Error = OauthError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        let query_string = value.parse::<Url>().map_err(|err| {
-            OauthResponseError::new(format!("Given string is not a valid URL: {}", err))
-        })?;
+        let query_string = value
+            .parse::<Url>()
+            .map_err(|err| OauthError::new(format!("Given string is not a valid URL: {}", err)))?;
 
         let query_params = query_string.query().ok_or_else(|| {
-            OauthResponseError::new("Failed to get code and state from redirect".to_string())
+            OauthError::new("Failed to get code and state from redirect".to_string())
         })?;
 
-        serde_urlencoded::from_str::<RedirectResponse>(&query_params).map_err(|_| {
-            OauthResponseError::new("Failed to get code and state from redirect".to_string())
-        })
+        serde_urlencoded::from_str::<RedirectResponse>(&query_params)
+            .map_err(|_| OauthError::new("Failed to get code and state from redirect".to_string()))
     }
 }

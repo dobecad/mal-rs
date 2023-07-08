@@ -7,7 +7,7 @@ use oauth2::{AccessToken, ClientId};
 use serde::{de::DeserializeOwned, Serialize};
 use std::marker::{PhantomData, Send, Sync};
 
-use crate::{common::PagingIter, ANIME_URL, USER_URL};
+use crate::{common::PagingIter, ANIME_URL, USER_URL, oauth::{MalClientId, MalAccessToken}};
 use std::error::Error;
 
 use super::{
@@ -132,6 +132,28 @@ impl From<&ClientId> for AnimeApiClient<Client> {
             client: reqwest::Client::new(),
             client_id: Some(value.clone().to_string()),
             access_token: None,
+            state: PhantomData::<Client>,
+        }
+    }
+}
+
+impl From<&MalClientId> for AnimeApiClient<Client> {
+    fn from(value: &MalClientId) -> Self {
+        AnimeApiClient::<Client> {
+            client: reqwest::Client::new(),
+            client_id: Some(value.0.to_string()),
+            access_token: None,
+            state: PhantomData::<Client>,
+        }
+    }
+}
+
+impl From<&MalAccessToken> for AnimeApiClient<Client> {
+    fn from(value: &MalAccessToken) -> Self {
+        AnimeApiClient::<Client> {
+            client: reqwest::Client::new(),
+            client_id: None,
+            access_token: Some(value.0.secret().clone()),
             state: PhantomData::<Client>,
         }
     }
