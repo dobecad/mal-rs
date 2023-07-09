@@ -17,7 +17,7 @@ pub struct GetAnimeList {
 impl GetAnimeList {
     /// Create new `Get anime list` query
     /// 
-    /// Limit must be within [1, 100]
+    /// Limit must be within `[1, 100]`
     pub fn new(
         q: String,
         limit: Option<u16>,
@@ -87,7 +87,7 @@ pub struct GetAnimeRanking {
 impl GetAnimeRanking {
     /// Create a new `Get anime ranking` query
     /// 
-    /// Limit must be within [1, 500]
+    /// Limit must be within `[1, 500]`
     pub fn new(
         ranking_type: RankingType,
         limit: Option<u16>,
@@ -159,7 +159,7 @@ pub struct GetSeasonalAnime {
 impl GetSeasonalAnime {
     /// Create a new `Get seasonal anime` query
     /// 
-    /// Limit must be within [1, 500]
+    /// Limit must be within `[1, 500]`
     pub fn new(
         year: u16,
         season: Season,
@@ -195,7 +195,7 @@ pub struct GetSuggestedAnime {
 impl GetSuggestedAnime {
     /// Create a new `Get suggested anime` query
     /// 
-    /// Limit must be within [1, 100]
+    /// Limit must be within `[1, 100]`
     pub fn new(
         limit: Option<u16>,
         offset: Option<u32>,
@@ -252,7 +252,7 @@ pub struct GetUserAnimeList {
 impl GetUserAnimeList {
     /// Create a new `Get user anime list` query
     /// 
-    /// Limit must be within [1, 1000]
+    /// Limit must be within `[1, 1000]`
     /// 
     /// Note: `user_name` should be the targets user name, or `@me` as a 
     /// shortcut for yourself. However, you can only use `@me` if you 
@@ -306,6 +306,13 @@ pub struct UpdateMyAnimeListStatus {
 }
 
 impl UpdateMyAnimeListStatus {
+    /// Create new `Update my anime list status` query
+    /// 
+    /// Score must be within `[0, 10]`
+    /// 
+    /// Priority must be within `[0, 2]`
+    /// 
+    /// Rewatch_value must be within `[0, 5]`
     pub fn new(
         anime_id: u32,
         status: Option<UserAnimeListStatus>,
@@ -378,6 +385,7 @@ pub struct DeleteMyAnimeListItem {
 }
 
 impl DeleteMyAnimeListItem {
+    /// Create new `Delete my anime list item` query
     pub fn new(anime_id: u32) -> Self {
         Self { anime_id }
     }

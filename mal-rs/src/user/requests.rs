@@ -10,6 +10,7 @@ pub struct GetUserInformation {
 }
 
 impl GetUserInformation {
+    /// Create new `Get user information` query
     pub fn new(fields: Option<&UserFields>) -> Self {
         Self {
             fields: fields.map(|f| f.into()),

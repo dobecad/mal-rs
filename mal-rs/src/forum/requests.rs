@@ -16,7 +16,7 @@ pub struct GetForumTopicDetail {
 impl GetForumTopicDetail {
     /// Create new `Get forum topic detail` query
     /// 
-    /// Limit must be within [1, 100]
+    /// Limit must be within `[1, 100]`
     pub fn new(
         topic_id: u32,
         limit: Option<u16>,
@@ -56,7 +56,7 @@ pub struct GetForumTopics {
 impl GetForumTopics {
     /// Create new `Get forum topics` query
     /// 
-    /// Limit must be within [1, 100]
+    /// Limit must be within `[1, 100]`
     pub fn new(
         q: Option<String>,
         board_id: Option<u32>,

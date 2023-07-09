@@ -13,6 +13,9 @@ pub struct GetMangaList {
 }
 
 impl GetMangaList {
+    /// Create new `Get manga list` query
+    /// 
+    /// Limit must be within `[1, 100]`
     pub fn new(
         q: String,
         limit: Option<u16>,
@@ -45,6 +48,7 @@ pub struct GetMangaDetails {
 }
 
 impl GetMangaDetails {
+    /// Create new `Get manga details` query
     pub fn new(manga_id: u32, fields: Option<&MangaFields>) -> Self {
         Self {
             manga_id,
@@ -77,6 +81,9 @@ pub struct GetMangaRanking {
 }
 
 impl GetMangaRanking {
+    /// Create new `Get manga ranking`
+    /// 
+    /// Limit must be within `[1, 500]`
     pub fn new(
         ranking_type: MangaRankingType,
         limit: Option<u16>,
@@ -132,6 +139,9 @@ pub struct GetUserMangaList {
 }
 
 impl GetUserMangaList {
+    /// Create new `Get user manga list` query
+    /// 
+    /// Limit must be within `[1, 1000]`
     pub fn new(
         user_name: String,
         status: Option<UserMangaListStatus>,
@@ -182,6 +192,13 @@ pub struct UpdateMyMangaListStatus {
 }
 
 impl UpdateMyMangaListStatus {
+    /// Create new `Update my manga list status` query
+    /// 
+    /// Score must be within `[0-10]`
+    /// 
+    /// Priority must be within `[0, 2]`
+    /// 
+    /// Reread_value must be within `[0, 5]`
     pub fn new(
         manga_id: u32,
         status: Option<UserMangaListStatus>,
@@ -255,6 +272,7 @@ pub struct DeleteMyMangaListItem {
 }
 
 impl DeleteMyMangaListItem {
+    /// Create new `Delete my manga list item` query
     pub fn new(manga_id: u32) -> Self {
         Self { manga_id }
     }
