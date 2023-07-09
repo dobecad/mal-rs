@@ -185,6 +185,8 @@ impl OauthClient<Authenticated> {
     }
 
     /// Get the expires in time
+    /// 
+    /// TODO: Update this value
     pub fn get_expires_in(&self) -> &Duration {
         &self.expires_in
     }
