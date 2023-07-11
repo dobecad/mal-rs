@@ -15,7 +15,7 @@ pub struct GetForumTopicDetail {
 
 impl GetForumTopicDetail {
     /// Create new `Get forum topic detail` query
-    /// 
+    ///
     /// Limit must be within `[1, 100]`
     pub fn new(
         topic_id: u32,
@@ -55,7 +55,7 @@ pub struct GetForumTopics {
 
 impl GetForumTopics {
     /// Create new `Get forum topics` query
-    /// 
+    ///
     /// Limit must be within `[1, 100]`
     pub fn new(
         q: Option<String>,
@@ -92,5 +92,74 @@ impl GetForumTopics {
             user_name,
             sort: "recent".to_string(),
         })
+    }
+}
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_forum_topic_detail() {
+        let query = GetForumTopicDetail::new(1234, Some(101), None);
+        assert!(query.is_err());
+
+        let query = GetForumTopicDetail::new(1234, Some(0), None);
+        assert!(query.is_err());
+
+        let query = GetForumTopicDetail::new(1234, Some(1), None);
+        assert!(query.is_ok());
+
+        let query = GetForumTopicDetail::new(1234, None, None);
+        assert!(query.is_ok());
+    }
+
+    #[test]
+    fn test_get_forum_topics() {
+        let query = GetForumTopics::new(None, None, None, None, None, None, None);
+        assert!(query.is_err());
+
+        let query = GetForumTopics::new(
+            Some("hello".to_string()),
+            None,
+            None,
+            None,
+            None,
+            Some(101),
+            None,
+        );
+        assert!(query.is_err());
+
+        let query = GetForumTopics::new(
+            Some("hello".to_string()),
+            None,
+            None,
+            None,
+            None,
+            Some(0),
+            None,
+        );
+        assert!(query.is_err());
+
+        let query = GetForumTopics::new(
+            Some("hello".to_string()),
+            None,
+            None,
+            None,
+            None,
+            Some(100),
+            None,
+        );
+        assert!(query.is_ok());
+
+        let query = GetForumTopics::new(
+            Some("hello".to_string()),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        );
+        assert!(query.is_ok());
     }
 }
