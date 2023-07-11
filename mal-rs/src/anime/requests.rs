@@ -411,6 +411,7 @@ impl<'a> Into<String> for &'a AnimeFields {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::anime::all_fields;
@@ -607,11 +608,11 @@ mod tests {
             1234,
             Some(UserAnimeListStatus::Completed),
             None,
+            Some(10),
             None,
+            Some(2),
             None,
-            None,
-            None,
-            None,
+            Some(5),
             None,
             None,
         );

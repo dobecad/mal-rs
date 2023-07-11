@@ -95,6 +95,7 @@ impl GetForumTopics {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
