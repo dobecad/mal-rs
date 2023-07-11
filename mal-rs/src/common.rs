@@ -98,6 +98,7 @@ pub enum RelationType {
     FullStory,
 }
 
+/// Verify that the given optional `value` is within `[lowerbound, upperbound]`
 pub(crate) fn limit_check(
     value: Option<u16>,
     lowerbound: u16,
