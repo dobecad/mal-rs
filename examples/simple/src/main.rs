@@ -11,12 +11,14 @@ async fn main() {
 
     // Anime API example
     let api_client = AnimeApiClient::from(&client_id);
+    let nsfw = false;
     let fields = anime_fields!(
         AnimeFieldsEnum::id,
         AnimeFieldsEnum::num_episodes,
         AnimeFieldsEnum::title,
     );
-    let query = GetAnimeList::new("one".to_string(), Some(5), None, Some(&fields)).unwrap();
+
+    let query = GetAnimeList::new("one".to_string(), nsfw, Some(5), None, Some(&fields)).unwrap();
     let result = api_client.get_anime_list(&query).await.unwrap();
     println!("Result: {}", &result);
 
@@ -30,7 +32,7 @@ async fn main() {
     // Mangag API example
     let api_client = MangaApiClient::from(&client_id);
     let fields = mal_rs::manga::all_fields();
-    let query = GetMangaList::new("one".to_string(), Some(5), None, Some(&fields)).unwrap();
+    let query = GetMangaList::new("one".to_string(), nsfw, Some(5), None, Some(&fields)).unwrap();
     let result = api_client.get_manga_list(&query).await.unwrap();
     println!("Result: {}", result);
 }

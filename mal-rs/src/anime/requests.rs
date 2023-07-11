@@ -8,6 +8,7 @@ use super::{error::AnimeApiError, responses::AnimeFieldsEnum};
 #[derive(Debug, Serialize)]
 pub struct GetAnimeList {
     q: String,
+    nsfw: bool,
     limit: u16,
     offset: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -20,6 +21,7 @@ impl GetAnimeList {
     /// Limit must be within `[1, 100]`
     pub fn new(
         q: String,
+        nsfw: bool,
         limit: Option<u16>,
         offset: Option<u32>,
         fields: Option<&AnimeFields>,
@@ -34,6 +36,7 @@ impl GetAnimeList {
 
         Ok(Self {
             q,
+            nsfw,
             limit: limit.unwrap_or(100),
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
@@ -78,6 +81,7 @@ pub enum RankingType {
 #[derive(Debug, Serialize)]
 pub struct GetAnimeRanking {
     ranking_type: RankingType,
+    nsfw: bool,
     limit: u16,
     offset: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -90,6 +94,7 @@ impl GetAnimeRanking {
     /// Limit must be within `[1, 500]`
     pub fn new(
         ranking_type: RankingType,
+        nsfw: bool,
         limit: Option<u16>,
         offset: Option<u32>,
         fields: Option<&AnimeFields>,
@@ -100,6 +105,7 @@ impl GetAnimeRanking {
 
         Ok(Self {
             ranking_type,
+            nsfw,
             limit: limit.unwrap_or(100),
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
@@ -149,6 +155,7 @@ pub struct GetSeasonalAnime {
     pub(crate) year: u16,
     #[serde(skip_serializing)]
     pub(crate) season: Season,
+    nsfw: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     sort: Option<SeasonalAnimeSort>,
     limit: u16,
@@ -163,6 +170,7 @@ impl GetSeasonalAnime {
     pub fn new(
         year: u16,
         season: Season,
+        nsfw: bool,
         sort: Option<SeasonalAnimeSort>,
         limit: Option<u16>,
         offset: Option<u32>,
@@ -175,6 +183,7 @@ impl GetSeasonalAnime {
         Ok(Self {
             year,
             season,
+            nsfw,
             sort,
             limit: limit.unwrap_or(100),
             offset: offset.unwrap_or(0),
@@ -186,6 +195,7 @@ impl GetSeasonalAnime {
 /// Corresponds to the [Get suggested anime](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetSuggestedAnime {
+    nsfw: bool,
     limit: u16,
     offset: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -197,6 +207,7 @@ impl GetSuggestedAnime {
     ///
     /// Limit must be within `[1, 100]`
     pub fn new(
+        nsfw: bool,
         limit: Option<u16>,
         offset: Option<u32>,
         fields: Option<&AnimeFields>,
@@ -206,6 +217,7 @@ impl GetSuggestedAnime {
         })?;
 
         Ok(Self {
+            nsfw,
             limit: limit.unwrap_or(100),
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
@@ -239,6 +251,7 @@ pub enum UserAnimeListSort {
 pub struct GetUserAnimeList {
     #[serde(skip_serializing)]
     pub(crate) user_name: String,
+    nsfw: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     status: Option<UserAnimeListStatus>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -259,6 +272,7 @@ impl GetUserAnimeList {
     /// have an `Oauth` client
     pub fn new(
         user_name: String,
+        nsfw: bool,
         status: Option<UserAnimeListStatus>,
         sort: Option<UserAnimeListSort>,
         limit: Option<u16>,
@@ -275,6 +289,7 @@ impl GetUserAnimeList {
 
         Ok(Self {
             user_name,
+            nsfw,
             status,
             sort,
             limit: limit.unwrap_or(100),
@@ -419,35 +434,35 @@ mod tests {
     #[test]
     fn test_get_anime_list() {
         let fields = all_fields();
-        let query = GetAnimeList::new("".to_string(), Some(100), None, Some(&fields));
+        let query = GetAnimeList::new("".to_string(), false, Some(100), None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetAnimeList::new("one".to_string(), Some(999), None, Some(&fields));
+        let query = GetAnimeList::new("one".to_string(), false, Some(999), None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetAnimeList::new("one".to_string(), Some(0), None, Some(&fields));
+        let query = GetAnimeList::new("one".to_string(), false, Some(0), None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetAnimeList::new("one".to_string(), Some(50), None, Some(&fields));
+        let query = GetAnimeList::new("one".to_string(), false, Some(50), None, Some(&fields));
         assert!(query.is_ok());
 
-        let query = GetAnimeList::new("one".to_string(), None, None, Some(&fields));
+        let query = GetAnimeList::new("one".to_string(), false, None, None, Some(&fields));
         assert!(query.is_ok());
     }
 
     #[test]
     fn test_get_anime_ranking() {
         let fields = all_fields();
-        let query = GetAnimeRanking::new(RankingType::All, Some(1000), None, Some(&fields));
+        let query = GetAnimeRanking::new(RankingType::All, false, Some(1000), None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetAnimeRanking::new(RankingType::All, Some(0), None, Some(&fields));
+        let query = GetAnimeRanking::new(RankingType::All, false, Some(0), None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetAnimeRanking::new(RankingType::All, Some(100), None, Some(&fields));
+        let query = GetAnimeRanking::new(RankingType::All, false, Some(100), None, Some(&fields));
         assert!(query.is_ok());
 
-        let query = GetAnimeRanking::new(RankingType::All, None, None, Some(&fields));
+        let query = GetAnimeRanking::new(RankingType::All, false, None, None, Some(&fields));
         assert!(query.is_ok());
     }
 
@@ -457,6 +472,7 @@ mod tests {
         let query = GetSeasonalAnime::new(
             1000,
             Season::Spring,
+            false,
             Some(SeasonalAnimeSort::AnimeScore),
             Some(999),
             None,
@@ -467,6 +483,7 @@ mod tests {
         let query = GetSeasonalAnime::new(
             1000,
             Season::Spring,
+            false,
             Some(SeasonalAnimeSort::AnimeScore),
             Some(0),
             None,
@@ -477,6 +494,7 @@ mod tests {
         let query = GetSeasonalAnime::new(
             1000,
             Season::Spring,
+            false,
             Some(SeasonalAnimeSort::AnimeScore),
             Some(500),
             None,
@@ -487,6 +505,7 @@ mod tests {
         let query = GetSeasonalAnime::new(
             1000,
             Season::Spring,
+            false,
             Some(SeasonalAnimeSort::AnimeScore),
             None,
             None,
@@ -498,16 +517,16 @@ mod tests {
     #[test]
     fn test_get_suggested_anime() {
         let fields = all_fields();
-        let query = GetSuggestedAnime::new(Some(500), None, Some(&fields));
+        let query = GetSuggestedAnime::new(false, Some(500), None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetSuggestedAnime::new(Some(0), None, Some(&fields));
+        let query = GetSuggestedAnime::new(false, Some(0), None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetSuggestedAnime::new(Some(1), None, Some(&fields));
+        let query = GetSuggestedAnime::new(false, Some(1), None, Some(&fields));
         assert!(query.is_ok());
 
-        let query = GetSuggestedAnime::new(None, None, Some(&fields));
+        let query = GetSuggestedAnime::new(false, None, None, Some(&fields));
         assert!(query.is_ok());
     }
 
@@ -516,6 +535,7 @@ mod tests {
         let fields = all_fields();
         let query = GetUserAnimeList::new(
             "".to_string(),
+            false,
             Some(UserAnimeListStatus::Completed),
             Some(UserAnimeListSort::AnimeTitle),
             Some(1001),
@@ -526,6 +546,7 @@ mod tests {
 
         let query = GetUserAnimeList::new(
             "hello".to_string(),
+            false,
             Some(UserAnimeListStatus::Completed),
             Some(UserAnimeListSort::AnimeTitle),
             Some(0),
@@ -536,6 +557,7 @@ mod tests {
 
         let query = GetUserAnimeList::new(
             "hello".to_string(),
+            false,
             Some(UserAnimeListStatus::Completed),
             Some(UserAnimeListSort::AnimeTitle),
             Some(1000),
@@ -546,6 +568,7 @@ mod tests {
 
         let query = GetUserAnimeList::new(
             "hello".to_string(),
+            false,
             Some(UserAnimeListStatus::Completed),
             Some(UserAnimeListSort::AnimeTitle),
             None,

@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize)]
 pub struct GetMangaList {
     q: String,
+    nsfw: bool,
     limit: u16,
     offset: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -18,6 +19,7 @@ impl GetMangaList {
     /// Limit must be within `[1, 100]`
     pub fn new(
         q: String,
+        nsfw: bool,
         limit: Option<u16>,
         offset: Option<u32>,
         fields: Option<&MangaFields>,
@@ -32,6 +34,7 @@ impl GetMangaList {
 
         Ok(Self {
             q,
+            nsfw,
             limit: limit.unwrap_or(100),
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
@@ -43,15 +46,17 @@ impl GetMangaList {
 pub struct GetMangaDetails {
     #[serde(skip_serializing)]
     pub(crate) manga_id: u32,
+    nsfw: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     fields: Option<String>,
 }
 
 impl GetMangaDetails {
     /// Create new `Get manga details` query
-    pub fn new(manga_id: u32, fields: Option<&MangaFields>) -> Self {
+    pub fn new(manga_id: u32, nsfw: bool, fields: Option<&MangaFields>) -> Self {
         Self {
             manga_id,
+            nsfw,
             fields: fields.map(|f| f.into()),
         }
     }
@@ -74,6 +79,7 @@ pub enum MangaRankingType {
 #[derive(Debug, Serialize)]
 pub struct GetMangaRanking {
     ranking_type: MangaRankingType,
+    nsfw: bool,
     limit: u16,
     offset: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -86,6 +92,7 @@ impl GetMangaRanking {
     /// Limit must be within `[1, 500]`
     pub fn new(
         ranking_type: MangaRankingType,
+        nsfw: bool,
         limit: Option<u16>,
         offset: Option<u32>,
         fields: Option<&MangaFields>,
@@ -96,6 +103,7 @@ impl GetMangaRanking {
 
         Ok(Self {
             ranking_type,
+            nsfw,
             limit: limit.unwrap_or(100),
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
@@ -128,6 +136,7 @@ pub enum UserMangaListSort {
 pub struct GetUserMangaList {
     #[serde(skip_serializing)]
     pub(crate) user_name: String,
+    nsfw: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     status: Option<UserMangaListStatus>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -144,6 +153,7 @@ impl GetUserMangaList {
     /// Limit must be within `[1, 1000]`
     pub fn new(
         user_name: String,
+        nsfw: bool,
         status: Option<UserMangaListStatus>,
         sort: Option<UserMangaListSort>,
         limit: Option<u16>,
@@ -160,6 +170,7 @@ impl GetUserMangaList {
 
         Ok(Self {
             user_name,
+            nsfw,
             status,
             sort,
             limit: limit.unwrap_or(100),
@@ -304,46 +315,51 @@ mod tests {
     #[test]
     fn test_get_manga_list() {
         let fields = all_fields();
-        let query = GetMangaList::new("".to_string(), None, None, Some(&fields));
+        let query = GetMangaList::new("".to_string(), false, None, None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetMangaList::new("one".to_string(), Some(101), None, Some(&fields));
+        let query = GetMangaList::new("one".to_string(), false, Some(101), None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetMangaList::new("".to_string(), Some(0), None, Some(&fields));
+        let query = GetMangaList::new("".to_string(), false, Some(0), None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetMangaList::new("".to_string(), Some(100), None, Some(&fields));
+        let query = GetMangaList::new("".to_string(), false, Some(100), None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetMangaList::new("".to_string(), None, None, Some(&fields));
+        let query = GetMangaList::new("".to_string(), false, None, None, Some(&fields));
         assert!(query.is_err());
     }
 
     #[test]
     fn test_get_manga_ranking() {
         let fields = all_fields();
-        let query = GetMangaRanking::new(MangaRankingType::All, Some(501), None, Some(&fields));
+        let query =
+            GetMangaRanking::new(MangaRankingType::All, false, Some(501), None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetMangaRanking::new(MangaRankingType::All, Some(0), None, Some(&fields));
+        let query =
+            GetMangaRanking::new(MangaRankingType::All, false, Some(0), None, Some(&fields));
         assert!(query.is_err());
 
-        let query = GetMangaRanking::new(MangaRankingType::All, Some(500), None, Some(&fields));
+        let query =
+            GetMangaRanking::new(MangaRankingType::All, false, Some(500), None, Some(&fields));
         assert!(query.is_ok());
 
-        let query = GetMangaRanking::new(MangaRankingType::All, None, None, Some(&fields));
+        let query = GetMangaRanking::new(MangaRankingType::All, false, None, None, Some(&fields));
         assert!(query.is_ok());
     }
 
     #[test]
     fn test_get_user_manga_list() {
         let fields = all_fields();
-        let query = GetUserMangaList::new("".to_string(), None, None, None, None, Some(&fields));
+        let query =
+            GetUserMangaList::new("".to_string(), false, None, None, None, None, Some(&fields));
         assert!(query.is_err());
 
         let query = GetUserMangaList::new(
             "hello".to_string(),
+            false,
             None,
             None,
             Some(1001),
@@ -354,6 +370,7 @@ mod tests {
 
         let query = GetUserMangaList::new(
             "hello".to_string(),
+            false,
             None,
             None,
             Some(0),
@@ -364,6 +381,7 @@ mod tests {
 
         let query = GetUserMangaList::new(
             "hello".to_string(),
+            false,
             None,
             None,
             Some(1000),
@@ -372,8 +390,15 @@ mod tests {
         );
         assert!(query.is_ok());
 
-        let query =
-            GetUserMangaList::new("hello".to_string(), None, None, None, None, Some(&fields));
+        let query = GetUserMangaList::new(
+            "hello".to_string(),
+            false,
+            None,
+            None,
+            None,
+            None,
+            Some(&fields),
+        );
         assert!(query.is_ok());
     }
 

@@ -37,6 +37,7 @@ impl GetForumTopicDetail {
 /// Corresponds to the [Get forum topics](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topics_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetForumTopics {
+    nsfw: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     q: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -58,6 +59,7 @@ impl GetForumTopics {
     ///
     /// Limit must be within `[1, 100]`
     pub fn new(
+        nsfw: bool,
         q: Option<String>,
         board_id: Option<u32>,
         subboard_id: Option<u32>,
@@ -83,6 +85,7 @@ impl GetForumTopics {
         }
 
         Ok(Self {
+            nsfw,
             board_id,
             subboard_id,
             limit: limit.unwrap_or(100),
@@ -116,10 +119,11 @@ mod tests {
 
     #[test]
     fn test_get_forum_topics() {
-        let query = GetForumTopics::new(None, None, None, None, None, None, None);
+        let query = GetForumTopics::new(false, None, None, None, None, None, None, None);
         assert!(query.is_err());
 
         let query = GetForumTopics::new(
+            false,
             Some("hello".to_string()),
             None,
             None,
@@ -131,6 +135,7 @@ mod tests {
         assert!(query.is_err());
 
         let query = GetForumTopics::new(
+            false,
             Some("hello".to_string()),
             None,
             None,
@@ -142,6 +147,7 @@ mod tests {
         assert!(query.is_err());
 
         let query = GetForumTopics::new(
+            false,
             Some("hello".to_string()),
             None,
             None,
@@ -153,6 +159,7 @@ mod tests {
         assert!(query.is_ok());
 
         let query = GetForumTopics::new(
+            false,
             Some("hello".to_string()),
             None,
             None,
