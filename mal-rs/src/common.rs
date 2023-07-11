@@ -119,3 +119,23 @@ pub trait PagingIter {
 
     fn prev_page(&self) -> Option<&String>;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_limit_check() {
+        let result = limit_check(Some(100), 1, 10);
+        assert!(result.is_err());
+
+        let result = limit_check(Some(100), 1, 1000);
+        assert!(result.is_ok());
+
+        let result = limit_check(Some(100), 100, 1000);
+        assert!(result.is_ok());
+
+        let result = limit_check(Some(100), 1, 100);
+        assert!(result.is_ok());
+    }
+}
