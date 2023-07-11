@@ -13,7 +13,7 @@ use serde::Deserialize;
 use std::env;
 use std::error::Error;
 use std::marker::PhantomData;
-use std::time::Duration;
+use std::time::{Duration, SystemTime};
 use url::Url;
 
 use std::fmt;
@@ -77,7 +77,7 @@ pub struct OauthClient<State = Unauthenticated> {
     state: PhantomData<State>,
     access_token: AccessToken,
     refresh_token: RefreshToken,
-    expires_in: Duration,
+    expires_at: u64,
 }
 
 impl OauthClient<Unauthenticated> {
@@ -104,7 +104,7 @@ impl OauthClient<Unauthenticated> {
             state: PhantomData::<Unauthenticated>,
             access_token: AccessToken::new("".to_string()),
             refresh_token: RefreshToken::new("".to_string()),
-            expires_in: Duration::new(0, 0),
+            expires_at: Duration::new(0, 0).as_secs(),
         }
     }
 
@@ -156,6 +156,8 @@ impl OauthClient<Unauthenticated> {
             .request_async(async_http_client)
             .await?;
 
+        let now = calculate_current_system_time();
+
         Ok(OauthClient::<Authenticated> {
             client: self.client,
             csrf: self.csrf,
@@ -163,7 +165,7 @@ impl OauthClient<Unauthenticated> {
             state: PhantomData::<Authenticated>,
             access_token: token_result.access_token().to_owned(),
             refresh_token: token_result.refresh_token().unwrap().to_owned(),
-            expires_in: Duration::from_secs(EXPIRATION_IN_SECONDS),
+            expires_at: now + Duration::from_secs(EXPIRATION_IN_SECONDS).as_secs(),
         })
     }
 }
@@ -184,11 +186,11 @@ impl OauthClient<Authenticated> {
         &self.refresh_token.secret()
     }
 
-    /// Get the expires in time
+    /// Get the time at which the token will expire
     /// 
-    /// TODO: Update this value
-    pub fn get_expires_in(&self) -> &Duration {
-        &self.expires_in
+    /// The time is represented as number of seconds since the Unix Epoch
+    pub fn get_expires_at(&self) -> &u64 {
+        &self.expires_at
     }
 
     /// Refresh the access token using the refresh token
@@ -199,6 +201,8 @@ impl OauthClient<Authenticated> {
             .request_async(async_http_client)
             .await?;
 
+        let now = calculate_current_system_time();
+
         Ok(OauthClient::<Authenticated> {
             client: self.client,
             csrf: self.csrf,
@@ -206,7 +210,7 @@ impl OauthClient<Authenticated> {
             state: PhantomData::<Authenticated>,
             access_token: refresh_result.access_token().to_owned(),
             refresh_token: refresh_result.refresh_token().unwrap().to_owned(),
-            expires_in: Duration::from_secs(EXPIRATION_IN_SECONDS),
+            expires_at: now + Duration::from_secs(EXPIRATION_IN_SECONDS).as_secs(),
         })
     }
 }
@@ -248,4 +252,12 @@ impl TryFrom<String> for RedirectResponse {
         serde_urlencoded::from_str::<RedirectResponse>(&query_params)
             .map_err(|_| OauthError::new("Failed to get code and state from redirect".to_string()))
     }
+}
+
+fn calculate_current_system_time() -> u64 {
+    let now = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .expect("Failed to get current time")
+        .as_secs();
+    now
 }
