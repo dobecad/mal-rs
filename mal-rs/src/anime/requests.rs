@@ -22,9 +22,9 @@ impl GetAnimeList {
     pub fn new(
         q: String,
         nsfw: bool,
+        fields: Option<&AnimeFields>,
         limit: Option<u16>,
         offset: Option<u32>,
-        fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
         limit_check(limit, 1, 100).map_err(|_| {
             AnimeApiError::new("Limit must be between 1 and 100 inclusive".to_string())
@@ -95,9 +95,9 @@ impl GetAnimeRanking {
     pub fn new(
         ranking_type: RankingType,
         nsfw: bool,
+        fields: Option<&AnimeFields>,
         limit: Option<u16>,
         offset: Option<u32>,
-        fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
         limit_check(limit, 1, 500).map_err(|_| {
             AnimeApiError::new("Limit must be between 1 and 500 inclusive".to_string())
@@ -171,10 +171,10 @@ impl GetSeasonalAnime {
         year: u16,
         season: Season,
         nsfw: bool,
+        fields: Option<&AnimeFields>,
         sort: Option<SeasonalAnimeSort>,
         limit: Option<u16>,
         offset: Option<u32>,
-        fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
         limit_check(limit, 1, 500).map_err(|_| {
             AnimeApiError::new("Limit must be between 1 and 500 inclusive".to_string())
@@ -208,9 +208,9 @@ impl GetSuggestedAnime {
     /// Limit must be within `[1, 100]`
     pub fn new(
         nsfw: bool,
+        fields: Option<&AnimeFields>,
         limit: Option<u16>,
         offset: Option<u32>,
-        fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
         limit_check(limit, 1, 100).map_err(|_| {
             AnimeApiError::new("Limit must be between 1 and 100 inclusive".to_string())
@@ -273,11 +273,11 @@ impl GetUserAnimeList {
     pub fn new(
         user_name: String,
         nsfw: bool,
+        fields: Option<&AnimeFields>,
         status: Option<UserAnimeListStatus>,
         sort: Option<UserAnimeListSort>,
         limit: Option<u16>,
         offset: Option<u32>,
-        fields: Option<&AnimeFields>,
     ) -> Result<Self, AnimeApiError> {
         limit_check(limit, 1, 1000).map_err(|_| {
             AnimeApiError::new("Limit must be between 1 and 1000 inclusive".to_string())
@@ -434,35 +434,35 @@ mod tests {
     #[test]
     fn test_get_anime_list() {
         let fields = all_fields();
-        let query = GetAnimeList::new("".to_string(), false, Some(100), None, Some(&fields));
+        let query = GetAnimeList::new("".to_string(), false, Some(&fields), Some(100), None);
         assert!(query.is_err());
 
-        let query = GetAnimeList::new("one".to_string(), false, Some(999), None, Some(&fields));
+        let query = GetAnimeList::new("one".to_string(), false, Some(&fields), Some(999), None);
         assert!(query.is_err());
 
-        let query = GetAnimeList::new("one".to_string(), false, Some(0), None, Some(&fields));
+        let query = GetAnimeList::new("one".to_string(), false, Some(&fields), Some(0), None);
         assert!(query.is_err());
 
-        let query = GetAnimeList::new("one".to_string(), false, Some(50), None, Some(&fields));
+        let query = GetAnimeList::new("one".to_string(), false, Some(&fields), Some(50), None);
         assert!(query.is_ok());
 
-        let query = GetAnimeList::new("one".to_string(), false, None, None, Some(&fields));
+        let query = GetAnimeList::new("one".to_string(), false, Some(&fields), None, None);
         assert!(query.is_ok());
     }
 
     #[test]
     fn test_get_anime_ranking() {
         let fields = all_fields();
-        let query = GetAnimeRanking::new(RankingType::All, false, Some(1000), None, Some(&fields));
+        let query = GetAnimeRanking::new(RankingType::All, false, Some(&fields), Some(1000), None);
         assert!(query.is_err());
 
-        let query = GetAnimeRanking::new(RankingType::All, false, Some(0), None, Some(&fields));
+        let query = GetAnimeRanking::new(RankingType::All, false, Some(&fields), Some(0), None);
         assert!(query.is_err());
 
-        let query = GetAnimeRanking::new(RankingType::All, false, Some(100), None, Some(&fields));
+        let query = GetAnimeRanking::new(RankingType::All, false, Some(&fields), Some(100), None);
         assert!(query.is_ok());
 
-        let query = GetAnimeRanking::new(RankingType::All, false, None, None, Some(&fields));
+        let query = GetAnimeRanking::new(RankingType::All, false, Some(&fields), None, None);
         assert!(query.is_ok());
     }
 
@@ -473,10 +473,10 @@ mod tests {
             1000,
             Season::Spring,
             false,
+            Some(&fields),
             Some(SeasonalAnimeSort::AnimeScore),
             Some(999),
             None,
-            Some(&fields),
         );
         assert!(query.is_err());
 
@@ -484,10 +484,10 @@ mod tests {
             1000,
             Season::Spring,
             false,
+            Some(&fields),
             Some(SeasonalAnimeSort::AnimeScore),
             Some(0),
             None,
-            Some(&fields),
         );
         assert!(query.is_err());
 
@@ -495,10 +495,10 @@ mod tests {
             1000,
             Season::Spring,
             false,
+            Some(&fields),
             Some(SeasonalAnimeSort::AnimeScore),
             Some(500),
             None,
-            Some(&fields),
         );
         assert!(query.is_ok());
 
@@ -506,10 +506,10 @@ mod tests {
             1000,
             Season::Spring,
             false,
+            Some(&fields),
             Some(SeasonalAnimeSort::AnimeScore),
             None,
             None,
-            Some(&fields),
         );
         assert!(query.is_ok());
     }
@@ -517,16 +517,16 @@ mod tests {
     #[test]
     fn test_get_suggested_anime() {
         let fields = all_fields();
-        let query = GetSuggestedAnime::new(false, Some(500), None, Some(&fields));
+        let query = GetSuggestedAnime::new(false, Some(&fields), Some(500), None);
         assert!(query.is_err());
 
-        let query = GetSuggestedAnime::new(false, Some(0), None, Some(&fields));
+        let query = GetSuggestedAnime::new(false, Some(&fields), Some(0), None);
         assert!(query.is_err());
 
-        let query = GetSuggestedAnime::new(false, Some(1), None, Some(&fields));
+        let query = GetSuggestedAnime::new(false, Some(&fields), Some(1), None);
         assert!(query.is_ok());
 
-        let query = GetSuggestedAnime::new(false, None, None, Some(&fields));
+        let query = GetSuggestedAnime::new(false, Some(&fields), None, None);
         assert!(query.is_ok());
     }
 
@@ -536,44 +536,44 @@ mod tests {
         let query = GetUserAnimeList::new(
             "".to_string(),
             false,
+            Some(&fields),
             Some(UserAnimeListStatus::Completed),
             Some(UserAnimeListSort::AnimeTitle),
             Some(1001),
             None,
-            Some(&fields),
         );
         assert!(query.is_err());
 
         let query = GetUserAnimeList::new(
             "hello".to_string(),
             false,
+            Some(&fields),
             Some(UserAnimeListStatus::Completed),
             Some(UserAnimeListSort::AnimeTitle),
             Some(0),
             None,
-            Some(&fields),
         );
         assert!(query.is_err());
 
         let query = GetUserAnimeList::new(
             "hello".to_string(),
             false,
+            Some(&fields),
             Some(UserAnimeListStatus::Completed),
             Some(UserAnimeListSort::AnimeTitle),
             Some(1000),
             None,
-            Some(&fields),
         );
         assert!(query.is_ok());
 
         let query = GetUserAnimeList::new(
             "hello".to_string(),
             false,
+            Some(&fields),
             Some(UserAnimeListStatus::Completed),
             Some(UserAnimeListSort::AnimeTitle),
             None,
             None,
-            Some(&fields),
         );
         assert!(query.is_ok());
     }

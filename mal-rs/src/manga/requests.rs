@@ -20,9 +20,9 @@ impl GetMangaList {
     pub fn new(
         q: String,
         nsfw: bool,
+        fields: Option<&MangaFields>,
         limit: Option<u16>,
         offset: Option<u32>,
-        fields: Option<&MangaFields>,
     ) -> Result<Self, MangaApiError> {
         limit_check(limit, 1, 100).map_err(|_| {
             MangaApiError::new("Limit must be between 1 and 100 inclusive".to_string())
@@ -93,9 +93,9 @@ impl GetMangaRanking {
     pub fn new(
         ranking_type: MangaRankingType,
         nsfw: bool,
+        fields: Option<&MangaFields>,
         limit: Option<u16>,
         offset: Option<u32>,
-        fields: Option<&MangaFields>,
     ) -> Result<Self, MangaApiError> {
         limit_check(limit, 1, 500).map_err(|_| {
             MangaApiError::new("Limit must be between 1 and 500 inclusive".to_string())
@@ -154,11 +154,11 @@ impl GetUserMangaList {
     pub fn new(
         user_name: String,
         nsfw: bool,
+        fields: Option<&MangaFields>,
         status: Option<UserMangaListStatus>,
         sort: Option<UserMangaListSort>,
         limit: Option<u16>,
         offset: Option<u32>,
-        fields: Option<&MangaFields>,
     ) -> Result<Self, MangaApiError> {
         limit_check(limit, 1, 1000).map_err(|_| {
             MangaApiError::new("Limit must be between 1 and 1000 inclusive".to_string())
@@ -315,19 +315,19 @@ mod tests {
     #[test]
     fn test_get_manga_list() {
         let fields = all_fields();
-        let query = GetMangaList::new("".to_string(), false, None, None, Some(&fields));
+        let query = GetMangaList::new("".to_string(), false, Some(&fields), None, None);
         assert!(query.is_err());
 
-        let query = GetMangaList::new("one".to_string(), false, Some(101), None, Some(&fields));
+        let query = GetMangaList::new("one".to_string(), false, Some(&fields), Some(101), None);
         assert!(query.is_err());
 
-        let query = GetMangaList::new("".to_string(), false, Some(0), None, Some(&fields));
+        let query = GetMangaList::new("".to_string(), false, Some(&fields), Some(0), None);
         assert!(query.is_err());
 
-        let query = GetMangaList::new("".to_string(), false, Some(100), None, Some(&fields));
+        let query = GetMangaList::new("".to_string(), false, Some(&fields), Some(100), None);
         assert!(query.is_err());
 
-        let query = GetMangaList::new("".to_string(), false, None, None, Some(&fields));
+        let query = GetMangaList::new("".to_string(), false, Some(&fields), None, None);
         assert!(query.is_err());
     }
 
@@ -335,18 +335,18 @@ mod tests {
     fn test_get_manga_ranking() {
         let fields = all_fields();
         let query =
-            GetMangaRanking::new(MangaRankingType::All, false, Some(501), None, Some(&fields));
+            GetMangaRanking::new(MangaRankingType::All, false, Some(&fields), Some(501), None);
         assert!(query.is_err());
 
         let query =
-            GetMangaRanking::new(MangaRankingType::All, false, Some(0), None, Some(&fields));
+            GetMangaRanking::new(MangaRankingType::All, false, Some(&fields), Some(0), None);
         assert!(query.is_err());
 
         let query =
-            GetMangaRanking::new(MangaRankingType::All, false, Some(500), None, Some(&fields));
+            GetMangaRanking::new(MangaRankingType::All, false, Some(&fields), Some(500), None);
         assert!(query.is_ok());
 
-        let query = GetMangaRanking::new(MangaRankingType::All, false, None, None, Some(&fields));
+        let query = GetMangaRanking::new(MangaRankingType::All, false, Some(&fields), None, None);
         assert!(query.is_ok());
     }
 
@@ -354,50 +354,50 @@ mod tests {
     fn test_get_user_manga_list() {
         let fields = all_fields();
         let query =
-            GetUserMangaList::new("".to_string(), false, None, None, None, None, Some(&fields));
+            GetUserMangaList::new("".to_string(), false, Some(&fields), None, None, None, None);
         assert!(query.is_err());
 
         let query = GetUserMangaList::new(
             "hello".to_string(),
             false,
+            Some(&fields),
             None,
             None,
             Some(1001),
             None,
-            Some(&fields),
         );
         assert!(query.is_err());
 
         let query = GetUserMangaList::new(
             "hello".to_string(),
             false,
+            Some(&fields),
             None,
             None,
             Some(0),
             None,
-            Some(&fields),
         );
         assert!(query.is_err());
 
         let query = GetUserMangaList::new(
             "hello".to_string(),
             false,
+            Some(&fields),
             None,
             None,
             Some(1000),
             None,
-            Some(&fields),
         );
         assert!(query.is_ok());
 
         let query = GetUserMangaList::new(
             "hello".to_string(),
             false,
-            None,
-            None,
-            None,
-            None,
             Some(&fields),
+            None,
+            None,
+            None,
+            None,
         );
         assert!(query.is_ok());
     }
