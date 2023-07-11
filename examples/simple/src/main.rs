@@ -1,7 +1,7 @@
 use dotenv;
+use mal_rs::anime_fields;
 use mal_rs::oauth::MalClientId;
 use mal_rs::prelude::*;
-use mal_rs::{anime_fields, manga_fields};
 
 #[tokio::main]
 async fn main() {
