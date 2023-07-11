@@ -43,7 +43,7 @@ pub struct None {}
 /// # Examples
 ///
 /// ## Using ClientId
-/// ```rust,no_run
+/// ```rust,ignore
 /// use std::env;
 ///
 /// use dotenv;

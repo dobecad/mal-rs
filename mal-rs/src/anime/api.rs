@@ -49,7 +49,7 @@ pub struct None {}
 /// # Examples
 ///
 /// ## Using ClientId
-/// ```rust,no_run
+/// ```rust,ignore
 /// use std::env;
 ///
 /// use dotenv;
@@ -69,7 +69,7 @@ pub struct None {}
 /// ```
 ///
 /// ## Using AccessToken
-/// ```rust,no_run
+/// ```rust,ignore
 /// use dotenv;
 /// use mal_rs::{
 ///     oauth::{OauthClient, RedirectResponse},

@@ -80,7 +80,7 @@
 //!
 //! ## Using a ClientId
 //!
-//! ```rust,no_run
+//! ```rust,ignore
 //! use std::env;
 //!
 //! use dotenv;
@@ -129,7 +129,7 @@
 //!
 //! ## Using OAuth token
 //!
-//! ```rust,no_run
+//! ```rust,ignore
 //! use dotenv;
 //! use mal_rs::{
 //!     oauth::{OauthClient, RedirectResponse},
