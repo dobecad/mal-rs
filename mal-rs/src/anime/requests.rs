@@ -270,7 +270,7 @@ impl GetUserAnimeList {
         })?;
 
         if user_name.is_empty() {
-            return Err(AnimeApiError::new("user_name cannot be empty".to_string()))
+            return Err(AnimeApiError::new("user_name cannot be empty".to_string()));
         }
 
         Ok(Self {
@@ -453,16 +453,44 @@ mod tests {
     #[test]
     fn test_get_seasonal_anime() {
         let fields = all_fields();
-        let query = GetSeasonalAnime::new(1000, Season::Spring, Some(SeasonalAnimeSort::AnimeScore), Some(999), None, Some(&fields));
+        let query = GetSeasonalAnime::new(
+            1000,
+            Season::Spring,
+            Some(SeasonalAnimeSort::AnimeScore),
+            Some(999),
+            None,
+            Some(&fields),
+        );
         assert!(query.is_err());
 
-        let query = GetSeasonalAnime::new(1000, Season::Spring, Some(SeasonalAnimeSort::AnimeScore), Some(0), None, Some(&fields));
+        let query = GetSeasonalAnime::new(
+            1000,
+            Season::Spring,
+            Some(SeasonalAnimeSort::AnimeScore),
+            Some(0),
+            None,
+            Some(&fields),
+        );
         assert!(query.is_err());
 
-        let query = GetSeasonalAnime::new(1000, Season::Spring, Some(SeasonalAnimeSort::AnimeScore), Some(500), None, Some(&fields));
+        let query = GetSeasonalAnime::new(
+            1000,
+            Season::Spring,
+            Some(SeasonalAnimeSort::AnimeScore),
+            Some(500),
+            None,
+            Some(&fields),
+        );
         assert!(query.is_ok());
 
-        let query = GetSeasonalAnime::new(1000, Season::Spring, Some(SeasonalAnimeSort::AnimeScore), None, None, Some(&fields));
+        let query = GetSeasonalAnime::new(
+            1000,
+            Season::Spring,
+            Some(SeasonalAnimeSort::AnimeScore),
+            None,
+            None,
+            Some(&fields),
+        );
         assert!(query.is_ok());
     }
 
@@ -485,34 +513,108 @@ mod tests {
     #[test]
     fn test_get_user_anime_list() {
         let fields = all_fields();
-        let query = GetUserAnimeList::new("".to_string(), Some(UserAnimeListStatus::Completed), Some(UserAnimeListSort::AnimeTitle), Some(1001), None, Some(&fields));
+        let query = GetUserAnimeList::new(
+            "".to_string(),
+            Some(UserAnimeListStatus::Completed),
+            Some(UserAnimeListSort::AnimeTitle),
+            Some(1001),
+            None,
+            Some(&fields),
+        );
         assert!(query.is_err());
 
-        let query = GetUserAnimeList::new("hello".to_string(), Some(UserAnimeListStatus::Completed), Some(UserAnimeListSort::AnimeTitle), Some(0), None, Some(&fields));
+        let query = GetUserAnimeList::new(
+            "hello".to_string(),
+            Some(UserAnimeListStatus::Completed),
+            Some(UserAnimeListSort::AnimeTitle),
+            Some(0),
+            None,
+            Some(&fields),
+        );
         assert!(query.is_err());
 
-        let query = GetUserAnimeList::new("hello".to_string(), Some(UserAnimeListStatus::Completed), Some(UserAnimeListSort::AnimeTitle), Some(1000), None, Some(&fields));
+        let query = GetUserAnimeList::new(
+            "hello".to_string(),
+            Some(UserAnimeListStatus::Completed),
+            Some(UserAnimeListSort::AnimeTitle),
+            Some(1000),
+            None,
+            Some(&fields),
+        );
         assert!(query.is_ok());
 
-        let query = GetUserAnimeList::new("hello".to_string(), Some(UserAnimeListStatus::Completed), Some(UserAnimeListSort::AnimeTitle), None, None, Some(&fields));
+        let query = GetUserAnimeList::new(
+            "hello".to_string(),
+            Some(UserAnimeListStatus::Completed),
+            Some(UserAnimeListSort::AnimeTitle),
+            None,
+            None,
+            Some(&fields),
+        );
         assert!(query.is_ok());
     }
 
     #[test]
     fn test_update_my_anime_list() {
-        let query = UpdateMyAnimeListStatus::new(1234, None, None, None, None, None, None, None, None, None);
+        let query = UpdateMyAnimeListStatus::new(
+            1234, None, None, None, None, None, None, None, None, None,
+        );
         assert!(query.is_err());
 
-        let query = UpdateMyAnimeListStatus::new(1234, Some(UserAnimeListStatus::Dropped), None, Some(11), None, None, None, None, None, None);
+        let query = UpdateMyAnimeListStatus::new(
+            1234,
+            Some(UserAnimeListStatus::Dropped),
+            None,
+            Some(11),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        );
         assert!(query.is_err());
 
-        let query = UpdateMyAnimeListStatus::new(1234, Some(UserAnimeListStatus::Dropped), None, None, None, Some(3), None, None, None, None);
+        let query = UpdateMyAnimeListStatus::new(
+            1234,
+            Some(UserAnimeListStatus::Dropped),
+            None,
+            None,
+            None,
+            Some(3),
+            None,
+            None,
+            None,
+            None,
+        );
         assert!(query.is_err());
 
-        let query = UpdateMyAnimeListStatus::new(1234, Some(UserAnimeListStatus::Dropped), None, None, None, None, None, Some(6), None, None);
+        let query = UpdateMyAnimeListStatus::new(
+            1234,
+            Some(UserAnimeListStatus::Dropped),
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(6),
+            None,
+            None,
+        );
         assert!(query.is_err());
 
-        let query = UpdateMyAnimeListStatus::new(1234, Some(UserAnimeListStatus::Completed), None, None, None, None, None, None, None, None);
+        let query = UpdateMyAnimeListStatus::new(
+            1234,
+            Some(UserAnimeListStatus::Completed),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        );
         assert!(query.is_ok());
     }
 }
