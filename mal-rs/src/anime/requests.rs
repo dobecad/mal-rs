@@ -16,7 +16,7 @@ pub struct GetAnimeList {
 
 impl GetAnimeList {
     /// Create new `Get anime list` query
-    /// 
+    ///
     /// Limit must be within `[1, 100]`
     pub fn new(
         q: String,
@@ -86,7 +86,7 @@ pub struct GetAnimeRanking {
 
 impl GetAnimeRanking {
     /// Create a new `Get anime ranking` query
-    /// 
+    ///
     /// Limit must be within `[1, 500]`
     pub fn new(
         ranking_type: RankingType,
@@ -158,7 +158,7 @@ pub struct GetSeasonalAnime {
 
 impl GetSeasonalAnime {
     /// Create a new `Get seasonal anime` query
-    /// 
+    ///
     /// Limit must be within `[1, 500]`
     pub fn new(
         year: u16,
@@ -194,7 +194,7 @@ pub struct GetSuggestedAnime {
 
 impl GetSuggestedAnime {
     /// Create a new `Get suggested anime` query
-    /// 
+    ///
     /// Limit must be within `[1, 100]`
     pub fn new(
         limit: Option<u16>,
@@ -251,11 +251,11 @@ pub struct GetUserAnimeList {
 
 impl GetUserAnimeList {
     /// Create a new `Get user anime list` query
-    /// 
+    ///
     /// Limit must be within `[1, 1000]`
-    /// 
-    /// Note: `user_name` should be the targets user name, or `@me` as a 
-    /// shortcut for yourself. However, you can only use `@me` if you 
+    ///
+    /// Note: `user_name` should be the targets user name, or `@me` as a
+    /// shortcut for yourself. However, you can only use `@me` if you
     /// have an `Oauth` client
     pub fn new(
         user_name: String,
@@ -268,6 +268,10 @@ impl GetUserAnimeList {
         limit_check(limit, 1, 1000).map_err(|_| {
             AnimeApiError::new("Limit must be between 1 and 1000 inclusive".to_string())
         })?;
+
+        if user_name.is_empty() {
+            return Err(AnimeApiError::new("user_name cannot be empty".to_string()))
+        }
 
         Ok(Self {
             user_name,
@@ -307,11 +311,11 @@ pub struct UpdateMyAnimeListStatus {
 
 impl UpdateMyAnimeListStatus {
     /// Create new `Update my anime list status` query
-    /// 
+    ///
     /// Score must be within `[0, 10]`
-    /// 
+    ///
     /// Priority must be within `[0, 2]`
-    /// 
+    ///
     /// Rewatch_value must be within `[0, 5]`
     pub fn new(
         anime_id: u32,
@@ -404,5 +408,111 @@ impl<'a> Into<String> for &'a AnimeFields {
             .collect::<Vec<String>>()
             .join(",");
         result
+    }
+}
+
+mod tests {
+    use super::*;
+    use crate::anime::all_fields;
+
+    #[test]
+    fn test_get_anime_list() {
+        let fields = all_fields();
+        let query = GetAnimeList::new("".to_string(), Some(100), None, Some(&fields));
+        assert!(query.is_err());
+
+        let query = GetAnimeList::new("one".to_string(), Some(999), None, Some(&fields));
+        assert!(query.is_err());
+
+        let query = GetAnimeList::new("one".to_string(), Some(0), None, Some(&fields));
+        assert!(query.is_err());
+
+        let query = GetAnimeList::new("one".to_string(), Some(50), None, Some(&fields));
+        assert!(query.is_ok());
+
+        let query = GetAnimeList::new("one".to_string(), None, None, Some(&fields));
+        assert!(query.is_ok());
+    }
+
+    #[test]
+    fn test_get_anime_ranking() {
+        let fields = all_fields();
+        let query = GetAnimeRanking::new(RankingType::All, Some(1000), None, Some(&fields));
+        assert!(query.is_err());
+
+        let query = GetAnimeRanking::new(RankingType::All, Some(0), None, Some(&fields));
+        assert!(query.is_err());
+
+        let query = GetAnimeRanking::new(RankingType::All, Some(100), None, Some(&fields));
+        assert!(query.is_ok());
+
+        let query = GetAnimeRanking::new(RankingType::All, None, None, Some(&fields));
+        assert!(query.is_ok());
+    }
+
+    #[test]
+    fn test_get_seasonal_anime() {
+        let fields = all_fields();
+        let query = GetSeasonalAnime::new(1000, Season::Spring, Some(SeasonalAnimeSort::AnimeScore), Some(999), None, Some(&fields));
+        assert!(query.is_err());
+
+        let query = GetSeasonalAnime::new(1000, Season::Spring, Some(SeasonalAnimeSort::AnimeScore), Some(0), None, Some(&fields));
+        assert!(query.is_err());
+
+        let query = GetSeasonalAnime::new(1000, Season::Spring, Some(SeasonalAnimeSort::AnimeScore), Some(500), None, Some(&fields));
+        assert!(query.is_ok());
+
+        let query = GetSeasonalAnime::new(1000, Season::Spring, Some(SeasonalAnimeSort::AnimeScore), None, None, Some(&fields));
+        assert!(query.is_ok());
+    }
+
+    #[test]
+    fn test_get_suggested_anime() {
+        let fields = all_fields();
+        let query = GetSuggestedAnime::new(Some(500), None, Some(&fields));
+        assert!(query.is_err());
+
+        let query = GetSuggestedAnime::new(Some(0), None, Some(&fields));
+        assert!(query.is_err());
+
+        let query = GetSuggestedAnime::new(Some(1), None, Some(&fields));
+        assert!(query.is_ok());
+
+        let query = GetSuggestedAnime::new(None, None, Some(&fields));
+        assert!(query.is_ok());
+    }
+
+    #[test]
+    fn test_get_user_anime_list() {
+        let fields = all_fields();
+        let query = GetUserAnimeList::new("".to_string(), Some(UserAnimeListStatus::Completed), Some(UserAnimeListSort::AnimeTitle), Some(1001), None, Some(&fields));
+        assert!(query.is_err());
+
+        let query = GetUserAnimeList::new("hello".to_string(), Some(UserAnimeListStatus::Completed), Some(UserAnimeListSort::AnimeTitle), Some(0), None, Some(&fields));
+        assert!(query.is_err());
+
+        let query = GetUserAnimeList::new("hello".to_string(), Some(UserAnimeListStatus::Completed), Some(UserAnimeListSort::AnimeTitle), Some(1000), None, Some(&fields));
+        assert!(query.is_ok());
+
+        let query = GetUserAnimeList::new("hello".to_string(), Some(UserAnimeListStatus::Completed), Some(UserAnimeListSort::AnimeTitle), None, None, Some(&fields));
+        assert!(query.is_ok());
+    }
+
+    #[test]
+    fn test_update_my_anime_list() {
+        let query = UpdateMyAnimeListStatus::new(1234, None, None, None, None, None, None, None, None, None);
+        assert!(query.is_err());
+
+        let query = UpdateMyAnimeListStatus::new(1234, Some(UserAnimeListStatus::Dropped), None, Some(11), None, None, None, None, None, None);
+        assert!(query.is_err());
+
+        let query = UpdateMyAnimeListStatus::new(1234, Some(UserAnimeListStatus::Dropped), None, None, None, Some(3), None, None, None, None);
+        assert!(query.is_err());
+
+        let query = UpdateMyAnimeListStatus::new(1234, Some(UserAnimeListStatus::Dropped), None, None, None, None, None, Some(6), None, None);
+        assert!(query.is_err());
+
+        let query = UpdateMyAnimeListStatus::new(1234, Some(UserAnimeListStatus::Completed), None, None, None, None, None, None, None, None);
+        assert!(query.is_ok());
     }
 }
