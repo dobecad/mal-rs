@@ -8,8 +8,6 @@ authors = ["dobecad"]
 
 [dependencies]
 quote = "1.0.28"
-strum = { version = "0.25.0", features = ["strum_macros"] }
-strum_macros = "0.25.0"
 syn = "2.0.18"
 
 [lib]
