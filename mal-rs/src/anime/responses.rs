@@ -5,8 +5,6 @@ use crate::common::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{self, Value};
-
-// This is imported for the `enum-from-struct` proc macro
 use strum_macros::EnumIter;
 
 #[derive(Debug, Deserialize, Serialize)]

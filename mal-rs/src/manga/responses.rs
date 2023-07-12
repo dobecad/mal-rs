@@ -5,8 +5,6 @@ use crate::common::{
 };
 use enum_from_struct::EnumFromStruct;
 use serde::{Deserialize, Serialize};
-
-// This is imported for the `enum-from-struct` proc macro
 use strum_macros::EnumIter;
 
 #[derive(Debug, Deserialize, Serialize)]
