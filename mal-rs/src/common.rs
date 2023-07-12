@@ -96,6 +96,7 @@ pub enum RelationType {
     ParentStory,
     Summary,
     FullStory,
+    Character,  // this type is not documented in the MAL API reference...
 }
 
 /// Verify that the given optional `value` is within `[lowerbound, upperbound]`
