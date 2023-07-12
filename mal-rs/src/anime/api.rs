@@ -236,7 +236,7 @@ pub trait AnimeApi {
         &self,
         query: &GetSeasonalAnime,
     ) -> Result<SeasonalAnime, Box<dyn Error>> {
-        let response = self.get_self().get(query).await?;
+        let response = self.get_self().get_seasonal(query).await?;
         let result: SeasonalAnime = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Seasonal Anime result: {}", err))
         })?;
