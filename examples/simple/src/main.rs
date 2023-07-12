@@ -1,5 +1,5 @@
 use dotenv;
-use mal_rs::anime_fields;
+use mal_rs::anime_common_fields;
 use mal_rs::oauth::MalClientId;
 use mal_rs::prelude::*;
 
@@ -12,7 +12,7 @@ async fn main() {
     // Anime API example
     let api_client = AnimeApiClient::from(&client_id);
     let nsfw = false;
-    let fields = anime_fields!(
+    let fields = anime_common_fields!(
         AnimeFieldsEnum::id,
         AnimeFieldsEnum::num_episodes,
         AnimeFieldsEnum::title,
