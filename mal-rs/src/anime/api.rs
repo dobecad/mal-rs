@@ -173,6 +173,8 @@ pub trait Request {
 
     async fn get_details(&self, query: &GetAnimeDetails) -> Result<String, Box<dyn Error>>;
 
+    async fn get_ranking(&self, query: &GetAnimeRanking) -> Result<String, Box<dyn Error>>;
+
     async fn get_seasonal(&self, query: &GetSeasonalAnime) -> Result<String, Box<dyn Error>>;
 
     async fn get_user(&self, query: &GetUserAnimeList) -> Result<String, Box<dyn Error>>;
@@ -206,6 +208,7 @@ pub trait AnimeApi {
         query: &GetAnimeDetails,
     ) -> Result<AnimeDetails, Box<dyn Error>> {
         let response = self.get_self().get_details(query).await?;
+        println!("Response string: {}", response);
         let result: AnimeDetails = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Anime Details result: {}", err))
         })?;
@@ -219,7 +222,7 @@ pub trait AnimeApi {
         &self,
         query: &GetAnimeRanking,
     ) -> Result<AnimeRanking, Box<dyn Error>> {
-        let response = self.get_self().get(query).await?;
+        let response = self.get_self().get_ranking(query).await?;
         let result: AnimeRanking = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Anime Ranking result: {}", err))
         })?;
@@ -303,6 +306,18 @@ impl Request for AnimeApiClient<Client> {
         handle_response(response).await
     }
 
+    async fn get_ranking(&self, query: &GetAnimeRanking) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/ranking", ANIME_URL))
+            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        handle_response(response).await
+    }
+
     async fn get_seasonal(&self, query: &GetSeasonalAnime) -> Result<String, Box<dyn Error>> {
         let response = self
             .client
@@ -369,6 +384,18 @@ impl Request for AnimeApiClient<Oauth> {
         let response = self
             .client
             .get(format!("{}/{}", ANIME_URL, query.anime_id))
+            .bearer_auth(&self.access_token.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        handle_response(response).await
+    }
+
+    async fn get_ranking(&self, query: &GetAnimeRanking) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/ranking", ANIME_URL))
             .bearer_auth(&self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
