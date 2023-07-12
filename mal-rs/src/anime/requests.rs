@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::common::limit_check;
 
-use super::{error::AnimeApiError, responses::AnimeFieldsEnum};
+use super::{error::AnimeApiError, responses::{AnimeFieldsEnum, AnimeDetailsEnum}};
 
 /// Corresponds to the [Get anime list](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get) endpoint
 #[derive(Debug, Serialize)]
@@ -22,7 +22,7 @@ impl GetAnimeList {
     pub fn new(
         q: String,
         nsfw: bool,
-        fields: Option<&AnimeFields>,
+        fields: Option<&AnimeCommonFields>,
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, AnimeApiError> {
@@ -55,7 +55,7 @@ pub struct GetAnimeDetails {
 
 impl GetAnimeDetails {
     /// Create new `Get anime details` query
-    pub fn new(anime_id: u32, fields: Option<&AnimeFields>) -> Self {
+    pub fn new(anime_id: u32, fields: Option<&AnimeDetailFields>) -> Self {
         Self {
             anime_id,
             fields: fields.map(|f| f.into()),
@@ -95,7 +95,7 @@ impl GetAnimeRanking {
     pub fn new(
         ranking_type: RankingType,
         nsfw: bool,
-        fields: Option<&AnimeFields>,
+        fields: Option<&AnimeCommonFields>,
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, AnimeApiError> {
@@ -171,7 +171,7 @@ impl GetSeasonalAnime {
         year: u16,
         season: Season,
         nsfw: bool,
-        fields: Option<&AnimeFields>,
+        fields: Option<&AnimeCommonFields>,
         sort: Option<SeasonalAnimeSort>,
         limit: Option<u16>,
         offset: Option<u32>,
@@ -208,7 +208,7 @@ impl GetSuggestedAnime {
     /// Limit must be within `[1, 100]`
     pub fn new(
         nsfw: bool,
-        fields: Option<&AnimeFields>,
+        fields: Option<&AnimeCommonFields>,
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, AnimeApiError> {
@@ -273,7 +273,7 @@ impl GetUserAnimeList {
     pub fn new(
         user_name: String,
         nsfw: bool,
-        fields: Option<&AnimeFields>,
+        fields: Option<&AnimeCommonFields>,
         status: Option<UserAnimeListStatus>,
         sort: Option<UserAnimeListSort>,
         limit: Option<u16>,
@@ -412,9 +412,25 @@ impl DeleteMyAnimeListItem {
 
 /// Wrapper for a vector of valid Anime Fields
 #[derive(Debug)]
-pub struct AnimeFields(pub Vec<AnimeFieldsEnum>);
+pub struct AnimeCommonFields(pub Vec<AnimeFieldsEnum>);
 
-impl<'a> Into<String> for &'a AnimeFields {
+/// Wrapper for a vector of valid Anime Fields
+#[derive(Debug)]
+pub struct AnimeDetailFields(pub Vec<AnimeDetailsEnum>);
+
+impl<'a> Into<String> for &'a AnimeCommonFields {
+    fn into(self) -> String {
+        let result = self
+            .0
+            .iter()
+            .map(|e| format!("{:?}", e))
+            .collect::<Vec<String>>()
+            .join(",");
+        result
+    }
+}
+
+impl<'a> Into<String> for &'a AnimeDetailFields {
     fn into(self) -> String {
         let result = self
             .0
@@ -429,11 +445,11 @@ impl<'a> Into<String> for &'a AnimeFields {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::anime::all_fields;
+    use crate::anime::all_common_fields;
 
     #[test]
     fn test_get_anime_list() {
-        let fields = all_fields();
+        let fields = all_common_fields();
         let query = GetAnimeList::new("".to_string(), false, Some(&fields), Some(100), None);
         assert!(query.is_err());
 
@@ -452,7 +468,7 @@ mod tests {
 
     #[test]
     fn test_get_anime_ranking() {
-        let fields = all_fields();
+        let fields = all_common_fields();
         let query = GetAnimeRanking::new(RankingType::All, false, Some(&fields), Some(1000), None);
         assert!(query.is_err());
 
@@ -468,7 +484,7 @@ mod tests {
 
     #[test]
     fn test_get_seasonal_anime() {
-        let fields = all_fields();
+        let fields = all_common_fields();
         let query = GetSeasonalAnime::new(
             1000,
             Season::Spring,
@@ -516,7 +532,7 @@ mod tests {
 
     #[test]
     fn test_get_suggested_anime() {
-        let fields = all_fields();
+        let fields = all_common_fields();
         let query = GetSuggestedAnime::new(false, Some(&fields), Some(500), None);
         assert!(query.is_err());
 
@@ -532,7 +548,7 @@ mod tests {
 
     #[test]
     fn test_get_user_anime_list() {
-        let fields = all_fields();
+        let fields = all_common_fields();
         let query = GetUserAnimeList::new(
             "".to_string(),
             false,
