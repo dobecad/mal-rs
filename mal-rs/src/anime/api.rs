@@ -208,7 +208,6 @@ pub trait AnimeApi {
         query: &GetAnimeDetails,
     ) -> Result<AnimeDetails, Box<dyn Error>> {
         let response = self.get_self().get_details(query).await?;
-        println!("Response string: {}", response);
         let result: AnimeDetails = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Anime Details result: {}", err))
         })?;
