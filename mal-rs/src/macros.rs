@@ -1,16 +1,31 @@
 //! Module for ease-of-use macros
 
-/// Macro for creating a vector of valid AnimeFields
+/// Macro for creating a vector of valid AnimeCommonFields
 #[cfg(feature = "anime")]
 #[macro_export]
-macro_rules! anime_fields {
+macro_rules! anime_common_fields {
     ($($variant:path),* $(,)?) => {
         {
             let mut v = Vec::new();
             $(
                 v.push($variant);
             )*
-            AnimeFields(v)
+            AnimeCommonFields(v)
+        }
+    };
+}
+
+/// Macro for creating a vector of valid AnimeDetailFields
+#[cfg(feature = "anime")]
+#[macro_export]
+macro_rules! anime_detail_fields {
+    ($($variant:path),* $(,)?) => {
+        {
+            let mut v = Vec::new();
+            $(
+                v.push($variant);
+            )*
+            AnimeDetailFields(v)
         }
     };
 }

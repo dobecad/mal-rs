@@ -3,9 +3,8 @@ use std::fmt::Display;
 use crate::common::{
     AlternativeTitles, Genre, MainPicture, Paging, PagingIter, RelationType, NSFW,
 };
-use enum_from_struct::EnumFromStruct;
 use serde::{Deserialize, Serialize};
-use serde_json;
+use serde_json::{self, Value};
 
 // This is imported for the `enum-from-struct` proc macro
 use strum_macros::EnumIter;
@@ -192,10 +191,10 @@ impl Display for Studio {
 }
 
 // Wrap everything in Options since user controls what fields should be returned
-#[derive(Debug, Deserialize, EnumFromStruct, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AnimeFields {
-    pub id: Option<u32>,
-    pub title: Option<String>,
+    pub id: u32,
+    pub title: String,
     pub main_picture: Option<MainPicture>,
     pub alternative_titles: Option<AlternativeTitles>,
     pub start_date: Option<String>,
@@ -220,6 +219,38 @@ pub struct AnimeFields {
     pub average_episode_duration: Option<u32>,
     pub rating: Option<Rating>,
     pub studios: Option<Vec<Studio>>,
+}
+
+#[derive(Debug, EnumIter, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum AnimeFieldsEnum {
+    /// These are the common anime fields
+    id,
+    title,
+    main_picture,
+    alternative_titles,
+    start_date,
+    end_date,
+    synopsis,
+    mean,
+    rank,
+    popularity,
+    num_list_users,
+    num_scoring_users,
+    nsfw,
+    genres,
+    created_at,
+    updated_at,
+    media_type,
+    status,
+    my_list_status,
+    num_episodes,
+    start_season,
+    broadcast,
+    source,
+    average_episode_duration,
+    rating,
+    studios,
 }
 
 impl Display for AnimeFields {
@@ -267,16 +298,35 @@ impl Display for Statistics {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct StatisticsStatus {
+    // MAL returns these as strings, even though docs say they are supposed to be integers
+    // Use custom serializer for these fields to turn the strings into u32
+    #[serde(deserialize_with = "deserialize_string_to_u32")]
     pub watching: u32,
+    #[serde(deserialize_with = "deserialize_string_to_u32")]
     pub completed: u32,
+    #[serde(deserialize_with = "deserialize_string_to_u32")]
     pub on_hold: u32,
+    #[serde(deserialize_with = "deserialize_string_to_u32")]
     pub dropped: u32,
+    #[serde(deserialize_with = "deserialize_string_to_u32")]
     pub plan_to_watch: u32,
 }
 
 impl Display for StatisticsStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+fn deserialize_string_to_u32<'de, D>(deserializer: D) -> Result<u32, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let value: Value = Deserialize::deserialize(deserializer)?;
+    if let Some(number) = value.as_str().and_then(|s| s.parse().ok()) {
+        Ok(number)
+    } else {
+        Err(serde::de::Error::custom("Invalid value for u32"))
     }
 }
 
@@ -287,10 +337,50 @@ pub struct AnimeDetails {
 
     pub pictures: Option<Vec<AnimePicture>>,
     pub background: Option<String>,
-    pub related_anime: Vec<RelatedAnime>,
-    pub related_manga: Option<Vec<crate::manga::responses::RelatedManga>>, // TODO: Add this once Manga structs done
-    pub recommendations: Vec<Recommendations>,
+    pub related_anime: Option<Vec<RelatedAnime>>,
+    pub related_manga: Option<Vec<crate::manga::responses::RelatedManga>>,
+    pub recommendations: Option<Vec<Recommendations>>,
     pub statistics: Option<Statistics>,
+}
+
+#[derive(Debug, EnumIter, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum AnimeDetailsEnum {
+    /// Common fields
+    id,
+    title,
+    main_picture,
+    alternative_titles,
+    start_date,
+    end_date,
+    synopsis,
+    mean,
+    rank,
+    popularity,
+    num_list_users,
+    num_scoring_users,
+    nsfw,
+    genres,
+    created_at,
+    updated_at,
+    media_type,
+    status,
+    my_list_status,
+    num_episodes,
+    start_season,
+    broadcast,
+    source,
+    average_episode_duration,
+    rating,
+    studios,
+
+    // These are the fields specific to AnimeDetails
+    pictures,
+    background,
+    related_anime,
+    related_manga,
+    recommendations,
+    statistics,
 }
 
 impl Display for AnimeDetails {
