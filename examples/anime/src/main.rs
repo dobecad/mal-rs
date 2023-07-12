@@ -24,6 +24,9 @@ async fn main() {
     let response = api_client.get_anime_list(&query).await;
     if let Ok(response) = response {
         println!("Received response: {}\n", response);
+        for entry in response.data.iter() {
+            println!("Id: {}", entry.node.id);
+        }
     }
 
     let query = GetAnimeDetails::new(9969, Some(&detail_fields));
