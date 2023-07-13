@@ -55,7 +55,9 @@ impl Display for Subboard {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ForumTopicDetail {
-    pub data: Vec<TopicDetail>,
+    // According to the MAL API reference, this is supposed to be an array.
+    // However, it seems to only be a single result.
+    pub data: TopicDetail,
     pub paging: Paging,
 }
 
@@ -81,7 +83,7 @@ impl PagingIter for ForumTopicDetail {
 pub struct TopicDetail {
     pub title: String,
     pub posts: Vec<Post>,
-    pub poll: Poll,
+    pub poll: Option<Poll>,
 }
 
 impl Display for TopicDetail {
@@ -96,7 +98,11 @@ pub struct Post {
     pub number: u32,
     pub created_at: String,
     pub created_by: ForumTopicPostCreatedBy,
+
+    /// `Warning`: This field can contain raw HTML
     pub body: String,
+
+    /// `Warning`: This field can contain raw HTML
     pub signature: String,
 }
 
@@ -110,6 +116,7 @@ impl Display for Post {
 pub struct ForumTopicPostCreatedBy {
     pub id: u32,
     pub name: String,
+    pub forum_title: Option<String>,    // Undocumented field in MAL API reference...
     pub forum_avator: String,
 }
 
@@ -123,8 +130,8 @@ impl Display for ForumTopicPostCreatedBy {
 pub struct Poll {
     pub id: u32,
     pub question: String,
-    pub close: bool,
-    pub options: PollOptions,
+    pub closed: bool,
+    pub options: Vec<PollOptions>,
 }
 
 impl Display for Poll {
