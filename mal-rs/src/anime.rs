@@ -15,7 +15,7 @@ pub mod requests;
 /// Anime API responses
 pub mod responses;
 
-/// Return all of the possible Anime Fields
+/// Return all of the possible [AnimeField] fields
 pub fn all_common_fields() -> AnimeCommonFields {
     let mut vec = Vec::with_capacity(AnimeField::iter().len());
     for variant in AnimeField::iter() {
@@ -24,7 +24,7 @@ pub fn all_common_fields() -> AnimeCommonFields {
     AnimeCommonFields(vec)
 }
 
-/// Return all of the possible Anime Fields
+/// Return all of the possible [AnimeDetail] fields
 pub fn all_detail_fields() -> AnimeDetailFields {
     let mut vec = Vec::with_capacity(AnimeDetail::iter().len());
     for variant in AnimeDetail::iter() {

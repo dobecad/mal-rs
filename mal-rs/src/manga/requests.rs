@@ -1,7 +1,8 @@
 use crate::common::limit_check;
 
-use super::{error::MangaApiError, responses::MangaFieldsEnum};
+use super::error::MangaApiError;
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumIter;
 
 #[derive(Debug, Serialize)]
 pub struct GetMangaList {
@@ -293,9 +294,90 @@ impl DeleteMyMangaListItem {
     }
 }
 
-pub struct MangaFields(pub Vec<MangaFieldsEnum>);
+#[derive(Debug, EnumIter, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum MangaField {
+    id,
+    title,
+    main_picture,
+    alternative_titles,
+    start_date,
+    end_date,
+    synopsis,
+    mean,
+    rank,
+    popularity,
+    num_list_users,
+    num_scoring_users,
+    nsfw,
+    genres,
+    created_at,
+    updated_at,
+    media_type,
+    status,
+    my_list_status,
+    num_volumes,
+    num_chapters,
+    authors,
+}
+
+#[derive(Debug, EnumIter, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum MangaDetail {
+    // Common fields
+    id,
+    title,
+    main_picture,
+    alternative_titles,
+    start_date,
+    end_date,
+    synopsis,
+    mean,
+    rank,
+    popularity,
+    num_list_users,
+    num_scoring_users,
+    nsfw,
+    genres,
+    created_at,
+    updated_at,
+    media_type,
+    status,
+    my_list_status,
+    num_volumes,
+    num_chapters,
+    authors,
+
+    // Detail specific fields
+    pictures,
+    background,
+    related_anime,
+    related_manga,
+    recommendations,
+    serialization,
+}
+
+/// Wrapper for a vector of valid Manga Fields
+#[derive(Debug)]
+pub struct MangaFields(pub Vec<MangaField>);
+
+/// Wrapper for a vector of valid Manga Detail Fields
+#[derive(Debug)]
+pub struct MangaDetails(pub Vec<MangaDetail>);
 
 impl Into<String> for &MangaFields {
+    fn into(self) -> String {
+        let result = self
+            .0
+            .iter()
+            .map(|e| format!("{:?}", e))
+            .collect::<Vec<String>>()
+            .join(",");
+        result
+    }
+}
+
+impl Into<String> for &MangaDetails {
     fn into(self) -> String {
         let result = self
             .0
@@ -310,11 +392,11 @@ impl Into<String> for &MangaFields {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::manga::all_fields;
+    use crate::manga::all_common_fields;
 
     #[test]
     fn test_get_manga_list() {
-        let fields = all_fields();
+        let fields = all_common_fields();
         let query = GetMangaList::new("".to_string(), false, Some(&fields), None, None);
         assert!(query.is_err());
 
@@ -333,7 +415,7 @@ mod tests {
 
     #[test]
     fn test_get_manga_ranking() {
-        let fields = all_fields();
+        let fields = all_common_fields();
         let query =
             GetMangaRanking::new(MangaRankingType::All, false, Some(&fields), Some(501), None);
         assert!(query.is_err());
@@ -352,7 +434,7 @@ mod tests {
 
     #[test]
     fn test_get_user_manga_list() {
-        let fields = all_fields();
+        let fields = all_common_fields();
         let query =
             GetUserMangaList::new("".to_string(), false, Some(&fields), None, None, None, None);
         assert!(query.is_err());
