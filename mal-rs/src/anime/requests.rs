@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumIter;
 
 use crate::common::limit_check;
 
-use super::{error::AnimeApiError, responses::{AnimeFieldsEnum, AnimeDetailsEnum}};
+use super::error::AnimeApiError;
 
 /// Corresponds to the [Get anime list](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get) endpoint
 #[derive(Debug, Serialize)]
@@ -410,13 +411,84 @@ impl DeleteMyAnimeListItem {
     }
 }
 
-/// Wrapper for a vector of valid Anime Fields
-#[derive(Debug)]
-pub struct AnimeCommonFields(pub Vec<AnimeFieldsEnum>);
+#[derive(Debug, EnumIter, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum AnimeField {
+    id,
+    title,
+    main_picture,
+    alternative_titles,
+    start_date,
+    end_date,
+    synopsis,
+    mean,
+    rank,
+    popularity,
+    num_list_users,
+    num_scoring_users,
+    nsfw,
+    genres,
+    created_at,
+    updated_at,
+    media_type,
+    status,
+    my_list_status,
+    num_episodes,
+    start_season,
+    broadcast,
+    source,
+    average_episode_duration,
+    rating,
+    studios,
+}
+
+#[derive(Debug, EnumIter, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum AnimeDetail {
+    // Common fields
+    id,
+    title,
+    main_picture,
+    alternative_titles,
+    start_date,
+    end_date,
+    synopsis,
+    mean,
+    rank,
+    popularity,
+    num_list_users,
+    num_scoring_users,
+    nsfw,
+    genres,
+    created_at,
+    updated_at,
+    media_type,
+    status,
+    my_list_status,
+    num_episodes,
+    start_season,
+    broadcast,
+    source,
+    average_episode_duration,
+    rating,
+    studios,
+
+    // These are the fields specific to AnimeDetails
+    pictures,
+    background,
+    related_anime,
+    related_manga,
+    recommendations,
+    statistics,
+}
 
 /// Wrapper for a vector of valid Anime Fields
 #[derive(Debug)]
-pub struct AnimeDetailFields(pub Vec<AnimeDetailsEnum>);
+pub struct AnimeCommonFields(pub Vec<AnimeField>);
+
+/// Wrapper for a vector of valid Anime Fields
+#[derive(Debug)]
+pub struct AnimeDetailFields(pub Vec<AnimeDetail>);
 
 impl<'a> Into<String> for &'a AnimeCommonFields {
     fn into(self) -> String {

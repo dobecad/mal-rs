@@ -5,7 +5,6 @@ use crate::common::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{self, Value};
-use strum_macros::EnumIter;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AnimeList {
@@ -219,38 +218,6 @@ pub struct AnimeFields {
     pub studios: Option<Vec<Studio>>,
 }
 
-#[derive(Debug, EnumIter, PartialEq)]
-#[allow(non_camel_case_types)]
-pub enum AnimeFieldsEnum {
-    /// These are the common anime fields
-    id,
-    title,
-    main_picture,
-    alternative_titles,
-    start_date,
-    end_date,
-    synopsis,
-    mean,
-    rank,
-    popularity,
-    num_list_users,
-    num_scoring_users,
-    nsfw,
-    genres,
-    created_at,
-    updated_at,
-    media_type,
-    status,
-    my_list_status,
-    num_episodes,
-    start_season,
-    broadcast,
-    source,
-    average_episode_duration,
-    rating,
-    studios,
-}
-
 impl Display for AnimeFields {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
@@ -339,46 +306,6 @@ pub struct AnimeDetails {
     pub related_manga: Option<Vec<crate::manga::responses::RelatedManga>>,
     pub recommendations: Option<Vec<Recommendations>>,
     pub statistics: Option<Statistics>,
-}
-
-#[derive(Debug, EnumIter, PartialEq)]
-#[allow(non_camel_case_types)]
-pub enum AnimeDetailsEnum {
-    /// Common fields
-    id,
-    title,
-    main_picture,
-    alternative_titles,
-    start_date,
-    end_date,
-    synopsis,
-    mean,
-    rank,
-    popularity,
-    num_list_users,
-    num_scoring_users,
-    nsfw,
-    genres,
-    created_at,
-    updated_at,
-    media_type,
-    status,
-    my_list_status,
-    num_episodes,
-    start_season,
-    broadcast,
-    source,
-    average_episode_duration,
-    rating,
-    studios,
-
-    // These are the fields specific to AnimeDetails
-    pictures,
-    background,
-    related_anime,
-    related_manga,
-    recommendations,
-    statistics,
 }
 
 impl Display for AnimeDetails {

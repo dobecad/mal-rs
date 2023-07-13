@@ -13,9 +13,9 @@ async fn main() {
     let api_client = AnimeApiClient::from(&client_id);
     let nsfw = false;
     let fields = anime_common_fields!(
-        AnimeFieldsEnum::id,
-        AnimeFieldsEnum::num_episodes,
-        AnimeFieldsEnum::title,
+        AnimeField::id,
+        AnimeField::num_episodes,
+        AnimeField::title,
     );
 
     let query = GetAnimeList::new("one".to_string(), nsfw, Some(&fields), Some(5), None).unwrap();
