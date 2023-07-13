@@ -1,7 +1,7 @@
 // Structs for crafting User Endpoint requests
 use serde::Serialize;
 
-use super::responses::UserEnum;
+use super::responses::UserFieldsEnum;
 
 #[derive(Debug, Serialize)]
 pub struct GetUserInformation {
@@ -18,7 +18,7 @@ impl GetUserInformation {
     }
 }
 
-pub struct UserFields(pub Vec<UserEnum>);
+pub struct UserFields(pub Vec<UserFieldsEnum>);
 
 impl Into<String> for &UserFields {
     fn into(self) -> String {

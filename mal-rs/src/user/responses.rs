@@ -1,24 +1,33 @@
-// Structs for deserializing User Endpoint responses
-#![allow(dead_code)]
-
-use enum_from_struct::EnumFromStruct;
 use serde::Deserialize;
-
-// This is imported for the `enum-from-struct` proc macro
 use strum_macros::EnumIter;
 
-#[derive(Debug, Deserialize, EnumFromStruct)]
+#[derive(Debug, Deserialize)]
 pub struct User {
-    id: u32,
-    name: String,
-    picture: String,
-    gender: Option<String>,
-    birthday: Option<String>,
-    location: Option<String>,
-    joined_at: Option<String>,
-    anime_statistics: Option<AnimeStatistics>,
-    time_zone: Option<String>,
-    is_supporter: bool,
+    pub id: u32,
+    pub name: String,
+    pub picture: String,
+    pub gender: Option<String>,
+    pub birthday: Option<String>,
+    pub location: Option<String>,
+    pub joined_at: Option<String>,
+    pub anime_statistics: Option<AnimeStatistics>,
+    pub time_zone: Option<String>,
+    pub is_supporter: bool,
+}
+
+#[derive(Debug, EnumIter, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum UserFieldsEnum {
+    id,
+    name,
+    picture,
+    gender,
+    birthday,
+    location,
+    joined_at,
+    anime_statistics,
+    time_zone,
+    is_supporter,
 }
 
 #[derive(Debug, Deserialize)]

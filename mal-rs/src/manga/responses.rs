@@ -3,7 +3,6 @@ use std::fmt::Display;
 use crate::common::{
     AlternativeTitles, Genre, MainPicture, Paging, PagingIter, RelationType, NSFW,
 };
-use enum_from_struct::EnumFromStruct;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
@@ -46,7 +45,7 @@ impl Display for MangaListNode {
 }
 
 // Wrap everything in Options since user controls what fields should be returned
-#[derive(Debug, Deserialize, EnumFromStruct, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct MangaFields {
     pub id: Option<u32>,
     pub title: Option<String>,
@@ -76,6 +75,33 @@ impl Display for MangaFields {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
     }
+}
+
+#[derive(Debug, EnumIter, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum MangaFieldsEnum {
+    id,
+    title,
+    main_picture,
+    alternative_titles,
+    start_date,
+    end_date,
+    synopsis,
+    mean,
+    rank,
+    popularity,
+    num_list_users,
+    num_scoring_users,
+    nsfw,
+    genres,
+    created_at,
+    updated_at,
+    media_type,
+    status,
+    my_list_status,
+    num_volumes,
+    num_chapters,
+    authors,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
@@ -245,6 +271,42 @@ impl Display for MangaDetails {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
     }
+}
+
+#[derive(Debug, EnumIter, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum MangaDetailsEnum {
+    // Common fields
+    id,
+    title,
+    main_picture,
+    alternative_titles,
+    start_date,
+    end_date,
+    synopsis,
+    mean,
+    rank,
+    popularity,
+    num_list_users,
+    num_scoring_users,
+    nsfw,
+    genres,
+    created_at,
+    updated_at,
+    media_type,
+    status,
+    my_list_status,
+    num_volumes,
+    num_chapters,
+    authors,
+
+    // Detail specific fields
+    pictures,
+    background,
+    related_anime,
+    related_manga,
+    recommendations,
+    serialization,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
