@@ -174,7 +174,7 @@
 //!     
 //!     // Create UserApiClient from the OauthClient
 //!     let api_client = UserApiClient::from(&authenticated_oauth_client);
-//! 
+//!
 //!     // Create fields that you want returned by the MAL API
 //!     let fields = user_fields!(UserEnum::id, UserEnum::name, UserEnum::is_supporter);
 //!     let query = GetUserInformation::new(Some(&fields));
@@ -217,16 +217,28 @@ const USER_URL: &'static str = "https://api.myanimelist.net/v2/users";
 /// Module re-exports
 pub mod prelude {
     #[cfg(feature = "anime")]
-    pub use crate::anime::{api::*, requests::*, responses::*};
+    pub use crate::anime::{
+        api::{AnimeApi, AnimeApiClient},
+        requests::*,
+        responses::*,
+    };
 
     #[cfg(feature = "manga")]
-    pub use crate::manga::{api::*, requests::*, responses::*};
+    pub use crate::manga::{
+        api::{MangaApi, MangaApiClient},
+        requests::*,
+        responses::*,
+    };
 
     #[cfg(feature = "forum")]
-    pub use crate::forum::{api::*, requests::*, responses::*};
+    pub use crate::forum::{
+        api::{ForumApi, ForumApiClient},
+        requests::*,
+        responses::*,
+    };
 
     #[cfg(feature = "user")]
-    pub use crate::user::{api::*, requests::*, responses::*};
+    pub use crate::user::{api::UserApiClient, requests::*};
 
     pub use crate::oauth::{MalClientId, OauthClient};
 }
