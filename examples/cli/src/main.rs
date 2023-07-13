@@ -4,8 +4,9 @@ use mal_rs::{
     user::{
         api::UserApiClient,
         requests::{GetUserInformation, UserFields},
-        responses::UserEnum,
-    }, user_fields,
+        responses::UserFieldsEnum,
+    },
+    user_fields,
 };
 use std::io;
 
@@ -42,7 +43,11 @@ async fn main() {
 
     // Using Oauth token to interact with User API
     let api_client = UserApiClient::from(&authenticated_oauth_client);
-    let fields = user_fields!(UserEnum::id, UserEnum::name, UserEnum::is_supporter);
+    let fields = user_fields!(
+        UserFieldsEnum::id,
+        UserFieldsEnum::name,
+        UserFieldsEnum::is_supporter
+    );
     let query = GetUserInformation::new(Some(&fields));
     let response = api_client.get_my_user_information(&query).await.unwrap();
     println!("Information about yourself: {:?}", response);
