@@ -123,6 +123,8 @@ pub trait Request {
 
     async fn get_details(&self, query: &GetMangaDetails) -> Result<String, Box<dyn Error>>;
 
+    async fn get_ranking(&self, query: &GetMangaRanking) -> Result<String, Box<dyn Error>>;
+
     async fn get_user(&self, query: &GetUserMangaList) -> Result<String, Box<dyn Error>>;
 
     async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>>;
@@ -149,6 +151,18 @@ impl Request for MangaApiClient<Client> {
         let response = self
             .client
             .get(format!("{}/{}", MANGA_URL, query.manga_id))
+            .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        handle_response(response).await
+    }
+
+    async fn get_ranking(&self, query: &GetMangaRanking) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/ranking", MANGA_URL))
             .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
             .query(&query)
             .send()
@@ -208,6 +222,18 @@ impl Request for MangaApiClient<Oauth> {
         let response = self
             .client
             .get(format!("{}/{}", MANGA_URL, query.manga_id))
+            .bearer_auth(self.access_token.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        handle_response(response).await
+    }
+
+    async fn get_ranking(&self, query: &GetMangaRanking) -> Result<String, Box<dyn Error>> {
+        let response = self
+            .client
+            .get(format!("{}/ranking", MANGA_URL))
             .bearer_auth(self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
@@ -285,7 +311,7 @@ pub trait MangaApi {
         &self,
         query: &GetMangaRanking,
     ) -> Result<MangaRanking, Box<dyn Error>> {
-        let response = self.get_self().get(query).await?;
+        let response = self.get_self().get_ranking(query).await?;
         let result: MangaRanking = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse MangaList result: {}", err))
         })?;
