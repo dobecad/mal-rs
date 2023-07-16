@@ -7,5 +7,7 @@ edition = "2021"
 
 [dependencies]
 tokio = { version = "1.28.2", features = ["macros", "rt-multi-thread"] }
-mal-rs = { path = "../../mal-rs", features = ["forum"] }
+mal-rs = { path = "../../mal-rs", features = [
+    "forum",
+], default-features = false }
 dotenvy = "0.15.7"
