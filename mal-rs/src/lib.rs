@@ -40,18 +40,18 @@
 //! # API Clients
 //!
 //! There are four different API clients you can use:
-//! - APIClient
+//! - AnimeApiClient
 //!   - Implements all of the [anime](https://myanimelist.net/apiconfig/references/api/v2#tag/anime)
 //! and [user animelist](https://myanimelist.net/apiconfig/references/api/v2#tag/user-animelist) MAL API endpoints
 //!   - Can be created from an AccessToken or a ClientId
-//! - MangaClient
+//! - MangaApiClient
 //!     - Implements all of the [manga](https://myanimelist.net/apiconfig/references/api/v2#tag/manga)
 //! and [user mangalist](https://myanimelist.net/apiconfig/references/api/v2#tag/user-mangalist) MAL API endpoints
 //!     - Can be created from an AccessToken or a ClientId
-//! - ForumClient
+//! - ForumApiClient
 //!     - Implements all of the [forum](https://myanimelist.net/apiconfig/references/api/v2#tag/forum) MAL API endpoints
 //!     - Can be created from an AccessToken or a ClientId
-//! - UserClient
+//! - UserApiClient
 //!     - Implements all of the [user](https://myanimelist.net/apiconfig/references/api/v2#tag/user) MAL API endpoints
 //!     - Can be created from an AccessToken
 //!
@@ -62,18 +62,20 @@
 //!
 //! ```rust,no_run
 //! use mal_rs::prelude::*;
-//! use mal_rs::anime_fields;
+//! use mal_rs::anime_common_fields;
 //!
-//!     // Anime Fields example
-//!     let fields = anime_fields!(
-//!         AnimeFieldsEnum::id,
-//!         AnimeFieldsEnum::num_episodes,
-//!         AnimeFieldsEnum::title,
-//!         // ....
-//!     );
+//! // Specify which fields you want returned from the Anime endpoint
+//! let fields = anime_common_fields!(
+//!     AnimeField::id,
+//!     AnimeField::num_episodes,
+//!     AnimeField::title,
+//! );
 //!
-//!     // If you want all the fields:
-//!     let fields = mal_rs::anime::all_fields();
+//! // If you want all the common fields:
+//! let fields = mal_rs::anime::all_common_fields();
+//!
+//! // If you want all of the detailed fields:
+//! let fields = mal_rs::anime::all_detail_fields();
 //! ```
 //!
 //! # Examples
@@ -81,8 +83,6 @@
 //! ## Using a ClientId
 //!
 //! ```rust,ignore
-//! use std::env;
-//!
 //! use dotenv;
 //! use mal_rs::prelude::*;
 //! use mal_rs::{anime_fields, manga_fields};
@@ -91,23 +91,21 @@
 //! async fn main() {
 //!     dotenv::dotenv().ok();
 //!
-//!     let client_id = ClientId::new(
-//!         env::var("CLIENT_ID").expect("CLIENT_ID environment variable is not defined"),
-//!     );
+//!     let client_id = MalClientId::from_env().unwrap();
 //!
-//!     // Create AnimeApiClient from the client_id
+//!     // Create a client for whichever MAL API you want to interact with
 //!     let api_client = AnimeApiClient::from(&client_id);
-//!
-//!     // Specify the anime fields you want returned
-//!     let fields = anime_fields!(
-//!         AnimeFieldsEnum::id,
-//!         AnimeFieldsEnum::num_episodes,
-//!         AnimeFieldsEnum::title,
+//! 
+//!     // Define some parameters to re-use across multiple queries
+//!     let nsfw = false;
+//!     let limit = Some(5);
+//!     let fields = anime_common_fields!(
+//!         AnimeField::id,
+//!         AnimeField::num_episodes,
+//!         AnimeField::title,
 //!     );
 //!
-//!     // Create a type-safe query to pass to the API client
-//!     // Search for an anime named "one", limit to 5 results, no offset, with the given fields
-//!     let query = GetAnimeList::new("one".to_string(), Some(5), None, Some(&fields)).unwrap();
+//!     let query = GetAnimeList::new("one".to_string(), nsfw, Some(&fields), limit, None).unwrap();
 //!     let result = api_client.get_anime_list(&query).await.unwrap();
 //!     println!("Result: {}", &result);
 //!
@@ -120,8 +118,8 @@
 //!
 //!     // Manga API example
 //!     let api_client = MangaApiClient::from(&client_id);
-//!     let fields = mal_rs::manga::all_fields();
-//!     let query = GetMangaList::new("one".to_string(), Some(5), None, Some(&fields)).unwrap();
+//!     let fields = mal_rs::manga::all_common_fields();
+//!     let query = GetMangaList::new("one".to_string(), nsfw, Some(&fields), limit, None).unwrap();
 //!     let result = api_client.get_manga_list(&query).await.unwrap();
 //!     println!("Result: {}", result);
 //! }
@@ -205,7 +203,6 @@ const USER_URL: &'static str = "https://api.myanimelist.net/v2/users";
 #[cfg(feature = "forum")]
 const FORUM_URL: &'static str = "https://api.myanimelist.net/v2/forum";
 
-
 /// Module re-exports
 pub mod prelude {
     pub use crate::oauth::{MalClientId, OauthClient};
@@ -231,5 +228,4 @@ pub mod prelude {
 
     #[cfg(feature = "user")]
     pub use crate::user::{api::UserApiClient, requests::*};
-
 }
