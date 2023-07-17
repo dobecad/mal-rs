@@ -18,9 +18,6 @@ strum = { version = "0.25.0", features = ["strum_macros"] }
 strum_macros = "0.25.0"
 
 [features]
-default = ["anime", "manga"]
-full = ["anime", "manga", "forum", "user"]
-anime = []
-manga = []
+full = ["forum", "user"]
 forum = []
 user = []

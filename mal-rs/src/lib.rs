@@ -183,10 +183,7 @@
 //! }
 //! ```
 
-#[cfg(feature = "anime")]
 pub mod anime;
-
-#[cfg(feature = "manga")]
 pub mod manga;
 
 #[cfg(feature = "forum")]
@@ -201,29 +198,24 @@ pub mod oauth;
 
 const OAUTH_URL: &'static str = "https://myanimelist.net/v1/oauth2/authorize";
 const OAUTH_TOKEN_URL: &'static str = "https://myanimelist.net/v1/oauth2/token";
-
-#[cfg(feature = "anime")]
 const ANIME_URL: &'static str = "https://api.myanimelist.net/v2/anime";
-
-#[cfg(feature = "manga")]
 const MANGA_URL: &'static str = "https://api.myanimelist.net/v2/manga";
+const USER_URL: &'static str = "https://api.myanimelist.net/v2/users";
 
 #[cfg(feature = "forum")]
 const FORUM_URL: &'static str = "https://api.myanimelist.net/v2/forum";
 
-#[cfg(any(feature = "anime", feature = "manga", feature = "user"))]
-const USER_URL: &'static str = "https://api.myanimelist.net/v2/users";
 
 /// Module re-exports
 pub mod prelude {
-    #[cfg(feature = "anime")]
+    pub use crate::oauth::{MalClientId, OauthClient};
+
     pub use crate::anime::{
         api::{AnimeApi, AnimeApiClient},
         requests::*,
         responses::*,
     };
 
-    #[cfg(feature = "manga")]
     pub use crate::manga::{
         api::{MangaApi, MangaApiClient},
         requests::*,
@@ -240,5 +232,4 @@ pub mod prelude {
     #[cfg(feature = "user")]
     pub use crate::user::{api::UserApiClient, requests::*};
 
-    pub use crate::oauth::{MalClientId, OauthClient};
 }
