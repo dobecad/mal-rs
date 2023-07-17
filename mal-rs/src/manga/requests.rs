@@ -54,7 +54,7 @@ pub struct GetMangaDetails {
 
 impl GetMangaDetails {
     /// Create new `Get manga details` query
-    pub fn new(manga_id: u32, nsfw: bool, fields: Option<&MangaFields>) -> Self {
+    pub fn new(manga_id: u32, nsfw: bool, fields: Option<&MangaDetails>) -> Self {
         Self {
             manga_id,
             nsfw,

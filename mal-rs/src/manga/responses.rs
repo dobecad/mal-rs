@@ -100,7 +100,7 @@ pub enum Status {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Author {
     pub node: AuthorDetails,
-    pub role: String,
+    pub role: Option<String>,
 }
 
 impl Display for Author {
@@ -205,7 +205,7 @@ impl Display for Recommendation {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Serialization {
     pub node: SerializationNode,
-    pub role: String,
+    pub role: Option<String>,
 }
 
 impl Display for Serialization {
