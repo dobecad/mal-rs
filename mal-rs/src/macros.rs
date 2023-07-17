@@ -28,7 +28,7 @@ macro_rules! anime_detail_fields {
     };
 }
 
-/// Macro for creating a vector of valid MangaFields
+/// Macro for creating a vector of valid MangaCommonFields
 #[macro_export]
 macro_rules! manga_common_fields {
     ($($variant:path),* $(,)?) => {
@@ -42,7 +42,7 @@ macro_rules! manga_common_fields {
     };
 }
 
-/// Macro for creating a vector of valid MangaFields
+/// Macro for creating a vector of valid MangaDetailFields
 #[macro_export]
 macro_rules! manga_detail_fields {
     ($($variant:path),* $(,)?) => {
