@@ -70,4 +70,16 @@ async fn main() {
     if let Ok(response) = response {
         println!("Response: {}\n", response);
     }
+
+    let query = DeleteMyAnimeListItem::new(52619);
+    let response = anime_api_client.delete_anime_list_item(&query).await;
+    if let Ok(_) = response {
+        println!("Deleted anime entry");
+    }
+
+    let query = DeleteMyMangaListItem::new(48881);
+    let response = manga_api_client.delete_manga_list_item(&query).await;
+    if let Ok(_) = response {
+        println!("Deleted manga entry");
+    }
 }
