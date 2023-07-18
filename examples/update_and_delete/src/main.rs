@@ -51,4 +51,23 @@ async fn main() {
     if let Ok(response) = response {
         println!("Response: {}\n", response);
     }
+
+    let query = UpdateMyMangaListStatus::new(
+        91941,
+        None,
+        None,
+        None,
+        None,
+        Some(57),
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
+    .unwrap();
+    let response = manga_api_client.update_manga_list_status(&query).await;
+    if let Ok(response) = response {
+        println!("Response: {}\n", response);
+    }
 }
