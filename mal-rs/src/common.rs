@@ -1,6 +1,7 @@
 //! Module containing common request/response fields, traits, and functions
 
 use std::{
+    collections::HashMap,
     error::Error,
     fmt::{self, Display},
 };
@@ -96,7 +97,7 @@ pub enum RelationType {
     ParentStory,
     Summary,
     FullStory,
-    Character,  // this type is not documented in the MAL API reference...
+    Character, // this type is not documented in the MAL API reference...
 }
 
 /// Verify that the given optional `value` is within `[lowerbound, upperbound]`
@@ -112,6 +113,22 @@ pub(crate) fn limit_check(
         }
     }
     Ok(())
+}
+
+pub(crate) fn struct_to_form_data<T>(query: &T) -> Result<HashMap<String, String>, Box<dyn Error>>
+where
+    T: Serialize,
+{
+    let form = serde_urlencoded::to_string(&query)?
+        .split('&')
+        .map(|x| {
+            let mut parts = x.splitn(2, "=");
+            let key = parts.next().unwrap().to_string();
+            let value = parts.next().unwrap_or("").to_string();
+            (key, value)
+        })
+        .collect();
+    Ok(form)
 }
 
 pub trait PagingIter {
