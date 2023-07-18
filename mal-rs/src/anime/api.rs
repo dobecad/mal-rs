@@ -558,8 +558,11 @@ impl AnimeApiClient<Oauth> {
 
         match response.status() {
             reqwest::StatusCode::OK => Ok(()),
+            reqwest::StatusCode::NOT_FOUND => Err(Box::new(AnimeApiError::new(
+                "Anime does not exist in user's anime list".to_string(),
+            ))),
             _ => Err(Box::new(AnimeApiError::new(format!(
-                "Did not recieve OK response: {}",
+                "Did not recieve expected response: {}",
                 response.status()
             )))),
         }

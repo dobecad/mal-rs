@@ -447,8 +447,11 @@ impl MangaApiClient<Oauth> {
 
         match response.status() {
             reqwest::StatusCode::OK => Ok(()),
+            reqwest::StatusCode::NOT_FOUND => Err(Box::new(MangaApiError::new(
+                "Manga does not exist in user's manga list".to_string(),
+            ))),
             _ => Err(Box::new(MangaApiError::new(format!(
-                "Did not recieve OK response: {}",
+                "Did not recieve expected response: {}",
                 response.status()
             )))),
         }
