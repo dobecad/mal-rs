@@ -108,28 +108,12 @@ impl OauthClient<Unauthenticated> {
         }
     }
 
-    pub fn generate_readonly_auth_url(&mut self) -> String {
+    pub fn generate_auth_url(&mut self) -> String {
         let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_plain();
 
         let (auth_url, csrf_token) = self
             .client
             .authorize_url(CsrfToken::new_random)
-            .set_pkce_challenge(pkce_challenge)
-            .url();
-
-        self.csrf = csrf_token;
-        self.pkce_verifier = pkce_verifier;
-
-        auth_url.to_string()
-    }
-
-    pub fn generate_write_auth_url(&mut self) -> String {
-        let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_plain();
-
-        let (auth_url, csrf_token) = self
-            .client
-            .authorize_url(CsrfToken::new_random)
-            .add_scope(Scope::new("write:users".to_string()))
             .set_pkce_challenge(pkce_challenge)
             .url();
 

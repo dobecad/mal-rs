@@ -15,10 +15,7 @@ async fn main() {
     dotenv::dotenv().ok();
 
     let mut oauth_client = OauthClient::new();
-    println!(
-        "Visit this URL: {}\n",
-        oauth_client.generate_readonly_auth_url()
-    );
+    println!("Visit this URL: {}\n", oauth_client.generate_auth_url());
 
     println!("After authorizing, please enter the URL you were redirected to: ");
     let mut input = String::new();

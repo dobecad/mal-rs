@@ -1,13 +1,5 @@
 use dotenv;
-use mal_rs::{
-    oauth::{OauthClient, RedirectResponse},
-    user::{
-        api::UserApiClient,
-        requests::{GetUserInformation, UserFields},
-        responses::UserFieldsEnum,
-    },
-    user_fields, prelude::{AnimeApiClient, MangaApiClient},
-};
+use mal_rs::{oauth::RedirectResponse, prelude::*};
 use std::io;
 
 #[tokio::main]
@@ -15,10 +7,7 @@ async fn main() {
     dotenv::dotenv().ok();
 
     let mut oauth_client = OauthClient::new();
-    println!(
-        "Visit this URL: {}\n",
-        oauth_client.generate_readonly_auth_url()
-    );
+    println!("Visit this URL: {}\n", oauth_client.generate_auth_url());
 
     println!("After authorizing, please enter the URL you were redirected to: ");
     let mut input = String::new();
@@ -43,5 +32,23 @@ async fn main() {
 
     let anime_api_client = AnimeApiClient::from(&authenticated_oauth_client);
     let manga_api_client = MangaApiClient::from(&authenticated_oauth_client);
-    
+
+    // Update One Piece episodes watched
+    let query = UpdateMyAnimeListStatus::new(
+        21,
+        None,
+        None,
+        None,
+        Some(1069),
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
+    .unwrap();
+    let response = anime_api_client.update_anime_list_status(&query).await;
+    if let Ok(response) = response {
+        println!("Response: {}\n", response);
+    }
 }
