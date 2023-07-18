@@ -99,25 +99,6 @@ impl Display for ListStatus {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct MyListStatus {
-    pub status: Option<super::requests::UserAnimeListStatus>,
-    pub is_rewatching: bool,
-    pub score: u8,
-    pub num_watched_episodes: u32,
-    pub priority: u8,
-    pub num_times_rewatched: u32,
-    pub rewatch_value: u8,
-    pub tags: String,
-    pub comments: String,
-}
-
-impl Display for MyListStatus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
-    }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
 pub struct StartSeason {
     pub year: u32,
     pub season: super::requests::Season,
