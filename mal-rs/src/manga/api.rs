@@ -1,11 +1,11 @@
-use super::{error::MangaApiError, requests::GetUserMangaList};
+use super::{error::MangaApiError, requests::GetUserMangaList, responses::ListStatus};
 use async_trait::async_trait;
 use oauth2::{AccessToken, ClientId};
 use serde::{de::DeserializeOwned, Serialize};
 use std::marker::PhantomData;
 
 use crate::{
-    common::{PagingIter, struct_to_form_data},
+    common::{struct_to_form_data, PagingIter},
     manga::requests::{DeleteMyMangaListItem, UpdateMyMangaListStatus},
     oauth::{Authenticated, MalClientId, OauthClient},
     MANGA_URL, USER_URL,
@@ -14,7 +14,7 @@ use std::error::Error;
 
 use super::{
     requests::{GetMangaDetails, GetMangaList, GetMangaRanking},
-    responses::{MangaDetails, MangaList, MangaRanking, MyListStatus},
+    responses::{MangaDetails, MangaList, MangaRanking},
 };
 use reqwest;
 
@@ -414,7 +414,7 @@ impl MangaApiClient<Oauth> {
     pub async fn update_manga_list_status(
         &self,
         query: &UpdateMyMangaListStatus,
-    ) -> Result<MyListStatus, Box<dyn Error>> {
+    ) -> Result<ListStatus, Box<dyn Error>> {
         let form_data = struct_to_form_data(&query)?;
         let response = self
             .client
@@ -425,7 +425,7 @@ impl MangaApiClient<Oauth> {
             .await?;
 
         let response = handle_response(response).await?;
-        let result: MyListStatus = serde_json::from_str(response.as_str()).map_err(|err| {
+        let result: ListStatus = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
         Ok(result)
