@@ -7,7 +7,7 @@ use oauth2::reqwest::async_http_client;
 pub use oauth2::ClientId;
 use oauth2::{
     AccessToken, AuthUrl, AuthorizationCode, ClientSecret, CsrfToken, PkceCodeChallenge,
-    PkceCodeVerifier, RedirectUrl, RefreshToken, Scope, TokenResponse, TokenUrl,
+    PkceCodeVerifier, RedirectUrl, RefreshToken, TokenResponse, TokenUrl,
 };
 use serde::Deserialize;
 use std::env;
@@ -171,7 +171,7 @@ impl OauthClient<Authenticated> {
     }
 
     /// Get the time at which the token will expire
-    /// 
+    ///
     /// The time is represented as number of seconds since the Unix Epoch
     pub fn get_expires_at(&self) -> &u64 {
         &self.expires_at
