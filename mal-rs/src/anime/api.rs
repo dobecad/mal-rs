@@ -1,6 +1,7 @@
 use super::{
     error::AnimeApiError,
     requests::{DeleteMyAnimeListItem, GetUserAnimeList, UpdateMyAnimeListStatus},
+    responses::ListStatus,
 };
 use async_trait::async_trait;
 use oauth2::{AccessToken, ClientId};
@@ -8,7 +9,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use std::marker::{PhantomData, Send, Sync};
 
 use crate::{
-    common::PagingIter,
+    common::{struct_to_form_data, PagingIter},
     oauth::{Authenticated, MalClientId, OauthClient},
     ANIME_URL, USER_URL,
 };
@@ -18,9 +19,7 @@ use super::{
     requests::{
         GetAnimeDetails, GetAnimeList, GetAnimeRanking, GetSeasonalAnime, GetSuggestedAnime,
     },
-    responses::{
-        AnimeDetails, AnimeList, AnimeRanking, MyListStatus, SeasonalAnime, SuggestedAnime,
-    },
+    responses::{AnimeDetails, AnimeList, AnimeRanking, SeasonalAnime, SuggestedAnime},
 };
 use reqwest;
 
@@ -525,18 +524,19 @@ impl AnimeApiClient<Oauth> {
     /// Corresponds to the [Update my anime list status](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put) endpoint
     pub async fn update_anime_list_status(
         &self,
-        query: UpdateMyAnimeListStatus,
-    ) -> Result<MyListStatus, Box<dyn Error>> {
+        query: &UpdateMyAnimeListStatus,
+    ) -> Result<ListStatus, Box<dyn Error>> {
+        let form_data = struct_to_form_data(&query)?;
         let response = self
             .client
             .put(format!("{}/{}/my_list_status", ANIME_URL, query.anime_id))
             .bearer_auth(&self.access_token.as_ref().unwrap())
-            .query(&query)
+            .form(&form_data)
             .send()
             .await?;
 
         let response = handle_response(response).await?;
-        let result: MyListStatus = serde_json::from_str(response.as_str()).map_err(|err| {
+        let result: ListStatus = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
         Ok(result)
@@ -547,7 +547,7 @@ impl AnimeApiClient<Oauth> {
     /// Corresponds to the [Delete my anime list item](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_delete) endpoint
     pub async fn delete_anime_list_item(
         &self,
-        query: DeleteMyAnimeListItem,
+        query: &DeleteMyAnimeListItem,
     ) -> Result<(), Box<dyn Error>> {
         let response = self
             .client
