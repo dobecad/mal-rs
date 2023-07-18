@@ -146,26 +146,6 @@ impl Display for ListStatus {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct MyListStatus {
-    pub status: Option<super::requests::UserMangaListStatus>,
-    pub is_rereading: bool,
-    pub score: u8,
-    pub num_volumes_read: u32,
-    pub num_chapters_read: u32,
-    pub priority: u8,
-    pub num_times_reread: u32,
-    pub reread_value: u8,
-    pub tags: String,
-    pub comments: String,
-}
-
-impl Display for MyListStatus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
-    }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
 pub struct MangaPicture {
     pub medium: String,
     pub large: String,
