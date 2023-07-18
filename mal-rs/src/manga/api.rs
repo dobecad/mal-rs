@@ -5,7 +5,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use std::marker::PhantomData;
 
 use crate::{
-    common::PagingIter,
+    common::{PagingIter, struct_to_form_data},
     manga::requests::{DeleteMyMangaListItem, UpdateMyMangaListStatus},
     oauth::{Authenticated, MalClientId, OauthClient},
     MANGA_URL, USER_URL,
@@ -415,11 +415,12 @@ impl MangaApiClient<Oauth> {
         &self,
         query: &UpdateMyMangaListStatus,
     ) -> Result<MyListStatus, Box<dyn Error>> {
+        let form_data = struct_to_form_data(&query)?;
         let response = self
             .client
             .put(format!("{}/{}/my_list_status", MANGA_URL, query.manga_id))
             .bearer_auth(&self.access_token.as_ref().unwrap())
-            .query(&query)
+            .form(&form_data)
             .send()
             .await?;
 
