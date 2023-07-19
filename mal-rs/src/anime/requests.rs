@@ -232,6 +232,11 @@ impl<'a> GetAnimeRankingBuilder<'a> {
         }
     }
 
+    pub fn ranking_type(mut self, value: RankingType) -> Self {
+        self.ranking_type = value;
+        self
+    }
+
     pub fn enable_nsfw(mut self) -> Self {
         self.nsfw = true;
         self
