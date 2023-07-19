@@ -6,7 +6,7 @@ use std::io;
 async fn main() {
     dotenv::dotenv().ok();
 
-    let mut oauth_client = OauthClient::new();
+    let mut oauth_client = OauthClient::new().unwrap();
     println!("Visit this URL: {}\n", oauth_client.generate_auth_url());
 
     println!("After authorizing, please enter the URL you were redirected to: ");
