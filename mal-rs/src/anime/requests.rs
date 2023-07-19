@@ -45,6 +45,56 @@ impl GetAnimeList {
     }
 }
 
+#[derive(Debug)]
+pub struct GetAnimeListBuilder<'a> {
+    q: String,
+    nsfw: bool,
+    limit: Option<u16>,
+    offset: Option<u32>,
+    fields: Option<&'a AnimeCommonFields>,
+}
+
+impl<'a> GetAnimeListBuilder<'a> {
+    pub fn new() -> Self {
+        Self {
+            q: String::from(""),
+            nsfw: false,
+            limit: None,
+            offset: None,
+            fields: None,
+        }
+    }
+
+    pub fn q(mut self, value: &str) -> Self {
+        self.q = value.to_string();
+        self
+    }
+
+    pub fn enable_nsfw(mut self) -> Self {
+        self.nsfw = true;
+        self
+    }
+
+    pub fn limit(mut self, value: u16) -> Self {
+        self.limit = Some(value);
+        self
+    }
+
+    pub fn offset(mut self, value: u32) -> Self {
+        self.offset = Some(value);
+        self
+    }
+
+    pub fn fields(mut self, value: &'a AnimeCommonFields) -> Self {
+        self.fields = Some(value);
+        self
+    }
+
+    pub fn build(self) -> Result<GetAnimeList, AnimeApiError> {
+        GetAnimeList::new(self.q, self.nsfw, self.fields, self.limit, self.offset)
+    }
+}
+
 /// Corresponds to the [Get anime details](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetAnimeDetails {
@@ -56,11 +106,45 @@ pub struct GetAnimeDetails {
 
 impl GetAnimeDetails {
     /// Create new `Get anime details` query
-    pub fn new(anime_id: u32, fields: Option<&AnimeDetailFields>) -> Self {
-        Self {
+    pub fn new(anime_id: u32, fields: Option<&AnimeDetailFields>) -> Result<Self, AnimeApiError> {
+        if anime_id == 0 {
+            return Err(AnimeApiError::new(
+                "anime_id must be greater than 0".to_string(),
+            ));
+        }
+
+        Ok(Self {
             anime_id,
             fields: fields.map(|f| f.into()),
+        })
+    }
+}
+
+pub struct GetAnimeDetailsBuilder<'a> {
+    anime_id: u32,
+    fields: Option<&'a AnimeDetailFields>,
+}
+
+impl<'a> GetAnimeDetailsBuilder<'a> {
+    pub fn new() -> Self {
+        Self {
+            anime_id: u32::default(),
+            fields: None,
         }
+    }
+
+    pub fn anime_id(mut self, value: u32) -> Self {
+        self.anime_id = value;
+        self
+    }
+
+    pub fn fields(mut self, value: &'a AnimeDetailFields) -> Self {
+        self.fields = Some(value);
+        self
+    }
+
+    pub fn build(self) -> Result<GetAnimeDetails, AnimeApiError> {
+        GetAnimeDetails::new(self.anime_id, self.fields)
     }
 }
 
@@ -111,6 +195,56 @@ impl GetAnimeRanking {
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
+    }
+}
+
+pub struct GetAnimeRankingBuilder<'a> {
+    ranking_type: RankingType,
+    nsfw: bool,
+    limit: Option<u16>,
+    offset: Option<u32>,
+    fields: Option<&'a AnimeCommonFields>,
+}
+
+impl<'a> GetAnimeRankingBuilder<'a> {
+    pub fn new() -> Self {
+        Self {
+            ranking_type: RankingType::All,
+            nsfw: false,
+            limit: None,
+            offset: None,
+            fields: None,
+        }
+    }
+
+    pub fn enable_nsfw(mut self) -> Self {
+        self.nsfw = true;
+        self
+    }
+
+    pub fn limit(mut self, value: u16) -> Self {
+        self.limit = Some(value);
+        self
+    }
+
+    pub fn offset(mut self, value: u32) -> Self {
+        self.offset = Some(value);
+        self
+    }
+
+    pub fn fields(mut self, value: &'a AnimeCommonFields) -> Self {
+        self.fields = Some(value.into());
+        self
+    }
+
+    pub fn build(self) -> Result<GetAnimeRanking, AnimeApiError> {
+        GetAnimeRanking::new(
+            self.ranking_type,
+            self.nsfw,
+            self.fields,
+            self.limit,
+            self.offset,
+        )
     }
 }
 
@@ -193,6 +327,77 @@ impl GetSeasonalAnime {
     }
 }
 
+pub struct GetSeasonalAnimeBuilder<'a> {
+    year: u16,
+    season: Season,
+    nsfw: bool,
+    sort: Option<SeasonalAnimeSort>,
+    limit: Option<u16>,
+    offset: Option<u32>,
+    fields: Option<&'a AnimeCommonFields>,
+}
+
+impl<'a> GetSeasonalAnimeBuilder<'a> {
+    pub fn new() -> Self {
+        Self {
+            year: u16::default(),
+            season: Season::Spring,
+            nsfw: false,
+            sort: None,
+            limit: None,
+            offset: None,
+            fields: None,
+        }
+    }
+
+    pub fn year(mut self, value: u16) -> Self {
+        self.year = value;
+        self
+    }
+
+    pub fn season(mut self, value: Season) -> Self {
+        self.season = value;
+        self
+    }
+
+    pub fn enable_nsfw(mut self) -> Self {
+        self.nsfw = true;
+        self
+    }
+
+    pub fn sort(mut self, value: SeasonalAnimeSort) -> Self {
+        self.sort = Some(value);
+        self
+    }
+
+    pub fn limit(mut self, value: u16) -> Self {
+        self.limit = Some(value);
+        self
+    }
+
+    pub fn offset(mut self, value: u32) -> Self {
+        self.offset = Some(value);
+        self
+    }
+
+    pub fn fields(mut self, value: &'a AnimeCommonFields) -> Self {
+        self.fields = Some(value.into());
+        self
+    }
+
+    pub fn build(self) -> Result<GetSeasonalAnime, AnimeApiError> {
+        GetSeasonalAnime::new(
+            self.year,
+            self.season,
+            self.nsfw,
+            self.fields,
+            self.sort,
+            self.limit,
+            self.offset,
+        )
+    }
+}
+
 /// Corresponds to the [Get suggested anime](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetSuggestedAnime {
@@ -223,6 +428,48 @@ impl GetSuggestedAnime {
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
+    }
+}
+
+pub struct GetSuggestedAnimeBuilder<'a> {
+    nsfw: bool,
+    fields: Option<&'a AnimeCommonFields>,
+    limit: Option<u16>,
+    offset: Option<u32>,
+}
+
+impl<'a> GetSuggestedAnimeBuilder<'a> {
+    pub fn new() -> Self {
+        Self {
+            nsfw: false,
+            fields: None,
+            limit: None,
+            offset: None,
+        }
+    }
+
+    pub fn enable_nsfw(mut self) -> Self {
+        self.nsfw = true;
+        self
+    }
+
+    pub fn fields(mut self, value: &'a AnimeCommonFields) -> Self {
+        self.fields = Some(value.into());
+        self
+    }
+
+    pub fn limit(mut self, value: u16) -> Self {
+        self.limit = Some(value);
+        self
+    }
+
+    pub fn offset(mut self, value: u32) -> Self {
+        self.offset = Some(value);
+        self
+    }
+
+    pub fn build(self) -> Result<GetSuggestedAnime, AnimeApiError> {
+        GetSuggestedAnime::new(self.nsfw, self.fields, self.limit, self.offset)
     }
 }
 
@@ -300,6 +547,77 @@ impl GetUserAnimeList {
     }
 }
 
+pub struct GetUserAnimeListBuilder<'a> {
+    user_name: String,
+    nsfw: bool,
+    fields: Option<&'a AnimeCommonFields>,
+    status: Option<UserAnimeListStatus>,
+    sort: Option<UserAnimeListSort>,
+    limit: Option<u16>,
+    offset: Option<u32>,
+}
+
+impl<'a> GetUserAnimeListBuilder<'a> {
+    pub fn new() -> Self {
+        Self {
+            user_name: String::default(),
+            nsfw: false,
+            fields: None,
+            status: None,
+            sort: None,
+            limit: None,
+            offset: None,
+        }
+    }
+
+    pub fn user_name(mut self, value: &str) -> Self {
+        self.user_name = value.to_string();
+        self
+    }
+
+    pub fn enable_nsfw(mut self) -> Self {
+        self.nsfw = true;
+        self
+    }
+
+    pub fn fields(mut self, value: &'a AnimeCommonFields) -> Self {
+        self.fields = Some(value.into());
+        self
+    }
+
+    pub fn status(mut self, value: UserAnimeListStatus) -> Self {
+        self.status = Some(value);
+        self
+    }
+
+    pub fn sort(mut self, value: UserAnimeListSort) -> Self {
+        self.sort = Some(value);
+        self
+    }
+
+    pub fn limit(mut self, value: u16) -> Self {
+        self.limit = Some(value);
+        self
+    }
+
+    pub fn offset(mut self, value: u32) -> Self {
+        self.offset = Some(value);
+        self
+    }
+
+    pub fn build(self) -> Result<GetUserAnimeList, AnimeApiError> {
+        GetUserAnimeList::new(
+            self.user_name,
+            self.nsfw,
+            self.fields,
+            self.status,
+            self.sort,
+            self.limit,
+            self.offset,
+        )
+    }
+}
+
 /// Corresponds to the [Update my anime list status](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put) endpoint
 #[derive(Debug, Serialize)]
 pub struct UpdateMyAnimeListStatus {
@@ -367,6 +685,12 @@ impl UpdateMyAnimeListStatus {
             }
         }
 
+        if anime_id == 0 {
+            return Err(AnimeApiError::new(
+                "anime_id must be greater than 0".to_string(),
+            ));
+        }
+
         // TODO: Abstract this logic to make it re-useable
         if !(status.is_some()
             || is_rewatching.is_some()
@@ -395,6 +719,101 @@ impl UpdateMyAnimeListStatus {
             tags,
             comments,
         })
+    }
+}
+
+pub struct UpdateMyAnimeListStatusBuilder {
+    anime_id: u32,
+    status: Option<UserAnimeListStatus>,
+    is_rewatching: Option<bool>,
+    score: Option<u8>,
+    num_watched_episodes: Option<u32>,
+    priority: Option<u8>,
+    num_times_rewatched: Option<u32>,
+    rewatch_value: Option<u8>,
+    tags: Option<String>,
+    comments: Option<String>,
+}
+
+impl UpdateMyAnimeListStatusBuilder {
+    pub fn new() -> Self {
+        Self {
+            anime_id: u32::default(),
+            status: None,
+            is_rewatching: None,
+            score: None,
+            num_watched_episodes: None,
+            priority: None,
+            num_times_rewatched: None,
+            rewatch_value: None,
+            tags: None,
+            comments: None,
+        }
+    }
+
+    pub fn anime_id(mut self, value: u32) -> Self {
+        self.anime_id = value;
+        self
+    }
+
+    pub fn status(mut self, value: UserAnimeListStatus) -> Self {
+        self.status = Some(value);
+        self
+    }
+
+    pub fn is_rewatching(mut self, value: bool) -> Self {
+        self.is_rewatching = Some(value);
+        self
+    }
+
+    pub fn score(mut self, value: u8) -> Self {
+        self.score = Some(value);
+        self
+    }
+
+    pub fn num_watched_episodes(mut self, value: u32) -> Self {
+        self.num_watched_episodes = Some(value);
+        self
+    }
+
+    pub fn priority(mut self, value: u8) -> Self {
+        self.priority = Some(value);
+        self
+    }
+
+    pub fn num_times_rewatched(mut self, value: u32) -> Self {
+        self.num_times_rewatched = Some(value);
+        self
+    }
+
+    pub fn rewatch_value(mut self, value: u8) -> Self {
+        self.rewatch_value = Some(value);
+        self
+    }
+
+    pub fn tags(mut self, value: &str) -> Self {
+        self.tags = Some(value.to_string());
+        self
+    }
+
+    pub fn comments(mut self, value: &str) -> Self {
+        self.comments = Some(value.to_string());
+        self
+    }
+
+    pub fn build(self) -> Result<UpdateMyAnimeListStatus, AnimeApiError> {
+        UpdateMyAnimeListStatus::new(
+            self.anime_id,
+            self.status,
+            self.is_rewatching,
+            self.score,
+            self.num_watched_episodes,
+            self.priority,
+            self.num_times_rewatched,
+            self.rewatch_value,
+            self.tags,
+            self.comments,
+        )
     }
 }
 

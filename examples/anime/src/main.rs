@@ -29,7 +29,7 @@ async fn main() {
         }
     }
 
-    let query = GetAnimeDetails::new(9969, Some(&detail_fields));
+    let query = GetAnimeDetails::new(9969, Some(&detail_fields)).unwrap();
     let response = api_client.get_anime_details(&query).await;
     if let Ok(response) = response {
         println!("Received response: {}\n", response);
