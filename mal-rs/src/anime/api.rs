@@ -242,10 +242,9 @@ pub trait AnimeApi {
     }
 
     /// Return the results of the next page, if possible
-    async fn next<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>>
+    async fn next<T>(&self, response: &T) -> Result<T, Box<dyn Error>>
     where
-        T: DeserializeOwned,
-        U: PagingIter + Sync + Send,
+        T: DeserializeOwned + PagingIter + Sync + Send,
     {
         let response = self
             .get_self()
@@ -257,10 +256,9 @@ pub trait AnimeApi {
     }
 
     /// Return the results of the previous page, if possible
-    async fn prev<T, U>(&self, response: &U) -> Result<T, Box<dyn Error>>
+    async fn prev<T>(&self, response: &T) -> Result<T, Box<dyn Error>>
     where
-        T: DeserializeOwned,
-        U: PagingIter + Sync + Send,
+        T: DeserializeOwned + PagingIter + Sync + Send,
     {
         let response = self
             .get_self()
