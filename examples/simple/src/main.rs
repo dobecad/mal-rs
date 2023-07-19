@@ -25,7 +25,7 @@ async fn main() {
     println!("Result: {}", &result);
 
     // Example iterating through pages
-    let result: AnimeList = api_client.next(&result).await.unwrap();
+    let result = api_client.next(&result).await.unwrap();
     println!("\nNext result: {}", &result);
 
     let result: AnimeList = api_client.prev(&result).await.unwrap();
