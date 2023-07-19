@@ -34,38 +34,21 @@ async fn main() {
     let manga_api_client = MangaApiClient::from(&authenticated_oauth_client);
 
     // Update One Piece episodes watched
-    let query = UpdateMyAnimeListStatus::new(
-        21,
-        None,
-        None,
-        None,
-        Some(1069),
-        None,
-        None,
-        None,
-        None,
-        None,
-    )
-    .unwrap();
+    let query = UpdateMyAnimeListStatus::builder()
+        .anime_id(21)
+        .num_watched_episodes(1069)
+        .build()
+        .unwrap();
     let response = anime_api_client.update_anime_list_status(&query).await;
     if let Ok(response) = response {
         println!("Response: {}\n", response);
     }
 
-    let query = UpdateMyMangaListStatus::new(
-        91941,
-        None,
-        None,
-        None,
-        None,
-        Some(57),
-        None,
-        None,
-        None,
-        None,
-        None,
-    )
-    .unwrap();
+    let query = UpdateMyMangaListStatus::builder()
+        .manga_id(91941)
+        .num_chapters_read(57)
+        .build()
+        .unwrap();
     let response = manga_api_client.update_manga_list_status(&query).await;
     if let Ok(response) = response {
         println!("Response: {}\n", response);
