@@ -33,32 +33,58 @@ pub struct None {}
 /// The MangaApiClient provides functions for interacting with the various
 /// `manga` and `user mangalist` MAL API endpoints. The accessible endpoints
 /// vary depending on if the MangaApiClient was constructed from a
-/// [ClientId] or an [AccessToken].
+/// [MalClientId] or an [OauthClient].
 ///
-/// Keep in mind that constructing an MangaApiClient from a [AccessToken] provides
-/// more access to the MAL API than from a [ClientId]. Check the MAL API documentation
-/// to view which endpoints require an [AccessToken] versus a [ClientId] to see which
+/// Keep in mind that constructing an MangaApiClient from a [OauthClient] provides
+/// more access to the MAL API than from a [MalClientId]. Check the MAL API documentation
+/// to view which endpoints require an [OauthClient] versus a [MalClientId] to see which
 /// one is most appropriate for your use case.
 ///
-/// # Examples
+/// # Example
 ///
-/// ## Using ClientId
 /// ```rust,ignore
-/// use std::env;
-///
-/// use dotenv;
+/// use dotenvy;
+/// use mal_rs::oauth::MalClientId;
 /// use mal_rs::prelude::*;
-///
+/// 
 /// #[tokio::main]
 /// async fn main() {
-///     dotenv::dotenv().ok();
-///
-///     let client_id = ClientId::new(
-///         env::var("CLIENT_ID").expect("CLIENT_ID environment variable is not defined"),
-///     );
-///
-///     // Create MangaApiClient from the ClientId
+///     dotenvy::dotenv().ok();
+/// 
+///     let client_id = MalClientId::from_env().unwrap();
 ///     let api_client = MangaApiClient::from(&client_id);
+///     let common_fields = mal_rs::manga::all_common_fields();
+///     let detail_fields = mal_rs::manga::all_detail_fields();
+/// 
+///     let query = GetMangaList::builder("one")
+///         .fields(&common_fields)
+///         .limit(3)
+///         .build()
+///         .unwrap();
+///     let response = api_client.get_manga_list(&query).await;
+///     if let Ok(response) = response {
+///         println!("Response: {}\n", response);
+///     }
+/// 
+///     let query = GetMangaDetails::builder(44347)
+///         .fields(&detail_fields)
+///         .build()
+///         .unwrap();
+///     let response = api_client.get_manga_details(&query).await;
+///     if let Ok(response) = response {
+///         println!("Response: {}\n", response);
+///     }
+/// 
+///     let query = GetMangaRanking::builder(MangaRankingType::All)
+///         .enable_nsfw()
+///         .fields(&common_fields)
+///         .limit(10)
+///         .build()
+///         .unwrap();
+///     let response = api_client.get_manga_ranking(&query).await;
+///     if let Ok(response) = response {
+///         println!("Response: {}\n", response);
+///     }
 /// }
 /// ```
 #[derive(Debug, Clone)]

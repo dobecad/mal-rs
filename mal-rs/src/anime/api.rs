@@ -38,76 +38,50 @@ pub struct None {}
 /// The AnimeApiClient provides functions for interacting with the various
 /// `anime` and `user animelist` MAL API endpoints. The accessible endpoints
 /// vary depending on if the AnimeApiClient was constructed from a
-/// [ClientId] or an [AccessToken].
+/// [MalClientId] or an [OauthClient].
 ///
-/// Keep in mind that constructing an AnimeApiClient from a [AccessToken] provides
-/// more access to the MAL API than from a [ClientId]. Check the MAL API documentation
-/// to view which endpoints require an [AccessToken] versus a [ClientId] to see which
+/// Keep in mind that constructing an AnimeApiClient from a [OauthClient] provides
+/// more access to the MAL API than from a [MalClientId]. Check the MAL API documentation
+/// to view which endpoints require an [OauthClient] versus a [MalClientId] to see which
 /// one is most appropriate for your use case.
 ///
-/// # Examples
+/// # Example
 ///
-/// ## Using ClientId
 /// ```rust,ignore
-/// use std::env;
-///
-/// use dotenv;
+/// use dotenvy;
+/// use mal_rs::oauth::MalClientId;
 /// use mal_rs::prelude::*;
 ///
 /// #[tokio::main]
 /// async fn main() {
-///     dotenv::dotenv().ok();
+///     dotenvy::dotenv().ok();
 ///
-///     let client_id = ClientId::new(
-///         env::var("CLIENT_ID").expect("CLIENT_ID environment variable is not defined"),
-///     );
-///
-///     // Create AnimeApiClient from the ClientId
+///     let client_id = MalClientId::from_env().unwrap();
 ///     let api_client = AnimeApiClient::from(&client_id);
-/// }
-/// ```
+///     let common_fields = mal_rs::anime::all_common_fields();
+///     let detail_fields = mal_rs::anime::all_detail_fields();
 ///
-/// ## Using AccessToken
-/// ```rust,ignore
-/// use dotenv;
-/// use mal_rs::{
-///     oauth::{OauthClient, RedirectResponse},
-///     user::{
-///         api::UserApiClient,
-///     },
-/// };
-/// use std::io;
-///
-/// #[tokio::main]
-/// async fn main() {
-///     dotenv::dotenv().ok();
-///
-///     let mut oauth_client = OauthClient::new();
-///     println!(
-///         "Visit this URL: {}\n",
-///         oauth_client.generate_readonly_auth_url()
-///     );
-///
-///     println!("After authorizing, please enter the URL you were redirected to: ");
-///     let mut input = String::new();
-///     io::stdin()
-///         .read_line(&mut input)
-///         .expect("Failed to read user input");
-///
-///     let response = RedirectResponse::try_from(input).unwrap();
-///
-///     // Authentication process
-///     let result = oauth_client.authenticate(response).await;
-///     let result = match result {
-///         Ok(t) => {
-///             println!("Got token: {:?}\n", t.get_access_token().secret());
-///
-///             let t = t.refresh().await.unwrap();
-///             println!("Refreshed token: {:?}", t.get_access_token().secret());
-///             t
+///     // Using the builder pattern for building the query
+///     let query = GetAnimeList::builder("One Piece")
+///         .fields(&common_fields)
+///         .build()
+///         .unwrap();
+///     let response = api_client.get_anime_list(&query).await;
+///     if let Ok(response) = response {
+///         println!("Received response: {}\n", response);
+///         for entry in response.data.iter() {
+///             println!("Id: {}", entry.node.id);
 ///         }
-///         Err(e) => panic!("Failed: {}", e),
-///     };
+///     }
+///
+///     let query = GetAnimeDetails::builder(9969)
+///         .fields(&detail_fields)
+///         .build()
+///         .unwrap();
+///     let response = api_client.get_anime_details(&query).await;
+///     if let Ok(response) = response {
+///         println!("Received response: {}\n", response);
+///     }
 /// }
 /// ```
 #[derive(Debug, Clone)]
