@@ -33,7 +33,7 @@ impl GetForumTopicDetail {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder(topic_id: u32) -> GetForumTopicDetailBuilder {
         GetForumTopicDetailBuilder::new(topic_id)
     }
@@ -137,7 +137,7 @@ impl GetForumTopics {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder() -> GetForumTopicsBuilder {
         GetForumTopicsBuilder::new()
     }

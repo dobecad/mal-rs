@@ -44,7 +44,7 @@ impl GetAnimeList {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder(q: &str) -> GetAnimeListBuilder<'static> {
         GetAnimeListBuilder::new(q.to_string())
     }
@@ -124,7 +124,7 @@ impl GetAnimeDetails {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder(anime_id: u32) -> GetAnimeDetailsBuilder<'static> {
         GetAnimeDetailsBuilder::new(anime_id)
     }
@@ -207,7 +207,7 @@ impl GetAnimeRanking {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder(ranking_type: RankingType) -> GetAnimeRankingBuilder<'static> {
         GetAnimeRankingBuilder::new(ranking_type)
     }
@@ -346,7 +346,7 @@ impl GetSeasonalAnime {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder(year: u16, season: Season) -> GetSeasonalAnimeBuilder<'static> {
         GetSeasonalAnimeBuilder::new(year, season)
     }
@@ -455,7 +455,7 @@ impl GetSuggestedAnime {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder() -> GetSuggestedAnimeBuilder<'static> {
         GetSuggestedAnimeBuilder::new()
     }
@@ -576,7 +576,7 @@ impl GetUserAnimeList {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder(user_name: &str) -> GetUserAnimeListBuilder<'static> {
         GetUserAnimeListBuilder::new(user_name.to_string())
     }
@@ -756,7 +756,7 @@ impl UpdateMyAnimeListStatus {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder(anime_id: u32) -> UpdateMyAnimeListStatusBuilder {
         UpdateMyAnimeListStatusBuilder::new(anime_id)
     }

@@ -42,7 +42,7 @@ impl GetMangaList {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder(q: &str) -> GetMangaListBuilder<'static> {
         GetMangaListBuilder::new(q.to_string())
     }
@@ -126,7 +126,7 @@ impl GetMangaDetails {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder(manga_id: u32) -> GetMangaDetailsBuilder<'static> {
         GetMangaDetailsBuilder::new(manga_id)
     }
@@ -215,7 +215,7 @@ impl GetMangaRanking {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder(ranking_type: MangaRankingType) -> GetMangaRankingBuilder<'static> {
         GetMangaRankingBuilder::new(ranking_type)
     }
@@ -344,7 +344,7 @@ impl GetUserMangaList {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder(user_name: &str) -> GetUserMangaListBuilder<'static> {
         GetUserMangaListBuilder::new(user_name.to_string())
     }
@@ -527,7 +527,7 @@ impl UpdateMyMangaListStatus {
         })
     }
 
-    /// Use builder pattern for building up the query
+    /// Use builder pattern for building up the query with required arguments
     pub fn builder(manga_id: u32) -> UpdateMyMangaListStatusBuilder {
         UpdateMyMangaListStatusBuilder::new(manga_id)
     }
