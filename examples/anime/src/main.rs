@@ -12,8 +12,7 @@ async fn main() {
     let detail_fields = mal_rs::anime::all_detail_fields();
 
     // Using the builder pattern for building the query
-    let query = GetAnimeList::builder()
-        .q("One Piece")
+    let query = GetAnimeList::builder("One Piece")
         .fields(&common_fields)
         .build()
         .unwrap();
@@ -25,8 +24,7 @@ async fn main() {
         }
     }
 
-    let query = GetAnimeDetails::builder()
-        .anime_id(9969)
+    let query = GetAnimeDetails::builder(9969)
         .fields(&detail_fields)
         .build()
         .unwrap();
@@ -35,8 +33,7 @@ async fn main() {
         println!("Received response: {}\n", response);
     }
 
-    let query = GetAnimeRanking::builder()
-        .ranking_type(RankingType::ByPopularity)
+    let query = GetAnimeRanking::builder(RankingType::ByPopularity)
         .enable_nsfw()
         .fields(&common_fields)
         .limit(5)
@@ -47,9 +44,7 @@ async fn main() {
         println!("Received response: {}\n", response);
     }
 
-    let query = GetSeasonalAnime::builder()
-        .year(2022)
-        .season(Season::Summer)
+    let query = GetSeasonalAnime::builder(2022, Season::Summer)
         .enable_nsfw()
         .fields(&common_fields)
         .sort(SeasonalAnimeSort::AnimeScore)

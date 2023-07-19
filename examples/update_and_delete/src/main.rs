@@ -34,8 +34,7 @@ async fn main() {
     let manga_api_client = MangaApiClient::from(&authenticated_oauth_client);
 
     // Update One Piece episodes watched
-    let query = UpdateMyAnimeListStatus::builder()
-        .anime_id(21)
+    let query = UpdateMyAnimeListStatus::builder(21)
         .num_watched_episodes(1069)
         .build()
         .unwrap();

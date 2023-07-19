@@ -16,8 +16,7 @@ async fn main() {
     let fields = anime_common_fields!(AnimeField::id, AnimeField::num_episodes, AnimeField::title,);
 
     // Example using builder pattern
-    let query = GetAnimeList::builder()
-        .q("one")
+    let query = GetAnimeList::builder("One")
         .fields(&fields)
         .limit(5)
         .build()

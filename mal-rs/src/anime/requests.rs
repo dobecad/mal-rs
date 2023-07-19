@@ -45,8 +45,8 @@ impl GetAnimeList {
     }
 
     /// Use builder pattern for building up the query
-    pub fn builder() -> GetAnimeListBuilder<'static> {
-        GetAnimeListBuilder::new()
+    pub fn builder(q: &str) -> GetAnimeListBuilder<'static> {
+        GetAnimeListBuilder::new(q.to_string())
     }
 }
 
@@ -60,9 +60,9 @@ pub struct GetAnimeListBuilder<'a> {
 }
 
 impl<'a> GetAnimeListBuilder<'a> {
-    pub fn new() -> Self {
+    pub fn new(q: String) -> Self {
         Self {
-            q: String::from(""),
+            q,
             nsfw: false,
             limit: None,
             offset: None,
@@ -125,8 +125,8 @@ impl GetAnimeDetails {
     }
 
     /// Use builder pattern for building up the query
-    pub fn builder() -> GetAnimeDetailsBuilder<'static> {
-        GetAnimeDetailsBuilder::new()
+    pub fn builder(anime_id: u32) -> GetAnimeDetailsBuilder<'static> {
+        GetAnimeDetailsBuilder::new(anime_id)
     }
 }
 
@@ -136,9 +136,9 @@ pub struct GetAnimeDetailsBuilder<'a> {
 }
 
 impl<'a> GetAnimeDetailsBuilder<'a> {
-    pub fn new() -> Self {
+    pub fn new(anime_id: u32) -> Self {
         Self {
-            anime_id: u32::default(),
+            anime_id,
             fields: None,
         }
     }
@@ -208,8 +208,8 @@ impl GetAnimeRanking {
     }
 
     /// Use builder pattern for building up the query
-    pub fn builder() -> GetAnimeRankingBuilder<'static> {
-        GetAnimeRankingBuilder::new()
+    pub fn builder(ranking_type: RankingType) -> GetAnimeRankingBuilder<'static> {
+        GetAnimeRankingBuilder::new(ranking_type)
     }
 }
 
@@ -222,9 +222,9 @@ pub struct GetAnimeRankingBuilder<'a> {
 }
 
 impl<'a> GetAnimeRankingBuilder<'a> {
-    pub fn new() -> Self {
+    pub fn new(ranking_type: RankingType) -> Self {
         Self {
-            ranking_type: RankingType::All,
+            ranking_type,
             nsfw: false,
             limit: None,
             offset: None,
@@ -347,8 +347,8 @@ impl GetSeasonalAnime {
     }
 
     /// Use builder pattern for building up the query
-    pub fn builder() -> GetSeasonalAnimeBuilder<'static> {
-        GetSeasonalAnimeBuilder::new()
+    pub fn builder(year: u16, season: Season) -> GetSeasonalAnimeBuilder<'static> {
+        GetSeasonalAnimeBuilder::new(year, season)
     }
 }
 
@@ -363,10 +363,10 @@ pub struct GetSeasonalAnimeBuilder<'a> {
 }
 
 impl<'a> GetSeasonalAnimeBuilder<'a> {
-    pub fn new() -> Self {
+    pub fn new(year: u16, season: Season) -> Self {
         Self {
-            year: u16::default(),
-            season: Season::Spring,
+            year,
+            season,
             nsfw: false,
             sort: None,
             limit: None,
@@ -577,8 +577,8 @@ impl GetUserAnimeList {
     }
 
     /// Use builder pattern for building up the query
-    pub fn builder() -> GetUserAnimeListBuilder<'static> {
-        GetUserAnimeListBuilder::new()
+    pub fn builder(user_name: &str) -> GetUserAnimeListBuilder<'static> {
+        GetUserAnimeListBuilder::new(user_name.to_string())
     }
 }
 
@@ -593,9 +593,9 @@ pub struct GetUserAnimeListBuilder<'a> {
 }
 
 impl<'a> GetUserAnimeListBuilder<'a> {
-    pub fn new() -> Self {
+    pub fn new(user_name: String) -> Self {
         Self {
-            user_name: String::default(),
+            user_name,
             nsfw: false,
             fields: None,
             status: None,
@@ -757,8 +757,8 @@ impl UpdateMyAnimeListStatus {
     }
 
     /// Use builder pattern for building up the query
-    pub fn builder() -> UpdateMyAnimeListStatusBuilder {
-        UpdateMyAnimeListStatusBuilder::new()
+    pub fn builder(anime_id: u32) -> UpdateMyAnimeListStatusBuilder {
+        UpdateMyAnimeListStatusBuilder::new(anime_id)
     }
 }
 
@@ -776,9 +776,9 @@ pub struct UpdateMyAnimeListStatusBuilder {
 }
 
 impl UpdateMyAnimeListStatusBuilder {
-    pub fn new() -> Self {
+    pub fn new(anime_id: u32) -> Self {
         Self {
-            anime_id: u32::default(),
+            anime_id,
             status: None,
             is_rewatching: None,
             score: None,
