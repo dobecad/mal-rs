@@ -13,14 +13,12 @@ async fn main() {
     let common_fields = mal_rs::anime::all_common_fields();
     let detail_fields = mal_rs::anime::all_detail_fields();
 
-    let query = GetAnimeList::new(
-        "One piece".to_string(),
-        nsfw,
-        Some(&common_fields),
-        limit,
-        None,
-    )
-    .unwrap();
+    // Using the builder pattern for building the query
+    let query = GetAnimeList::builder()
+        .q("One Piece")
+        .fields(&common_fields)
+        .build()
+        .unwrap();
     let response = api_client.get_anime_list(&query).await;
     if let Ok(response) = response {
         println!("Received response: {}\n", response);

@@ -43,6 +43,11 @@ impl GetAnimeList {
             fields: fields.map(|f| f.into()),
         })
     }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> GetAnimeListBuilder<'static> {
+        GetAnimeListBuilder::new()
+    }
 }
 
 #[derive(Debug)]
@@ -117,6 +122,11 @@ impl GetAnimeDetails {
             anime_id,
             fields: fields.map(|f| f.into()),
         })
+    }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> GetAnimeDetailsBuilder<'static> {
+        GetAnimeDetailsBuilder::new()
     }
 }
 
@@ -195,6 +205,11 @@ impl GetAnimeRanking {
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
+    }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> GetAnimeRankingBuilder<'static> {
+        GetAnimeRankingBuilder::new()
     }
 }
 
@@ -325,6 +340,11 @@ impl GetSeasonalAnime {
             fields: fields.map(|f| f.into()),
         })
     }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> GetSeasonalAnimeBuilder<'static> {
+        GetSeasonalAnimeBuilder::new()
+    }
 }
 
 pub struct GetSeasonalAnimeBuilder<'a> {
@@ -428,6 +448,11 @@ impl GetSuggestedAnime {
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
+    }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> GetSuggestedAnimeBuilder<'static> {
+        GetSuggestedAnimeBuilder::new()
     }
 }
 
@@ -544,6 +569,11 @@ impl GetUserAnimeList {
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
+    }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> GetUserAnimeListBuilder<'static> {
+        GetUserAnimeListBuilder::new()
     }
 }
 
@@ -719,6 +749,11 @@ impl UpdateMyAnimeListStatus {
             tags,
             comments,
         })
+    }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> UpdateMyAnimeListStatusBuilder {
+        UpdateMyAnimeListStatusBuilder::new()
     }
 }
 

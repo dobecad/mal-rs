@@ -41,6 +41,11 @@ impl GetMangaList {
             fields: fields.map(|f| f.into()),
         })
     }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> GetMangaListBuilder<'static> {
+        GetMangaListBuilder::new()
+    }
 }
 
 pub struct GetMangaListBuilder<'a> {
@@ -119,6 +124,11 @@ impl GetMangaDetails {
             nsfw,
             fields: fields.map(|f| f.into()),
         })
+    }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> GetMangaDetailsBuilder<'static> {
+        GetMangaDetailsBuilder::new()
     }
 }
 
@@ -203,6 +213,11 @@ impl GetMangaRanking {
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
+    }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> GetMangaRankingBuilder<'static> {
+        GetMangaRankingBuilder::new()
     }
 }
 
@@ -327,6 +342,11 @@ impl GetUserMangaList {
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
+    }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> GetUserMangaListBuilder<'static> {
+        GetUserMangaListBuilder::new()
     }
 }
 
@@ -505,6 +525,11 @@ impl UpdateMyMangaListStatus {
             tags,
             comments,
         })
+    }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> UpdateMyMangaListStatusBuilder {
+        UpdateMyMangaListStatusBuilder::new()
     }
 }
 

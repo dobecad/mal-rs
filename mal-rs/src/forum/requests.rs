@@ -32,6 +32,11 @@ impl GetForumTopicDetail {
             offset: offset.unwrap_or(0),
         })
     }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> GetForumTopicDetailBuilder {
+        GetForumTopicDetailBuilder::new()
+    }
 }
 
 pub struct GetForumTopicDetailBuilder {
@@ -130,6 +135,11 @@ impl GetForumTopics {
             user_name,
             sort: "recent".to_string(),
         })
+    }
+
+    /// Use builder pattern for building up the query
+    pub fn builder() -> GetForumTopicsBuilder {
+        GetForumTopicsBuilder::new()
     }
 }
 
