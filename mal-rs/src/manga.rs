@@ -1,6 +1,6 @@
 //! Module for interacting with the `manga` and `user mangalist` endpoints
 
-use self::requests::{MangaDetail, MangaDetails, MangaField, MangaFields};
+use self::requests::{MangaDetail, MangaDetailFields, MangaField, MangaCommonFields};
 use strum::IntoEnumIterator;
 
 /// Manga API client
@@ -16,19 +16,19 @@ pub mod requests;
 pub mod responses;
 
 /// Return all of the possible [MangaField] values
-pub fn all_common_fields() -> MangaFields {
+pub fn all_common_fields() -> MangaCommonFields {
     let mut vec = Vec::with_capacity(MangaField::iter().len());
     for variant in MangaField::iter() {
         vec.push(variant);
     }
-    MangaFields(vec)
+    MangaCommonFields(vec)
 }
 
 /// Return all of the possible [MangaDetail] fields
-pub fn all_detail_fields() -> MangaDetails {
+pub fn all_detail_fields() -> MangaDetailFields {
     let mut vec = Vec::with_capacity(MangaDetail::iter().len());
     for variant in MangaDetail::iter() {
         vec.push(variant);
     }
-    MangaDetails(vec)
+    MangaDetailFields(vec)
 }

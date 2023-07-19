@@ -20,7 +20,7 @@ async fn main() {
         println!("Response: {}\n", response);
     }
 
-    let query = GetMangaDetails::new(44347, nsfw, Some(&detail_fields));
+    let query = GetMangaDetails::new(44347, nsfw, Some(&detail_fields)).unwrap();
     let response = api_client.get_manga_details(&query).await;
     if let Ok(response) = response {
         println!("Response: {}\n", response);

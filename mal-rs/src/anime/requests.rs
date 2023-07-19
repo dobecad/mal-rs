@@ -901,11 +901,11 @@ pub enum AnimeDetail {
     statistics,
 }
 
-/// Wrapper for a vector of valid Anime Fields
+/// Wrapper for a vector of valid Anime Common Fields
 #[derive(Debug)]
 pub struct AnimeCommonFields(pub Vec<AnimeField>);
 
-/// Wrapper for a vector of valid Anime Fields
+/// Wrapper for a vector of valid Anime Detail Fields
 #[derive(Debug)]
 pub struct AnimeDetailFields(pub Vec<AnimeDetail>);
 
