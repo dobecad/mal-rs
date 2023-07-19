@@ -31,7 +31,7 @@
 //!
 //! # OAuth
 //!
-//! mal-rs provides a method for obtaining a MAL OAuth token.
+//! mal-rs provides a method for obtaining MAL OAuth access tokens.
 //! This token is necessary to access certain MAL API endpoints.
 //! Depending on whether you obtain an OAuth token or just use your ClientId,
 //! the mal-rs API client you create from either token will ensure you can only
@@ -84,8 +84,9 @@
 //!
 //! ```rust,ignore
 //! use dotenv;
+//! use mal_rs::anime_common_fields;
+//! use mal_rs::oauth::MalClientId;
 //! use mal_rs::prelude::*;
-//! use mal_rs::{anime_fields, manga_fields};
 //!
 //! #[tokio::main]
 //! async fn main() {
@@ -93,91 +94,87 @@
 //!
 //!     let client_id = MalClientId::from_env().unwrap();
 //!
-//!     // Create a client for whichever MAL API you want to interact with
+//!     // Anime API example
 //!     let api_client = AnimeApiClient::from(&client_id);
-//! 
-//!     // Define some parameters to re-use across multiple queries
-//!     let nsfw = false;
-//!     let limit = Some(5);
-//!     let fields = anime_common_fields!(
-//!         AnimeField::id,
-//!         AnimeField::num_episodes,
-//!         AnimeField::title,
-//!     );
+//!     let fields = anime_common_fields!(AnimeField::id, AnimeField::num_episodes, AnimeField::title,);
 //!
-//!     let query = GetAnimeList::new("one".to_string(), nsfw, Some(&fields), limit, None).unwrap();
+//!     // Example using builder pattern. The `builder(args...)` method will only require
+//!     // the required arguments for the specific API endpoint, while the
+//!     // other builder instance methods will build up the optional arguments.
+//!     let query = GetAnimeList::builder("One")
+//!         .fields(&fields)
+//!         .limit(5)
+//!         .build()
+//!         .unwrap();
 //!     let result = api_client.get_anime_list(&query).await.unwrap();
 //!     println!("Result: {}", &result);
 //!
 //!     // Example iterating through pages
-//!     let result: AnimeList = api_client.next(&result).await.unwrap();
+//!     let result = api_client.next(&result).await.unwrap();
 //!     println!("Next result: {}", &result);
 //!
-//!     let result: AnimeList = api_client.prev(&result).await.unwrap();
+//!     let result = api_client.prev(&result).await.unwrap();
 //!     println!("Prev result: {}", &result);
 //!
 //!     // Manga API example
 //!     let api_client = MangaApiClient::from(&client_id);
 //!     let fields = mal_rs::manga::all_common_fields();
+//!
+//!     // Example using `new` pattern. Not recommended, but available
+//!     let nsfw = false;
+//!     let limit = Some(5);
 //!     let query = GetMangaList::new("one".to_string(), nsfw, Some(&fields), limit, None).unwrap();
 //!     let result = api_client.get_manga_list(&query).await.unwrap();
 //!     println!("Result: {}", result);
 //! }
 //! ```
 //!
-//! ## Using OAuth token
+//! ## Creating an OAuth token
 //!
 //! ```rust,ignore
 //! use dotenv;
-//! use mal_rs::{
-//!     oauth::{OauthClient, RedirectResponse},
-//!     user::{
-//!         api::UserApiClient,
-//!         requests::{GetUserInformation, UserFields},
-//!         responses::UserEnum,
-//!     }, user_fields,
-//! };
+//! use mal_rs::oauth::{OauthClient, RedirectResponse};
 //! use std::io;
-//!
+//! 
 //! #[tokio::main]
 //! async fn main() {
 //!     dotenv::dotenv().ok();
-//!
-//!     let mut oauth_client = OauthClient::new();
-//!     println!(
-//!         "Visit this URL: {}\n",
-//!         oauth_client.generate_readonly_auth_url()
-//!     );
-//!
+//! 
+//!     let authenticated_client = OauthClient::load_from_config();
+//!     match authenticated_client {
+//!         Ok(_) => {
+//!             println!("An existing authorized Oauth client already exists");
+//!             return;
+//!         }
+//!         Err(_) => println!("No existing Oauth client exists\n"),
+//!     }
+//! 
+//!     let mut oauth_client = OauthClient::new().unwrap();
+//!     println!("Visit this URL: {}\n", oauth_client.generate_auth_url());
+//! 
 //!     println!("After authorizing, please enter the URL you were redirected to: ");
 //!     let mut input = String::new();
 //!     io::stdin()
 //!         .read_line(&mut input)
 //!         .expect("Failed to read user input");
-//!
+//! 
 //!     let response = RedirectResponse::try_from(input).unwrap();
-//!
-//!     // Authenticate to get an Authenticated oauth_client back
+//! 
+//!     // Authentication process
 //!     let result = oauth_client.authenticate(response).await;
 //!     let authenticated_oauth_client = match result {
 //!         Ok(t) => {
 //!             println!("Got token: {:?}\n", t.get_access_token_secret());
-//!     
+//! 
 //!             let t = t.refresh().await.unwrap();
 //!             println!("Refreshed token: {:?}", t.get_access_token_secret());
 //!             t
 //!         }
 //!         Err(e) => panic!("Failed: {}", e),
 //!     };
-//!     
-//!     // Create UserApiClient from the OauthClient
-//!     let api_client = UserApiClient::from(&authenticated_oauth_client);
-//!
-//!     // Create fields that you want returned by the MAL API
-//!     let fields = user_fields!(UserEnum::id, UserEnum::name, UserEnum::is_supporter);
-//!     let query = GetUserInformation::new(Some(&fields));
-//!     let response = api_client.get_my_user_information(&query).await.unwrap();
-//!     println!("Information about yourself: {:?}", response);
+//! 
+//!     // Save credentials to config to be re-used later
+//!     let _ = authenticated_oauth_client.save_to_config();
 //! }
 //! ```
 

@@ -11,11 +11,11 @@ async fn main() {
 
     // Anime API example
     let api_client = AnimeApiClient::from(&client_id);
-    let nsfw = false;
-    let limit = Some(5);
     let fields = anime_common_fields!(AnimeField::id, AnimeField::num_episodes, AnimeField::title,);
 
-    // Example using builder pattern
+    // Example using builder pattern. The `builder(args...)` method will only require
+    // the required arguments for the specific API endpoint, while the
+    // other builder instance methods will build up the optional arguments
     let query = GetAnimeList::builder("One")
         .fields(&fields)
         .limit(5)
@@ -35,7 +35,9 @@ async fn main() {
     let api_client = MangaApiClient::from(&client_id);
     let fields = mal_rs::manga::all_common_fields();
 
-    // Example using `new` pattern
+    // Example using `new` pattern. Not recommended, but available
+    let nsfw = false;
+    let limit = Some(5);
     let query = GetMangaList::new("one".to_string(), nsfw, Some(&fields), limit, None).unwrap();
     let result = api_client.get_manga_list(&query).await.unwrap();
     println!("Result: {}", result);
