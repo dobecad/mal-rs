@@ -34,6 +34,41 @@ impl GetForumTopicDetail {
     }
 }
 
+pub struct GetForumTopicDetailBuilder {
+    topic_id: u32,
+    limit: Option<u16>,
+    offset: Option<u32>,
+}
+
+impl GetForumTopicDetailBuilder {
+    pub fn new() -> Self {
+        Self {
+            topic_id: u32::default(),
+            limit: None,
+            offset: None,
+        }
+    }
+
+    pub fn topic_id(mut self, value: u32) -> Self {
+        self.topic_id = value;
+        self
+    }
+
+    pub fn limit(mut self, value: u16) -> Self {
+        self.limit = Some(value);
+        self
+    }
+
+    pub fn offset(mut self, value: u32) -> Self {
+        self.offset = Some(value);
+        self
+    }
+
+    pub fn build(self) -> Result<GetForumTopicDetail, ForumApiError> {
+        GetForumTopicDetail::new(self.topic_id, self.limit, self.offset)
+    }
+}
+
 /// Corresponds to the [Get forum topics](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topics_get) endpoint
 #[derive(Debug, Serialize)]
 pub struct GetForumTopics {
@@ -95,6 +130,85 @@ impl GetForumTopics {
             user_name,
             sort: "recent".to_string(),
         })
+    }
+}
+
+pub struct GetForumTopicsBuilder {
+    nsfw: bool,
+    q: Option<String>,
+    board_id: Option<u32>,
+    subboard_id: Option<u32>,
+    topic_user_name: Option<String>,
+    user_name: Option<String>,
+    limit: Option<u16>,
+    offset: Option<u32>,
+}
+
+impl GetForumTopicsBuilder {
+    pub fn new() -> Self {
+        Self {
+            nsfw: false,
+            q: None,
+            board_id: None,
+            subboard_id: None,
+            topic_user_name: None,
+            user_name: None,
+            limit: None,
+            offset: None,
+        }
+    }
+
+    pub fn enable_nsfw(mut self) -> Self {
+        self.nsfw = true;
+        self
+    }
+
+    pub fn q(mut self, value: &str) -> Self {
+        self.q = Some(value.to_string());
+        self
+    }
+
+    pub fn board_id(mut self, value: u32) -> Self {
+        self.board_id = Some(value);
+        self
+    }
+
+    pub fn subboard_id(mut self, value: u32) -> Self {
+        self.subboard_id = Some(value);
+        self
+    }
+
+    pub fn topic_user_name(mut self, value: &str) -> Self {
+        self.topic_user_name = Some(value.to_string());
+        self
+    }
+
+    pub fn user_name(mut self, value: &str) -> Self {
+        self.user_name = Some(value.to_string());
+        self
+    }
+
+    pub fn limit(mut self, value: u16) -> Self {
+        self.limit = Some(value);
+        self
+    }
+
+    pub fn offset(mut self, value: u32) -> Self {
+        self.offset = Some(value);
+        self
+    }
+
+    pub fn build(self) -> Result<GetForumTopics, ForumApiError> {
+        GetForumTopics::new(
+            self.nsfw,
+            self.q,
+            self.board_id,
+            self.subboard_id,
+            self.topic_user_name,
+            self.user_name,
+            self.limit,
+            self.offset,
+        )
     }
 }
 
