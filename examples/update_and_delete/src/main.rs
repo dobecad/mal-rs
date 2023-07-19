@@ -43,8 +43,7 @@ async fn main() {
         println!("Response: {}\n", response);
     }
 
-    let query = UpdateMyMangaListStatus::builder()
-        .manga_id(91941)
+    let query = UpdateMyMangaListStatus::builder(91941)
         .num_chapters_read(57)
         .build()
         .unwrap();

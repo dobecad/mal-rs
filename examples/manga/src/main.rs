@@ -11,8 +11,7 @@ async fn main() {
     let common_fields = mal_rs::manga::all_common_fields();
     let detail_fields = mal_rs::manga::all_detail_fields();
 
-    let query = GetMangaList::builder()
-        .q("one")
+    let query = GetMangaList::builder("one")
         .fields(&common_fields)
         .limit(3)
         .build()
@@ -22,8 +21,7 @@ async fn main() {
         println!("Response: {}\n", response);
     }
 
-    let query = GetMangaDetails::builder()
-        .manga_id(44347)
+    let query = GetMangaDetails::builder(44347)
         .fields(&detail_fields)
         .build()
         .unwrap();
@@ -32,8 +30,7 @@ async fn main() {
         println!("Response: {}\n", response);
     }
 
-    let query = GetMangaRanking::builder()
-        .ranking_type(MangaRankingType::All)
+    let query = GetMangaRanking::builder(MangaRankingType::All)
         .enable_nsfw()
         .fields(&common_fields)
         .limit(10)

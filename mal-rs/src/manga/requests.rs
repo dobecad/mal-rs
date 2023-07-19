@@ -43,8 +43,8 @@ impl GetMangaList {
     }
 
     /// Use builder pattern for building up the query
-    pub fn builder() -> GetMangaListBuilder<'static> {
-        GetMangaListBuilder::new()
+    pub fn builder(q: &str) -> GetMangaListBuilder<'static> {
+        GetMangaListBuilder::new(q.to_string())
     }
 }
 
@@ -57,9 +57,9 @@ pub struct GetMangaListBuilder<'a> {
 }
 
 impl<'a> GetMangaListBuilder<'a> {
-    pub fn new() -> Self {
+    pub fn new(q: String) -> Self {
         Self {
-            q: String::default(),
+            q,
             nsfw: false,
             fields: None,
             limit: None,
@@ -127,8 +127,8 @@ impl GetMangaDetails {
     }
 
     /// Use builder pattern for building up the query
-    pub fn builder() -> GetMangaDetailsBuilder<'static> {
-        GetMangaDetailsBuilder::new()
+    pub fn builder(manga_id: u32) -> GetMangaDetailsBuilder<'static> {
+        GetMangaDetailsBuilder::new(manga_id)
     }
 }
 
@@ -139,9 +139,9 @@ pub struct GetMangaDetailsBuilder<'a> {
 }
 
 impl<'a> GetMangaDetailsBuilder<'a> {
-    pub fn new() -> Self {
+    pub fn new(manga_id: u32) -> Self {
         Self {
-            manga_id: u32::default(),
+            manga_id,
             nsfw: false,
             fields: None,
         }
@@ -216,8 +216,8 @@ impl GetMangaRanking {
     }
 
     /// Use builder pattern for building up the query
-    pub fn builder() -> GetMangaRankingBuilder<'static> {
-        GetMangaRankingBuilder::new()
+    pub fn builder(ranking_type: MangaRankingType) -> GetMangaRankingBuilder<'static> {
+        GetMangaRankingBuilder::new(ranking_type)
     }
 }
 
@@ -230,9 +230,9 @@ pub struct GetMangaRankingBuilder<'a> {
 }
 
 impl<'a> GetMangaRankingBuilder<'a> {
-    pub fn new() -> Self {
+    pub fn new(ranking_type: MangaRankingType) -> Self {
         Self {
-            ranking_type: MangaRankingType::All,
+            ranking_type,
             nsfw: false,
             fields: None,
             limit: None,
@@ -345,8 +345,8 @@ impl GetUserMangaList {
     }
 
     /// Use builder pattern for building up the query
-    pub fn builder() -> GetUserMangaListBuilder<'static> {
-        GetUserMangaListBuilder::new()
+    pub fn builder(user_name: &str) -> GetUserMangaListBuilder<'static> {
+        GetUserMangaListBuilder::new(user_name.to_string())
     }
 }
 
@@ -361,9 +361,9 @@ pub struct GetUserMangaListBuilder<'a> {
 }
 
 impl<'a> GetUserMangaListBuilder<'a> {
-    pub fn new() -> Self {
+    pub fn new(user_name: String) -> Self {
         Self {
-            user_name: String::default(),
+            user_name,
             nsfw: false,
             fields: None,
             status: None,
@@ -528,8 +528,8 @@ impl UpdateMyMangaListStatus {
     }
 
     /// Use builder pattern for building up the query
-    pub fn builder() -> UpdateMyMangaListStatusBuilder {
-        UpdateMyMangaListStatusBuilder::new()
+    pub fn builder(manga_id: u32) -> UpdateMyMangaListStatusBuilder {
+        UpdateMyMangaListStatusBuilder::new(manga_id)
     }
 }
 
@@ -548,9 +548,9 @@ pub struct UpdateMyMangaListStatusBuilder {
 }
 
 impl UpdateMyMangaListStatusBuilder {
-    pub fn new() -> Self {
+    pub fn new(manga_id: u32) -> Self {
         Self {
-            manga_id: u32::default(),
+            manga_id,
             status: None,
             is_rereading: None,
             score: None,

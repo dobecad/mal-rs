@@ -34,8 +34,8 @@ impl GetForumTopicDetail {
     }
 
     /// Use builder pattern for building up the query
-    pub fn builder() -> GetForumTopicDetailBuilder {
-        GetForumTopicDetailBuilder::new()
+    pub fn builder(topic_id: u32) -> GetForumTopicDetailBuilder {
+        GetForumTopicDetailBuilder::new(topic_id)
     }
 }
 
@@ -46,9 +46,9 @@ pub struct GetForumTopicDetailBuilder {
 }
 
 impl GetForumTopicDetailBuilder {
-    pub fn new() -> Self {
+    pub fn new(topic_id: u32) -> Self {
         Self {
-            topic_id: u32::default(),
+            topic_id,
             limit: None,
             offset: None,
         }
