@@ -8,8 +8,6 @@ async fn main() {
 
     let client_id = MalClientId::from_env().unwrap();
     let api_client = AnimeApiClient::from(&client_id);
-    let nsfw = false;
-    let limit = Some(3);
     let common_fields = mal_rs::anime::all_common_fields();
     let detail_fields = mal_rs::anime::all_detail_fields();
 
@@ -27,35 +25,37 @@ async fn main() {
         }
     }
 
-    let query = GetAnimeDetails::new(9969, Some(&detail_fields)).unwrap();
+    let query = GetAnimeDetails::builder()
+        .anime_id(9969)
+        .fields(&detail_fields)
+        .build()
+        .unwrap();
     let response = api_client.get_anime_details(&query).await;
     if let Ok(response) = response {
         println!("Received response: {}\n", response);
     }
 
-    let query = GetAnimeRanking::new(
-        RankingType::ByPopularity,
-        nsfw,
-        Some(&common_fields),
-        limit,
-        None,
-    )
-    .unwrap();
+    let query = GetAnimeRanking::builder()
+        .ranking_type(RankingType::ByPopularity)
+        .enable_nsfw()
+        .fields(&common_fields)
+        .limit(5)
+        .build()
+        .unwrap();
     let response = api_client.get_anime_ranking(&query).await;
     if let Ok(response) = response {
         println!("Received response: {}\n", response);
     }
 
-    let query = GetSeasonalAnime::new(
-        2022,
-        Season::Summer,
-        nsfw,
-        Some(&common_fields),
-        Some(SeasonalAnimeSort::AnimeScore),
-        limit,
-        None,
-    )
-    .unwrap();
+    let query = GetSeasonalAnime::builder()
+        .year(2022)
+        .season(Season::Summer)
+        .enable_nsfw()
+        .fields(&common_fields)
+        .sort(SeasonalAnimeSort::AnimeScore)
+        .limit(5)
+        .build()
+        .unwrap();
     let response = api_client.get_seasonal_anime(&query).await;
     if let Ok(response) = response {
         println!("Received response: {}\n", response);
