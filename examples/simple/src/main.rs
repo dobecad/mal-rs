@@ -28,7 +28,7 @@ async fn main() {
     let result = api_client.next(&result).await.unwrap();
     println!("\nNext result: {}", &result);
 
-    let result: AnimeList = api_client.prev(&result).await.unwrap();
+    let result = api_client.prev(&result).await.unwrap();
     println!("\nPrev result: {}", &result);
 
     // Manga API example
