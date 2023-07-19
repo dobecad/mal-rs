@@ -1,7 +1,7 @@
 // Structs for crafting User Endpoint requests
 use serde::Serialize;
 
-use super::responses::UserFieldsEnum;
+use strum_macros::EnumIter;
 
 #[derive(Debug, Serialize)]
 pub struct GetUserInformation {
@@ -18,7 +18,22 @@ impl GetUserInformation {
     }
 }
 
-pub struct UserFields(pub Vec<UserFieldsEnum>);
+#[derive(Debug, EnumIter, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum UserField {
+    id,
+    name,
+    picture,
+    gender,
+    birthday,
+    location,
+    joined_at,
+    anime_statistics,
+    time_zone,
+    is_supporter,
+}
+
+pub struct UserFields(pub Vec<UserField>);
 
 impl Into<String> for &UserFields {
     fn into(self) -> String {

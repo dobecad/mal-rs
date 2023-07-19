@@ -1,5 +1,4 @@
 use serde::Deserialize;
-use strum_macros::EnumIter;
 
 #[derive(Debug, Deserialize)]
 pub struct User {
@@ -13,21 +12,6 @@ pub struct User {
     pub anime_statistics: Option<AnimeStatistics>,
     pub time_zone: Option<String>,
     pub is_supporter: bool,
-}
-
-#[derive(Debug, EnumIter, PartialEq)]
-#[allow(non_camel_case_types)]
-pub enum UserFieldsEnum {
-    id,
-    name,
-    picture,
-    gender,
-    birthday,
-    location,
-    joined_at,
-    anime_statistics,
-    time_zone,
-    is_supporter,
 }
 
 #[derive(Debug, Deserialize)]

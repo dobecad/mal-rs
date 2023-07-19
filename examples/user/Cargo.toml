@@ -6,6 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dotenv = "0.15.0"
-tokio = { version = "1.28.2", features = ["macros", "rt", "rt-multi-thread"] }
-mal-rs = { path = "../../mal-rs", features = ["user"]}
+tokio = { version = "1.28.2", features = ["macros", "rt-multi-thread"] }
+mal-rs = { path = "../../mal-rs", features = ["user"] }
+dotenvy = "0.15.7"

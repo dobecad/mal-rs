@@ -1,6 +1,6 @@
 //! Module for interacting with the `user` endpoint
 
-use self::{requests::UserFields, responses::UserFieldsEnum};
+use self::requests::{UserField, UserFields};
 use strum::IntoEnumIterator;
 
 /// User API client
@@ -17,8 +17,8 @@ pub mod responses;
 
 /// Return all of the possible User Fields
 pub fn all_fields() -> UserFields {
-    let mut vec = Vec::with_capacity(UserFieldsEnum::iter().len());
-    for variant in UserFieldsEnum::iter() {
+    let mut vec = Vec::with_capacity(UserField::iter().len());
+    for variant in UserField::iter() {
         vec.push(variant);
     }
     UserFields(vec)
