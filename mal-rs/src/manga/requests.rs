@@ -21,7 +21,7 @@ impl GetMangaList {
     pub fn new(
         q: String,
         nsfw: bool,
-        fields: Option<&MangaFields>,
+        fields: Option<&MangaCommonFields>,
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, MangaApiError> {
@@ -43,6 +43,55 @@ impl GetMangaList {
     }
 }
 
+pub struct GetMangaListBuilder<'a> {
+    q: String,
+    nsfw: bool,
+    fields: Option<&'a MangaCommonFields>,
+    limit: Option<u16>,
+    offset: Option<u32>,
+}
+
+impl<'a> GetMangaListBuilder<'a> {
+    pub fn new() -> Self {
+        Self {
+            q: String::default(),
+            nsfw: false,
+            fields: None,
+            limit: None,
+            offset: None,
+        }
+    }
+
+    pub fn q(mut self, value: &str) -> Self {
+        self.q = value.to_string();
+        self
+    }
+
+    pub fn enable_nsfw(mut self) -> Self {
+        self.nsfw = true;
+        self
+    }
+
+    pub fn fields(mut self, value: &'a MangaCommonFields) -> Self {
+        self.fields = Some(value.into());
+        self
+    }
+
+    pub fn limit(mut self, value: u16) -> Self {
+        self.limit = Some(value);
+        self
+    }
+
+    pub fn offset(mut self, value: u32) -> Self {
+        self.offset = Some(value);
+        self
+    }
+
+    pub fn build(self) -> Result<GetMangaList, MangaApiError> {
+        GetMangaList::new(self.q, self.nsfw, self.fields, self.limit, self.offset)
+    }
+}
+
 #[derive(Debug, Serialize)]
 pub struct GetMangaDetails {
     #[serde(skip_serializing)]
@@ -54,12 +103,57 @@ pub struct GetMangaDetails {
 
 impl GetMangaDetails {
     /// Create new `Get manga details` query
-    pub fn new(manga_id: u32, nsfw: bool, fields: Option<&MangaDetails>) -> Self {
-        Self {
+    pub fn new(
+        manga_id: u32,
+        nsfw: bool,
+        fields: Option<&MangaDetailFields>,
+    ) -> Result<Self, MangaApiError> {
+        if manga_id == 0 {
+            return Err(MangaApiError::new(
+                "manga_id must be greater than 0".to_string(),
+            ));
+        }
+
+        Ok(Self {
             manga_id,
             nsfw,
             fields: fields.map(|f| f.into()),
+        })
+    }
+}
+
+pub struct GetMangaDetailsBuilder<'a> {
+    manga_id: u32,
+    nsfw: bool,
+    fields: Option<&'a MangaDetailFields>,
+}
+
+impl<'a> GetMangaDetailsBuilder<'a> {
+    pub fn new() -> Self {
+        Self {
+            manga_id: u32::default(),
+            nsfw: false,
+            fields: None,
         }
+    }
+
+    pub fn manga_id(mut self, value: u32) -> Self {
+        self.manga_id = value;
+        self
+    }
+
+    pub fn enable_nsfw(mut self) -> Self {
+        self.nsfw = true;
+        self
+    }
+
+    pub fn fields(mut self, value: &'a MangaDetailFields) -> Self {
+        self.fields = Some(value.into());
+        self
+    }
+
+    pub fn build(self) -> Result<GetMangaDetails, MangaApiError> {
+        GetMangaDetails::new(self.manga_id, self.nsfw, self.fields)
     }
 }
 
@@ -94,7 +188,7 @@ impl GetMangaRanking {
     pub fn new(
         ranking_type: MangaRankingType,
         nsfw: bool,
-        fields: Option<&MangaFields>,
+        fields: Option<&MangaCommonFields>,
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, MangaApiError> {
@@ -109,6 +203,61 @@ impl GetMangaRanking {
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
+    }
+}
+
+pub struct GetMangaRankingBuilder<'a> {
+    ranking_type: MangaRankingType,
+    nsfw: bool,
+    fields: Option<&'a MangaCommonFields>,
+    limit: Option<u16>,
+    offset: Option<u32>,
+}
+
+impl<'a> GetMangaRankingBuilder<'a> {
+    pub fn new() -> Self {
+        Self {
+            ranking_type: MangaRankingType::All,
+            nsfw: false,
+            fields: None,
+            limit: None,
+            offset: None,
+        }
+    }
+
+    pub fn ranking_type(mut self, value: MangaRankingType) -> Self {
+        self.ranking_type = value;
+        self
+    }
+
+    pub fn enable_nsfw(mut self) -> Self {
+        self.nsfw = true;
+        self
+    }
+
+    pub fn fields(mut self, value: &'a MangaCommonFields) -> Self {
+        self.fields = Some(value.into());
+        self
+    }
+
+    pub fn limit(mut self, value: u16) -> Self {
+        self.limit = Some(value);
+        self
+    }
+
+    pub fn offset(mut self, value: u32) -> Self {
+        self.offset = Some(value);
+        self
+    }
+
+    pub fn build(self) -> Result<GetMangaRanking, MangaApiError> {
+        GetMangaRanking::new(
+            self.ranking_type,
+            self.nsfw,
+            self.fields,
+            self.limit,
+            self.offset,
+        )
     }
 }
 
@@ -155,7 +304,7 @@ impl GetUserMangaList {
     pub fn new(
         user_name: String,
         nsfw: bool,
-        fields: Option<&MangaFields>,
+        fields: Option<&MangaCommonFields>,
         status: Option<UserMangaListStatus>,
         sort: Option<UserMangaListSort>,
         limit: Option<u16>,
@@ -178,6 +327,77 @@ impl GetUserMangaList {
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
         })
+    }
+}
+
+pub struct GetUserMangaListBuilder<'a> {
+    user_name: String,
+    nsfw: bool,
+    fields: Option<&'a MangaCommonFields>,
+    status: Option<UserMangaListStatus>,
+    sort: Option<UserMangaListSort>,
+    limit: Option<u16>,
+    offset: Option<u32>,
+}
+
+impl<'a> GetUserMangaListBuilder<'a> {
+    pub fn new() -> Self {
+        Self {
+            user_name: String::default(),
+            nsfw: false,
+            fields: None,
+            status: None,
+            sort: None,
+            limit: None,
+            offset: None,
+        }
+    }
+
+    pub fn user_name(mut self, value: &str) -> Self {
+        self.user_name = value.to_string();
+        self
+    }
+
+    pub fn enable_nsfw(mut self) -> Self {
+        self.nsfw = true;
+        self
+    }
+
+    pub fn fields(mut self, value: &'a MangaCommonFields) -> Self {
+        self.fields = Some(value.into());
+        self
+    }
+
+    pub fn status(mut self, value: UserMangaListStatus) -> Self {
+        self.status = Some(value);
+        self
+    }
+
+    pub fn sort(mut self, value: UserMangaListSort) -> Self {
+        self.sort = Some(value);
+        self
+    }
+
+    pub fn limit(mut self, value: u16) -> Self {
+        self.limit = Some(value);
+        self
+    }
+
+    pub fn offset(mut self, value: u32) -> Self {
+        self.offset = Some(value);
+        self
+    }
+
+    pub fn build(self) -> Result<GetUserMangaList, MangaApiError> {
+        GetUserMangaList::new(
+            self.user_name,
+            self.nsfw,
+            self.fields,
+            self.status,
+            self.sort,
+            self.limit,
+            self.offset,
+        )
     }
 }
 
@@ -250,6 +470,12 @@ impl UpdateMyMangaListStatus {
             }
         }
 
+        if manga_id == 0 {
+            return Err(MangaApiError::new(
+                "manga_id must be greater than 0".to_string(),
+            ));
+        }
+
         if !(status.is_some()
             || is_rereading.is_some()
             || score.is_some()
@@ -279,6 +505,109 @@ impl UpdateMyMangaListStatus {
             tags,
             comments,
         })
+    }
+}
+
+pub struct UpdateMyMangaListStatusBuilder {
+    manga_id: u32,
+    status: Option<UserMangaListStatus>,
+    is_rereading: Option<bool>,
+    score: Option<u8>,
+    num_volumes_read: Option<u32>,
+    num_chapters_read: Option<u32>,
+    priority: Option<u8>,
+    num_times_reread: Option<u32>,
+    reread_value: Option<u8>,
+    tags: Option<String>,
+    comments: Option<String>,
+}
+
+impl UpdateMyMangaListStatusBuilder {
+    pub fn new() -> Self {
+        Self {
+            manga_id: u32::default(),
+            status: None,
+            is_rereading: None,
+            score: None,
+            num_volumes_read: None,
+            num_chapters_read: None,
+            priority: None,
+            num_times_reread: None,
+            reread_value: None,
+            tags: None,
+            comments: None,
+        }
+    }
+
+    pub fn manga_id(mut self, value: u32) -> Self {
+        self.manga_id = value;
+        self
+    }
+
+    pub fn status(mut self, value: UserMangaListStatus) -> Self {
+        self.status = Some(value);
+        self
+    }
+
+    pub fn is_rereading(mut self, value: bool) -> Self {
+        self.is_rereading = Some(value);
+        self
+    }
+
+    pub fn score(mut self, value: u8) -> Self {
+        self.score = Some(value);
+        self
+    }
+
+    pub fn num_volumes_read(mut self, value: u32) -> Self {
+        self.num_volumes_read = Some(value);
+        self
+    }
+
+    pub fn num_chapters_read(mut self, value: u32) -> Self {
+        self.num_chapters_read = Some(value);
+        self
+    }
+
+    pub fn priority(mut self, value: u8) -> Self {
+        self.priority = Some(value);
+        self
+    }
+
+    pub fn num_times_reread(mut self, value: u32) -> Self {
+        self.num_times_reread = Some(value);
+        self
+    }
+
+    pub fn reread_value(mut self, value: u8) -> Self {
+        self.reread_value = Some(value);
+        self
+    }
+
+    pub fn tags(mut self, value: &str) -> Self {
+        self.tags = Some(value.to_string());
+        self
+    }
+
+    pub fn comments(mut self, value: &str) -> Self {
+        self.comments = Some(value.to_string());
+        self
+    }
+
+    pub fn build(self) -> Result<UpdateMyMangaListStatus, MangaApiError> {
+        UpdateMyMangaListStatus::new(
+            self.manga_id,
+            self.status,
+            self.is_rereading,
+            self.score,
+            self.num_volumes_read,
+            self.num_chapters_read,
+            self.priority,
+            self.num_times_reread,
+            self.reread_value,
+            self.tags,
+            self.comments,
+        )
     }
 }
 
@@ -357,15 +686,15 @@ pub enum MangaDetail {
     serialization,
 }
 
-/// Wrapper for a vector of valid Manga Fields
+/// Wrapper for a vector of valid Manga Common Fields
 #[derive(Debug)]
-pub struct MangaFields(pub Vec<MangaField>);
+pub struct MangaCommonFields(pub Vec<MangaField>);
 
 /// Wrapper for a vector of valid Manga Detail Fields
 #[derive(Debug)]
-pub struct MangaDetails(pub Vec<MangaDetail>);
+pub struct MangaDetailFields(pub Vec<MangaDetail>);
 
-impl Into<String> for &MangaFields {
+impl Into<String> for &MangaCommonFields {
     fn into(self) -> String {
         let result = self
             .0
@@ -377,7 +706,7 @@ impl Into<String> for &MangaFields {
     }
 }
 
-impl Into<String> for &MangaDetails {
+impl Into<String> for &MangaDetailFields {
     fn into(self) -> String {
         let result = self
             .0
