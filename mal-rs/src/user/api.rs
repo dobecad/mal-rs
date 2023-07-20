@@ -1,7 +1,6 @@
 use oauth2::AccessToken;
 use reqwest;
 use serde::Serialize;
-use std::error::Error;
 
 use crate::{
     oauth::{Authenticated, OauthClient},
@@ -82,7 +81,7 @@ impl From<&OauthClient<Authenticated>> for UserApiClient {
 }
 
 impl UserApiClient {
-    async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: &T) -> Result<String, UserApiError>
     where
         T: Serialize,
     {
@@ -92,7 +91,8 @@ impl UserApiClient {
             .bearer_auth(&self.access_token)
             .query(&query)
             .send()
-            .await?;
+            .await
+            .map_err(|err| UserApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
@@ -103,7 +103,7 @@ impl UserApiClient {
     pub async fn get_my_user_information(
         &self,
         query: &GetUserInformation,
-    ) -> Result<User, Box<dyn Error>> {
+    ) -> Result<User, UserApiError> {
         let response = self.get(query).await?;
         let result: User = serde_json::from_str(response.as_str()).map_err(|err| {
             UserApiError::new(format!("Failed to parse AnimeList result: {}", err))
@@ -112,7 +112,7 @@ impl UserApiClient {
     }
 }
 
-async fn handle_response(response: reqwest::Response) -> Result<String, Box<dyn Error>> {
+async fn handle_response(response: reqwest::Response) -> Result<String, UserApiError> {
     match response.status() {
         reqwest::StatusCode::OK => {
             let content = response.text().await.map_err(|err| {
@@ -120,9 +120,9 @@ async fn handle_response(response: reqwest::Response) -> Result<String, Box<dyn 
             })?;
             Ok(content)
         }
-        _ => Err(Box::new(UserApiError::new(format!(
+        _ => Err(UserApiError::new(format!(
             "Did not recieve OK response: {}",
             response.status()
-        )))),
+        ))),
     }
 }
