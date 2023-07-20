@@ -37,26 +37,26 @@ pub struct None {}
 /// use dotenvy;
 /// use mal_rs::oauth::MalClientId;
 /// use mal_rs::prelude::*;
-/// 
+///
 /// #[tokio::main]
 /// async fn main() {
 ///     dotenvy::dotenv().ok();
-/// 
+///
 ///     let client_id = MalClientId::from_env().unwrap();
 ///     let api_client = ForumApiClient::from(&client_id);
 ///     let limit = Some(3);
-/// 
+///
 ///     let topics = api_client.get_forum_boards().await;
 ///     if let Ok(topics) = topics {
 ///         println!("Topics: {}\n", topics);
 ///     }
-/// 
+///
 ///     let query = GetForumTopicDetail::new(481, limit, None).unwrap();
 ///     let response = api_client.get_forum_topic_detail(&query).await;
 ///     if let Ok(response) = response {
 ///         println!("Forum topic detail: {}\n", response);
 ///     }
-/// 
+///
 ///     let query = GetForumTopics::builder()
 ///         .q("hello")
 ///         .enable_nsfw()
@@ -125,13 +125,13 @@ impl From<&OauthClient<Authenticated>> for ForumApiClient<Oauth> {
 /// Client and Oauth ForumApiClients
 #[async_trait]
 pub trait Request {
-    async fn get(&self) -> Result<String, Box<dyn Error>>;
+    async fn get(&self) -> Result<String, ForumApiError>;
 
-    async fn get_detail(&self, query: &GetForumTopicDetail) -> Result<String, Box<dyn Error>>;
+    async fn get_detail(&self, query: &GetForumTopicDetail) -> Result<String, ForumApiError>;
 
-    async fn get_topics(&self, query: &GetForumTopics) -> Result<String, Box<dyn Error>>;
+    async fn get_topics(&self, query: &GetForumTopics) -> Result<String, ForumApiError>;
 
-    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>>;
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, ForumApiError>;
 }
 
 /// This trait defines the shared endpoints for Client and Oauth
@@ -144,7 +144,7 @@ pub trait ForumApi {
     /// Get a list of Forum boards
     ///
     /// Corresponds to the [Get forum boards](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_boards_get) endpoint
-    async fn get_forum_boards(&self) -> Result<ForumBoards, Box<dyn Error>> {
+    async fn get_forum_boards(&self) -> Result<ForumBoards, ForumApiError> {
         let response = self.get_self().get().await?;
         let result: ForumBoards = serde_json::from_str(response.as_str()).map_err(|err| {
             ForumApiError::new(format!("Failed to parse Forum Boards result: {}", err))
@@ -158,7 +158,7 @@ pub trait ForumApi {
     async fn get_forum_topic_detail(
         &self,
         query: &GetForumTopicDetail,
-    ) -> Result<ForumTopicDetail, Box<dyn Error>> {
+    ) -> Result<ForumTopicDetail, ForumApiError> {
         let response = self.get_self().get_detail(query).await?;
         let result: ForumTopicDetail = serde_json::from_str(response.as_str()).map_err(|err| {
             ForumApiError::new(format!(
@@ -172,10 +172,7 @@ pub trait ForumApi {
     /// Get a list of forum topics matching the given query
     ///
     /// Corresponds to the [Get forum topics](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topics_get) endpoint
-    async fn get_forum_topics(
-        &self,
-        query: &GetForumTopics,
-    ) -> Result<ForumTopics, Box<dyn Error>> {
+    async fn get_forum_topics(&self, query: &GetForumTopics) -> Result<ForumTopics, ForumApiError> {
         let response = self.get_self().get_topics(query).await?;
         let result: ForumTopics = serde_json::from_str(response.as_str()).map_err(|err| {
             ForumApiError::new(format!("Failed to parse Forum Topics result: {}", err))
@@ -184,7 +181,7 @@ pub trait ForumApi {
     }
 
     /// Return the results of the next page, if possible
-    async fn next<T>(&self, response: &T) -> Result<T, Box<dyn Error>>
+    async fn next<T>(&self, response: &T) -> Result<T, ForumApiError>
     where
         T: DeserializeOwned + PagingIter + Sync + Send,
     {
@@ -198,7 +195,7 @@ pub trait ForumApi {
     }
 
     /// Return the results of the previous page, if possible
-    async fn prev<T>(&self, response: &T) -> Result<T, Box<dyn Error>>
+    async fn prev<T>(&self, response: &T) -> Result<T, ForumApiError>
     where
         T: DeserializeOwned + PagingIter + Sync + Send,
     {
@@ -217,108 +214,112 @@ pub trait ForumApi {
 
 #[async_trait]
 impl Request for ForumApiClient<Client> {
-    async fn get(&self) -> Result<String, Box<dyn Error>> {
+    async fn get(&self) -> Result<String, ForumApiError> {
         let response = self
             .client
             .get(format!("{}/boards", FORUM_URL))
             .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
             .send()
-            .await?;
+            .await
+            .map_err(|err| ForumApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_detail(&self, query: &GetForumTopicDetail) -> Result<String, Box<dyn Error>> {
+    async fn get_detail(&self, query: &GetForumTopicDetail) -> Result<String, ForumApiError> {
         let response = self
             .client
             .get(format!("{}/topic/{}", FORUM_URL, query.topic_id))
             .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
             .send()
-            .await?;
+            .await
+            .map_err(|err| ForumApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_topics(&self, query: &GetForumTopics) -> Result<String, Box<dyn Error>> {
+    async fn get_topics(&self, query: &GetForumTopics) -> Result<String, ForumApiError> {
         let response = self
             .client
             .get(format!("{}/topics", FORUM_URL))
             .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
             .query(&query)
             .send()
-            .await?;
+            .await
+            .map_err(|err| ForumApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>> {
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, ForumApiError> {
         if let Some(itr) = query {
             let response = self
                 .client
                 .get(itr)
                 .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
                 .send()
-                .await?;
+                .await
+                .map_err(|err| ForumApiError::new(format!("Failed get request: {}", err)))?;
 
             handle_response(response).await
         } else {
-            Err(Box::new(ForumApiError::new(
-                "Page does not exist".to_string(),
-            )))
+            Err(ForumApiError::new("Page does not exist".to_string()))
         }
     }
 }
 
 #[async_trait]
 impl Request for ForumApiClient<Oauth> {
-    async fn get(&self) -> Result<String, Box<dyn Error>> {
+    async fn get(&self) -> Result<String, ForumApiError> {
         let response = self
             .client
             .get(format!("{}/boards", FORUM_URL))
             .bearer_auth(self.access_token.as_ref().unwrap())
             .send()
-            .await?;
+            .await
+            .map_err(|err| ForumApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_detail(&self, query: &GetForumTopicDetail) -> Result<String, Box<dyn Error>> {
+    async fn get_detail(&self, query: &GetForumTopicDetail) -> Result<String, ForumApiError> {
         let response = self
             .client
             .get(format!("{}/topic/{}", FORUM_URL, query.topic_id))
             .bearer_auth(self.access_token.as_ref().unwrap())
             .send()
-            .await?;
+            .await
+            .map_err(|err| ForumApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_topics(&self, query: &GetForumTopics) -> Result<String, Box<dyn Error>> {
+    async fn get_topics(&self, query: &GetForumTopics) -> Result<String, ForumApiError> {
         let response = self
             .client
             .get(format!("{}/topics", FORUM_URL))
             .bearer_auth(self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
-            .await?;
+            .await
+            .map_err(|err| ForumApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>> {
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, ForumApiError> {
         if let Some(itr) = query {
             let response = self
                 .client
                 .get(itr)
                 .bearer_auth(self.access_token.as_ref().unwrap())
                 .send()
-                .await?;
+                .await
+                .map_err(|err| ForumApiError::new(format!("Failed get request: {}", err)))?;
 
             handle_response(response).await
         } else {
-            Err(Box::new(ForumApiError::new(
-                "Page does not exist".to_string(),
-            )))
+            Err(ForumApiError::new("Page does not exist".to_string()))
         }
     }
 }
@@ -339,7 +340,7 @@ impl ForumApi for ForumApiClient<Oauth> {
     }
 }
 
-async fn handle_response(response: reqwest::Response) -> Result<String, Box<dyn Error>> {
+async fn handle_response(response: reqwest::Response) -> Result<String, ForumApiError> {
     match response.status() {
         reqwest::StatusCode::OK => {
             let content = response.text().await.map_err(|err| {
@@ -347,9 +348,9 @@ async fn handle_response(response: reqwest::Response) -> Result<String, Box<dyn 
             })?;
             Ok(content)
         }
-        _ => Err(Box::new(ForumApiError::new(format!(
+        _ => Err(ForumApiError::new(format!(
             "Did not recieve OK response: {}",
             response.status()
-        )))),
+        ))),
     }
 }
