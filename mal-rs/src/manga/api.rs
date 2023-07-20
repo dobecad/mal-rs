@@ -46,16 +46,16 @@ pub struct None {}
 /// use dotenvy;
 /// use mal_rs::oauth::MalClientId;
 /// use mal_rs::prelude::*;
-/// 
+///
 /// #[tokio::main]
 /// async fn main() {
 ///     dotenvy::dotenv().ok();
-/// 
+///
 ///     let client_id = MalClientId::from_env().unwrap();
 ///     let api_client = MangaApiClient::from(&client_id);
 ///     let common_fields = mal_rs::manga::all_common_fields();
 ///     let detail_fields = mal_rs::manga::all_detail_fields();
-/// 
+///
 ///     let query = GetMangaList::builder("one")
 ///         .fields(&common_fields)
 ///         .limit(3)
@@ -65,7 +65,7 @@ pub struct None {}
 ///     if let Ok(response) = response {
 ///         println!("Response: {}\n", response);
 ///     }
-/// 
+///
 ///     let query = GetMangaDetails::builder(44347)
 ///         .fields(&detail_fields)
 ///         .build()
@@ -74,7 +74,7 @@ pub struct None {}
 ///     if let Ok(response) = response {
 ///         println!("Response: {}\n", response);
 ///     }
-/// 
+///
 ///     let query = GetMangaRanking::builder(MangaRankingType::All)
 ///         .enable_nsfw()
 ///         .fields(&common_fields)
@@ -143,24 +143,24 @@ impl From<&OauthClient<Authenticated>> for MangaApiClient<Oauth> {
 /// Client and Oauth MangaApiClients
 #[async_trait]
 pub trait Request {
-    async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: &T) -> Result<String, MangaApiError>
     where
-        T: Serialize + std::marker::Send + std::marker::Sync;
+        T: Serialize + Send + Sync;
 
-    async fn get_details(&self, query: &GetMangaDetails) -> Result<String, Box<dyn Error>>;
+    async fn get_details(&self, query: &GetMangaDetails) -> Result<String, MangaApiError>;
 
-    async fn get_ranking(&self, query: &GetMangaRanking) -> Result<String, Box<dyn Error>>;
+    async fn get_ranking(&self, query: &GetMangaRanking) -> Result<String, MangaApiError>;
 
-    async fn get_user(&self, query: &GetUserMangaList) -> Result<String, Box<dyn Error>>;
+    async fn get_user(&self, query: &GetUserMangaList) -> Result<String, MangaApiError>;
 
-    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>>;
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, MangaApiError>;
 }
 
 #[async_trait]
 impl Request for MangaApiClient<Client> {
-    async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: &T) -> Result<String, MangaApiError>
     where
-        T: Serialize + std::marker::Send + std::marker::Sync,
+        T: Serialize + Send + Sync,
     {
         let response = self
             .client
@@ -168,68 +168,71 @@ impl Request for MangaApiClient<Client> {
             .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
             .query(&query)
             .send()
-            .await?;
+            .await
+            .map_err(|err| MangaApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_details(&self, query: &GetMangaDetails) -> Result<String, Box<dyn Error>> {
+    async fn get_details(&self, query: &GetMangaDetails) -> Result<String, MangaApiError> {
         let response = self
             .client
             .get(format!("{}/{}", MANGA_URL, query.manga_id))
             .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
             .query(&query)
             .send()
-            .await?;
+            .await
+            .map_err(|err| MangaApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_ranking(&self, query: &GetMangaRanking) -> Result<String, Box<dyn Error>> {
+    async fn get_ranking(&self, query: &GetMangaRanking) -> Result<String, MangaApiError> {
         let response = self
             .client
             .get(format!("{}/ranking", MANGA_URL))
             .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
             .query(&query)
             .send()
-            .await?;
+            .await
+            .map_err(|err| MangaApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_user(&self, query: &GetUserMangaList) -> Result<String, Box<dyn Error>> {
+    async fn get_user(&self, query: &GetUserMangaList) -> Result<String, MangaApiError> {
         let response = self
             .client
             .get(format!("{}/{}/mangalist", USER_URL, query.user_name))
             .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
             .query(&query)
             .send()
-            .await?;
+            .await
+            .map_err(|err| MangaApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>> {
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, MangaApiError> {
         if let Some(itr) = query {
             let response = self
                 .client
                 .get(itr)
                 .header("X-MAL-CLIENT-ID", self.client_id.as_ref().unwrap())
                 .send()
-                .await?;
+                .await
+                .map_err(|err| MangaApiError::new(format!("Failed get request: {}", err)))?;
 
             handle_response(response).await
         } else {
-            Err(Box::new(MangaApiError::new(
-                "Page does not exist".to_string(),
-            )))
+            Err(MangaApiError::new("Page does not exist".to_string()))
         }
     }
 }
 
 #[async_trait]
 impl Request for MangaApiClient<Oauth> {
-    async fn get<T>(&self, query: &T) -> Result<String, Box<dyn Error>>
+    async fn get<T>(&self, query: &T) -> Result<String, MangaApiError>
     where
         T: Serialize + std::marker::Send + std::marker::Sync,
     {
@@ -239,61 +242,64 @@ impl Request for MangaApiClient<Oauth> {
             .bearer_auth(self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
-            .await?;
+            .await
+            .map_err(|err| MangaApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_details(&self, query: &GetMangaDetails) -> Result<String, Box<dyn Error>> {
+    async fn get_details(&self, query: &GetMangaDetails) -> Result<String, MangaApiError> {
         let response = self
             .client
             .get(format!("{}/{}", MANGA_URL, query.manga_id))
             .bearer_auth(self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
-            .await?;
+            .await
+            .map_err(|err| MangaApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_ranking(&self, query: &GetMangaRanking) -> Result<String, Box<dyn Error>> {
+    async fn get_ranking(&self, query: &GetMangaRanking) -> Result<String, MangaApiError> {
         let response = self
             .client
             .get(format!("{}/ranking", MANGA_URL))
             .bearer_auth(self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
-            .await?;
+            .await
+            .map_err(|err| MangaApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_user(&self, query: &GetUserMangaList) -> Result<String, Box<dyn Error>> {
+    async fn get_user(&self, query: &GetUserMangaList) -> Result<String, MangaApiError> {
         let response = self
             .client
             .get(format!("{}/{}/mangalist", USER_URL, query.user_name))
             .bearer_auth(self.access_token.as_ref().unwrap())
             .query(&query)
             .send()
-            .await?;
+            .await
+            .map_err(|err| MangaApiError::new(format!("Failed get request: {}", err)))?;
 
         handle_response(response).await
     }
 
-    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, Box<dyn Error>> {
+    async fn get_next_or_prev(&self, query: Option<&String>) -> Result<String, MangaApiError> {
         if let Some(itr) = query {
             let response = self
                 .client
                 .get(itr)
                 .bearer_auth(self.access_token.as_ref().unwrap())
                 .send()
-                .await?;
+                .await
+                .map_err(|err| MangaApiError::new(format!("Failed get request: {}", err)))?;
 
             handle_response(response).await
         } else {
-            Err(Box::new(MangaApiError::new(
-                "Page does not exist".to_string(),
-            )))
+            Err(MangaApiError::new("Page does not exist".to_string()))
         }
     }
 }
@@ -308,7 +314,7 @@ pub trait MangaApi {
     /// Get a list of manga that are similar to the given query
     ///
     /// Corresponds to the [Get manga list](https://myanimelist.net/apiconfig/references/api/v2#operation/manga_get) endpoint
-    async fn get_manga_list(&self, query: &GetMangaList) -> Result<MangaList, Box<dyn Error>> {
+    async fn get_manga_list(&self, query: &GetMangaList) -> Result<MangaList, MangaApiError> {
         let response = self.get_self().get(query).await?;
         let result: MangaList = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse MangaList result: {}", err))
@@ -322,7 +328,7 @@ pub trait MangaApi {
     async fn get_manga_details(
         &self,
         query: &GetMangaDetails,
-    ) -> Result<MangaDetails, Box<dyn Error>> {
+    ) -> Result<MangaDetails, MangaApiError> {
         let response = self.get_self().get_details(query).await?;
         let result: MangaDetails = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse MangaList result: {}", err))
@@ -336,7 +342,7 @@ pub trait MangaApi {
     async fn get_manga_ranking(
         &self,
         query: &GetMangaRanking,
-    ) -> Result<MangaRanking, Box<dyn Error>> {
+    ) -> Result<MangaRanking, MangaApiError> {
         let response = self.get_self().get_ranking(query).await?;
         let result: MangaRanking = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse MangaList result: {}", err))
@@ -352,11 +358,11 @@ pub trait MangaApi {
     async fn get_user_manga_list(
         &self,
         query: &GetUserMangaList,
-    ) -> Result<MangaList, Box<dyn Error>> {
+    ) -> Result<MangaList, MangaApiError> {
         if query.user_name == "@me".to_string() {
-            return Err(Box::new(MangaApiError::new(
+            return Err(MangaApiError::new(
                 "You can only get your list via an Oauth client".to_string(),
-            )));
+            ));
         }
         let response = self.get_self().get_user(query).await?;
         let result: MangaList = serde_json::from_str(response.as_str()).map_err(|err| {
@@ -366,7 +372,7 @@ pub trait MangaApi {
     }
 
     /// Return the results of the next page, if possible
-    async fn next<T>(&self, response: &T) -> Result<T, Box<dyn Error>>
+    async fn next<T>(&self, response: &T) -> Result<T, MangaApiError>
     where
         T: DeserializeOwned + PagingIter + Sync + Send,
     {
@@ -380,7 +386,7 @@ pub trait MangaApi {
     }
 
     /// Return the results of the previous page, if possible
-    async fn prev<T>(&self, response: &T) -> Result<T, Box<dyn Error>>
+    async fn prev<T>(&self, response: &T) -> Result<T, MangaApiError>
     where
         T: DeserializeOwned + PagingIter + Sync + Send,
     {
@@ -422,7 +428,7 @@ impl MangaApi for MangaApiClient<Oauth> {
     async fn get_user_manga_list(
         &self,
         query: &GetUserMangaList,
-    ) -> Result<MangaList, Box<dyn Error>> {
+    ) -> Result<MangaList, MangaApiError> {
         let response = self.get_self().get_user(query).await?;
         let result: MangaList = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse Anime List result: {}", err))
@@ -438,15 +444,18 @@ impl MangaApiClient<Oauth> {
     pub async fn update_manga_list_status(
         &self,
         query: &UpdateMyMangaListStatus,
-    ) -> Result<ListStatus, Box<dyn Error>> {
-        let form_data = struct_to_form_data(&query)?;
+    ) -> Result<ListStatus, MangaApiError> {
+        let form_data = struct_to_form_data(&query).map_err(|err| {
+            MangaApiError::new(format!("Failed to turn request into form data: {}", err))
+        })?;
         let response = self
             .client
             .put(format!("{}/{}/my_list_status", MANGA_URL, query.manga_id))
             .bearer_auth(&self.access_token.as_ref().unwrap())
             .form(&form_data)
             .send()
-            .await?;
+            .await
+            .map_err(|err| MangaApiError::new(format!("Failed put request: {}", err)))?;
 
         let response = handle_response(response).await?;
         let result: ListStatus = serde_json::from_str(response.as_str()).map_err(|err| {
@@ -461,28 +470,29 @@ impl MangaApiClient<Oauth> {
     pub async fn delete_manga_list_item(
         &self,
         query: &DeleteMyMangaListItem,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), MangaApiError> {
         let response = self
             .client
             .delete(format!("{}/{}/my_list_status", MANGA_URL, query.manga_id))
             .bearer_auth(&self.access_token.as_ref().unwrap())
             .send()
-            .await?;
+            .await
+            .map_err(|err| MangaApiError::new(format!("Failed delete request: {}", err)))?;
 
         match response.status() {
             reqwest::StatusCode::OK => Ok(()),
-            reqwest::StatusCode::NOT_FOUND => Err(Box::new(MangaApiError::new(
+            reqwest::StatusCode::NOT_FOUND => Err(MangaApiError::new(
                 "Manga does not exist in user's manga list".to_string(),
-            ))),
-            _ => Err(Box::new(MangaApiError::new(format!(
+            )),
+            _ => Err(MangaApiError::new(format!(
                 "Did not recieve expected response: {}",
                 response.status()
-            )))),
+            ))),
         }
     }
 }
 
-async fn handle_response(response: reqwest::Response) -> Result<String, Box<dyn Error>> {
+async fn handle_response(response: reqwest::Response) -> Result<String, MangaApiError> {
     match response.status() {
         reqwest::StatusCode::OK => {
             let content = response.text().await.map_err(|err| {
@@ -490,9 +500,9 @@ async fn handle_response(response: reqwest::Response) -> Result<String, Box<dyn 
             })?;
             Ok(content)
         }
-        _ => Err(Box::new(MangaApiError::new(format!(
+        _ => Err(MangaApiError::new(format!(
             "Did not recieve OK response: {}",
             response.status()
-        )))),
+        ))),
     }
 }
