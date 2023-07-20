@@ -10,7 +10,6 @@ use crate::{
     oauth::{Authenticated, MalClientId, OauthClient},
     MANGA_URL, USER_URL,
 };
-use std::error::Error;
 
 use super::{
     requests::{GetMangaDetails, GetMangaList, GetMangaRanking},
