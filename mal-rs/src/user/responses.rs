@@ -1,6 +1,8 @@
-use serde::Deserialize;
+use std::fmt::Display;
 
-#[derive(Debug, Deserialize)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct User {
     pub id: u32,
     pub name: String,
@@ -14,7 +16,13 @@ pub struct User {
     pub is_supporter: bool,
 }
 
-#[derive(Debug, Deserialize)]
+impl Display for User {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct AnimeStatistics {
     pub num_items_watching: u32,
     pub num_items_completed: u32,
@@ -31,4 +39,10 @@ pub struct AnimeStatistics {
     pub num_episodes: u32,
     pub num_times_rewatched: u32,
     pub mean_score: f32,
+}
+
+impl Display for AnimeStatistics {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
 }
