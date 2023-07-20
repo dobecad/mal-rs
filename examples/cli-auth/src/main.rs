@@ -1,10 +1,10 @@
-use dotenv;
+use dotenvy;
 use mal_rs::oauth::{OauthClient, RedirectResponse};
 use std::io;
 
 #[tokio::main]
 async fn main() {
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let authenticated_client = OauthClient::load_from_config();
     match authenticated_client {

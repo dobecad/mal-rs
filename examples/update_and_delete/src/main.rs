@@ -1,10 +1,10 @@
-use dotenv;
+use dotenvy;
 use mal_rs::{oauth::RedirectResponse, prelude::*};
 use std::io;
 
 #[tokio::main]
 async fn main() {
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let mut oauth_client = OauthClient::new().unwrap();
     println!("Visit this URL: {}\n", oauth_client.generate_auth_url());
