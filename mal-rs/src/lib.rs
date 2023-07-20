@@ -83,14 +83,14 @@
 //! ## Using a ClientId
 //!
 //! ```rust,ignore
-//! use dotenv;
+//! use dotenvy;
 //! use mal_rs::anime_common_fields;
 //! use mal_rs::oauth::MalClientId;
 //! use mal_rs::prelude::*;
 //!
 //! #[tokio::main]
 //! async fn main() {
-//!     dotenv::dotenv().ok();
+//!     dotenvy::dotenv().ok();
 //!
 //!     let client_id = MalClientId::from_env().unwrap();
 //!
@@ -132,13 +132,13 @@
 //! ## Creating an OAuth token
 //!
 //! ```rust,ignore
-//! use dotenv;
+//! use dotenvy;
 //! use mal_rs::oauth::{OauthClient, RedirectResponse};
 //! use std::io;
 //! 
 //! #[tokio::main]
 //! async fn main() {
-//!     dotenv::dotenv().ok();
+//!     dotenvy::dotenv().ok();
 //! 
 //!     let authenticated_client = OauthClient::load_from_config();
 //!     match authenticated_client {
