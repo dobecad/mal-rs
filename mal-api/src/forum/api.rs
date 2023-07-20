@@ -35,8 +35,8 @@ pub struct None {}
 /// # Example
 /// ```rust,ignore
 /// use dotenvy;
-/// use mal_rs::oauth::MalClientId;
-/// use mal_rs::prelude::*;
+/// use mal_api::oauth::MalClientId;
+/// use mal_api::prelude::*;
 ///
 /// #[tokio::main]
 /// async fn main() {

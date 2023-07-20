@@ -17,8 +17,8 @@ use super::{error::UserApiError, requests::GetUserInformation, responses::User};
 ///
 /// ```rust,ignore
 /// use dotenvy;
-/// use mal_rs::oauth::RedirectResponse;
-/// use mal_rs::prelude::*;
+/// use mal_api::oauth::RedirectResponse;
+/// use mal_api::prelude::*;
 /// use std::io;
 ///
 /// #[tokio::main]
@@ -51,7 +51,7 @@ use super::{error::UserApiError, requests::GetUserInformation, responses::User};
 ///
 ///     // Using Oauth access token to interact with User API
 ///     let api_client = UserApiClient::from(&authenticated_oauth_client);
-///     let fields = mal_rs::user_fields!(UserField::id, UserField::name, UserField::is_supporter);
+///     let fields = mal_api::user_fields!(UserField::id, UserField::name, UserField::is_supporter);
 ///     let query = GetUserInformation::new(Some(&fields));
 ///     let response = api_client.get_my_user_information(&query).await.unwrap();
 ///     println!("Information about yourself: {:?}", response);
