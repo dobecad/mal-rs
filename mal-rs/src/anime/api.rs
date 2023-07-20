@@ -13,7 +13,6 @@ use crate::{
     oauth::{Authenticated, MalClientId, OauthClient},
     ANIME_URL, USER_URL,
 };
-use std::error::Error;
 
 use super::{
     requests::{
