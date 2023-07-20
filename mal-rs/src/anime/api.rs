@@ -39,7 +39,7 @@ pub struct None {}
 /// vary depending on if the AnimeApiClient was constructed from a
 /// [MalClientId] or an [OauthClient].
 ///
-/// Keep in mind that constructing an AnimeApiClient from a [OauthClient] provides
+/// Keep in mind that constructing an AnimeApiClient from an [OauthClient] provides
 /// more access to the MAL API than from a [MalClientId]. Check the MAL API documentation
 /// to view which endpoints require an [OauthClient] versus a [MalClientId] to see which
 /// one is most appropriate for your use case.
@@ -83,6 +83,7 @@ pub struct None {}
 ///     }
 /// }
 /// ```
+
 #[derive(Debug, Clone)]
 pub struct AnimeApiClient<State = None> {
     client: reqwest::Client,
@@ -516,7 +517,7 @@ impl AnimeApiClient<Oauth> {
 
     /// Get a users Anime list
     ///
-    /// You **can** get the anime list of `@me` with an [Oauth] AnimeApiClient
+    /// You **can** get the anime list of `@me` with an [OauthClient] AnimeApiClient
     ///
     /// Corresponds to the [Get user anime list](https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get) endpoint
     pub async fn get_user_anime_list(

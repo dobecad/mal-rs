@@ -11,9 +11,9 @@ use super::{error::UserApiError, requests::GetUserInformation, responses::User};
 
 /// The UserApiClient provides functions for interacting with the various
 /// `anime` and `user animelist` MAL API endpoints. A UserApiClient
-/// can only be created from an [AccessToken].
+/// can only be created from an [OauthClient].
 ///
-/// Example:
+/// # Example:
 ///
 /// ```rust,ignore
 /// use dotenvy;
@@ -49,7 +49,7 @@ use super::{error::UserApiError, requests::GetUserInformation, responses::User};
 ///         Err(e) => panic!("Failed: {}", e),
 ///     };
 ///
-///     // Using Oauth token to interact with User API
+///     // Using Oauth access token to interact with User API
 ///     let api_client = UserApiClient::from(&authenticated_oauth_client);
 ///     let fields = mal_rs::user_fields!(UserField::id, UserField::name, UserField::is_supporter);
 ///     let query = GetUserInformation::new(Some(&fields));
@@ -57,6 +57,7 @@ use super::{error::UserApiError, requests::GetUserInformation, responses::User};
 ///     println!("Information about yourself: {:?}", response);
 /// }
 /// ```
+
 pub struct UserApiClient {
     client: reqwest::Client,
     access_token: String,

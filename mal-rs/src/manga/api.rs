@@ -34,7 +34,7 @@ pub struct None {}
 /// vary depending on if the MangaApiClient was constructed from a
 /// [MalClientId] or an [OauthClient].
 ///
-/// Keep in mind that constructing an MangaApiClient from a [OauthClient] provides
+/// Keep in mind that constructing a MangaApiClient from an [OauthClient] provides
 /// more access to the MAL API than from a [MalClientId]. Check the MAL API documentation
 /// to view which endpoints require an [OauthClient] versus a [MalClientId] to see which
 /// one is most appropriate for your use case.
@@ -86,6 +86,7 @@ pub struct None {}
 ///     }
 /// }
 /// ```
+
 #[derive(Debug, Clone)]
 pub struct MangaApiClient<State = None> {
     client: reqwest::Client,
@@ -421,7 +422,7 @@ impl MangaApi for MangaApiClient<Oauth> {
 
     /// Get a users manga list
     ///
-    /// You **can** get the manga list of `@me` with an [Oauth] MangaApiClient
+    /// You **can** get the manga list of `@me` with an [OauthClient] MangaApiClient
     ///
     /// Corresponds to the [Get user mangalist](https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_mangalist_get) endpoint
     async fn get_user_manga_list(

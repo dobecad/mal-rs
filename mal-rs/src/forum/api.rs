@@ -30,7 +30,7 @@ pub struct None {}
 
 /// The ForumApiClient provides functions for interacting with the various
 /// `forum` MAL API endpoints. The accessible endpoints do not vary between
-/// [ClientId] or [AccessToken] clients.
+/// [MalClientId] or [OauthClient] clients.
 ///
 /// # Example
 /// ```rust,ignore
@@ -69,6 +69,7 @@ pub struct None {}
 ///     }
 /// }
 /// ```
+
 #[derive(Debug, Clone)]
 pub struct ForumApiClient<State = None> {
     client: reqwest::Client,
