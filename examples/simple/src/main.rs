@@ -22,7 +22,11 @@ async fn main() {
         .build()
         .unwrap();
     let result = api_client.get_anime_list(&query).await.unwrap();
-    println!("Result: {}", &result);
+    println!("Received response: {}\n", result);
+    for entry in result.data.iter() {
+        println!("Anime Title: {}  Anime ID: {}", entry.node.title, entry.node.id);
+    }
+    
 
     // Example iterating through pages
     let result = api_client.next(&result).await.unwrap();
