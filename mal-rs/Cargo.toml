@@ -8,7 +8,7 @@ repository = "https://github.com/dobecad/mal-rs"
 description = "An asynchronous MyAnimeList (MAL) API library for Rust"
 keywords = ["async", "mal", "myanimelist", "anime", "manga"]
 categories = ["asynchronous", "api-bindings"]
-readme = "README.md"
+readme = "../README.md"
 
 [lib]
 crate-type = ["lib"]
