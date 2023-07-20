@@ -95,6 +95,7 @@ pub enum Status {
     Finished,
     CurrentlyPublishing,
     NotYetPublished,
+    OnHiatus,   // Undocumented status...
 }
 
 #[derive(Debug, Deserialize, Serialize)]
