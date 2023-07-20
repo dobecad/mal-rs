@@ -468,7 +468,16 @@ impl AnimeApiClient<Oauth> {
         &self,
         query: &GetSuggestedAnime,
     ) -> Result<SuggestedAnime, Box<dyn Error>> {
-        let response = self.get(query).await?;
+        let response = self
+            .client
+            .get(format!("{}/suggestions", ANIME_URL))
+            .bearer_auth(&self.access_token.as_ref().unwrap())
+            .query(&query)
+            .send()
+            .await?;
+
+        let response = handle_response(response).await?;
+
         let result: SuggestedAnime = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Suggested Anime result: {}", err))
         })?;
