@@ -2,7 +2,16 @@
 name = "mal-rs"
 version = "0.1.0"
 edition = "2021"
-authors = ["dobecad"]
+authors = ["dobecad https://github.com/dobecad"]
+license = "MIT"
+repository = "https://github.com/dobecad/mal-rs"
+description = "An asynchronous MyAnimeList (MAL) API library for Rust"
+keywords = ["async", "mal", "myanimelist", "anime", "manga"]
+categories = ["asynchronous", "api-bindings"]
+readme = "README.md"
+
+[lib]
+crate-type = ["lib"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
