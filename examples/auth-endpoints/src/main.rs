@@ -1,5 +1,5 @@
 use dotenvy;
-use mal_rs::{
+use mal_api::{
     oauth::{Authenticated, OauthClient, RedirectResponse},
     prelude::{
         AnimeApiClient, GetSuggestedAnime, GetUserAnimeList, GetUserInformation, GetUserMangaList,
@@ -56,7 +56,7 @@ async fn endpoints(oauth_client: &OauthClient<Authenticated>) {
     let user_api_client = UserApiClient::from(oauth_client);
 
     let query = GetSuggestedAnime::builder()
-        .fields(&mal_rs::anime::all_common_fields())
+        .fields(&mal_api::anime::all_common_fields())
         .limit(5)
         .build()
         .unwrap();
@@ -77,7 +77,7 @@ async fn endpoints(oauth_client: &OauthClient<Authenticated>) {
         println!("Response: {}\n", response);
     }
 
-    let user_fields = mal_rs::user::all_fields();
+    let user_fields = mal_api::user::all_fields();
     let query = GetUserInformation::new(Some(&user_fields));
     let response = user_api_client.get_my_user_information(&query).await;
     if let Ok(response) = response {

@@ -1,5 +1,5 @@
 [package]
-name = "mal-rs"
+name = "mal-api"
 version = "0.1.0"
 edition = "2021"
 authors = ["dobecad https://github.com/dobecad"]

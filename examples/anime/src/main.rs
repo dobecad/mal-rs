@@ -1,6 +1,6 @@
 use dotenvy;
-use mal_rs::oauth::MalClientId;
-use mal_rs::prelude::*;
+use mal_api::oauth::MalClientId;
+use mal_api::prelude::*;
 
 #[tokio::main]
 async fn main() {
@@ -8,8 +8,8 @@ async fn main() {
 
     let client_id = MalClientId::from_env().unwrap();
     let api_client = AnimeApiClient::from(&client_id);
-    let common_fields = mal_rs::anime::all_common_fields();
-    let detail_fields = mal_rs::anime::all_detail_fields();
+    let common_fields = mal_api::anime::all_common_fields();
+    let detail_fields = mal_api::anime::all_detail_fields();
 
     // Using the builder pattern for building the query
     let query = GetAnimeList::builder("One Piece")

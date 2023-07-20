@@ -1,4 +1,4 @@
-//! `mal-rs` is an asynchronous, fully type-safe MyAnimeList API
+//! `mal-api` is an asynchronous, fully type-safe MyAnimeList API
 //!
 //! # Table of Contents
 //! - [Overview](#overview)
@@ -9,18 +9,18 @@
 //!
 //! # Overview
 //!
-//! `mal-rs` library is a fully type-safe library
+//! `mal-api` library is a fully type-safe library
 //! that provides asynchronous functionality for interacting with the [MyAnimeList](https://myanimelist.net/apiconfig/references/api/v2) (MAL)
 //! API.
 //!
-//! With `mal-rs`, developers can confidently integrate MAL API
+//! With `mal-api`, developers can confidently integrate MAL API
 //! functionality into their applications, enabling them to retrieve, update,
 //! and manage anime and manga data effortlessly. The library offers a comprehensive
 //! set of API endpoints, allowing users to perform operations such as searching for
 //! anime, retrieving detailed information about specific titles, managing user
 //! lists, and more.
 //!
-//! One of the key features of `mal-rs` is its type safety. By utilizing Rust's
+//! One of the key features of `mal-api` is its type safety. By utilizing Rust's
 //! strong type system, the library provides compile-time guarantees that the API
 //! requests and responses are correctly structured and formatted. This eliminates
 //! the risk of runtime errors. Developers can leverage the library's well-defined
@@ -29,10 +29,10 @@
 //!
 //! # OAuth
 //!
-//! `mal-rs` provides a method for obtaining MAL OAuth access tokens.
+//! `mal-api` provides a method for obtaining MAL OAuth access tokens.
 //! This token is necessary to access certain MAL API endpoints.
 //! Depending on whether you obtain an OAuth token or just use your ClientId,
-//! the `mal-rs` API client you create from either token will ensure you can only
+//! the `mal-api` API client you create from either token will ensure you can only
 //! access the endpoints your token is comptatible with.
 //!
 //! # API Clients
@@ -55,12 +55,12 @@
 //!
 //! # Anime and Manga Fields
 //!
-//! `mal-rs` provides utilities to ensure that the fields you want returned from the
+//! `mal-api` provides utilities to ensure that the fields you want returned from the
 //! anime and manga endpoints are valid fields.
 //!
 //! ```rust,no_run
-//! use mal_rs::prelude::*;
-//! use mal_rs::anime_common_fields;
+//! use mal_api::prelude::*;
+//! use mal_api::anime_common_fields;
 //!
 //! // Specify which fields you want returned from the Anime endpoint
 //! let fields = anime_common_fields!(
@@ -70,10 +70,10 @@
 //! );
 //!
 //! // If you want all of the common fields:
-//! let fields = mal_rs::anime::all_common_fields();
+//! let fields = mal_api::anime::all_common_fields();
 //!
 //! // If you want all of the detailed fields:
-//! let fields = mal_rs::anime::all_detail_fields();
+//! let fields = mal_api::anime::all_detail_fields();
 //! ```
 //!
 //! # Examples
@@ -82,9 +82,9 @@
 //!
 //! ```rust,ignore
 //! use dotenvy;
-//! use mal_rs::anime_common_fields;
-//! use mal_rs::oauth::MalClientId;
-//! use mal_rs::prelude::*;
+//! use mal_api::anime_common_fields;
+//! use mal_api::oauth::MalClientId;
+//! use mal_api::prelude::*;
 //!
 //! #[tokio::main]
 //! async fn main() {
@@ -120,7 +120,7 @@
 //!
 //!     // Manga API example
 //!     let api_client = MangaApiClient::from(&client_id);
-//!     let fields = mal_rs::manga::all_common_fields();
+//!     let fields = mal_api::manga::all_common_fields();
 //!
 //!     // Example using `new` pattern. Not recommended, but available
 //!     let nsfw = false;
@@ -135,7 +135,7 @@
 //!
 //! ```rust,ignore
 //! use dotenvy;
-//! use mal_rs::oauth::{OauthClient, RedirectResponse};
+//! use mal_api::oauth::{OauthClient, RedirectResponse};
 //! use std::io;
 //!
 //! #[tokio::main]

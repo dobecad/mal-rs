@@ -1,5 +1,5 @@
 use dotenvy;
-use mal_rs::{oauth::RedirectResponse, prelude::*};
+use mal_api::{oauth::RedirectResponse, prelude::*};
 use std::io;
 
 #[tokio::main]

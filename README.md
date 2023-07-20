@@ -1,4 +1,4 @@
-# mal-rs
+# mal-api
 
 An asynchronous [MyAnimeList](https://myanimelist.net/) (MAL) API library for Rust.
 
@@ -15,9 +15,9 @@ An asynchronous [MyAnimeList](https://myanimelist.net/) (MAL) API library for Ru
 
 ```rust
 use dotenvy;
-use mal_rs::anime_common_fields;
-use mal_rs::oauth::MalClientId;
-use mal_rs::prelude::*;
+use mal_api::anime_common_fields;
+use mal_api::oauth::MalClientId;
+use mal_api::prelude::*;
 
 #[tokio::main]
 async fn main() {
@@ -55,7 +55,7 @@ async fn main() {
 
     // Manga API example
     let api_client = MangaApiClient::from(&client_id);
-    let fields = mal_rs::manga::all_common_fields();
+    let fields = mal_api::manga::all_common_fields();
 
     // Example using `new` pattern. Not recommended, but available
     let nsfw = false;
