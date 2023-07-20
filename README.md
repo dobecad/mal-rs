@@ -66,7 +66,7 @@ async fn main() {
 }
 ```
 
-You can check out the [examples](./examples/) directory to see usage examples.
+You can check out the [examples](./examples/) directory to see additional usage examples.
 
 ## License
 
