@@ -20,7 +20,10 @@ async fn main() {
     if let Ok(response) = response {
         println!("Received response: {}\n", response);
         for entry in response.data.iter() {
-            println!("Anime Title: {}  Anime ID: {}", entry.node.title, entry.node.id);
+            println!(
+                "Anime Title: {}  Anime ID: {}",
+                entry.node.title, entry.node.id
+            );
         }
     }
 
