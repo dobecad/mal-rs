@@ -1,0 +1,26 @@
+name: Rust Test
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Check code formatting
+        run: cargo fmt -- --check
+
+      - name: Run tests
+        run: cargo test
