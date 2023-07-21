@@ -1,0 +1,22 @@
+name: Publish Crate
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger the workflow on new Git tags (e.g., v0.1.0)
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Build and test
+        run: cargo build --verbose && cargo test --verbose
+
+      - name: Publish to crates.io
+        env:
+          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+        run: cargo publish --token $CRATES_IO_TOKEN
