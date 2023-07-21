@@ -21,6 +21,8 @@ use mal_api::prelude::*;
 
 #[tokio::main]
 async fn main() {
+    // See the .env.example for which 
+    // environment variables you are expected to define
     dotenvy::dotenv().ok();
 
     let client_id = MalClientId::from_env().unwrap();
@@ -32,7 +34,8 @@ async fn main() {
         AnimeField::title,
     );
 
-    // Example using builder pattern. The `builder(args...)` method will only require
+    // Example using the builder pattern. 
+    // The `builder(args...)` method will only require
     // the required arguments for the specific API endpoint, while the
     // other builder instance methods will build up the optional arguments
     let query = GetAnimeList::builder("One")
