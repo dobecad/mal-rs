@@ -3,7 +3,7 @@ name: Publish Crate
 on:
   push:
     tags:
-      - 'v*' # Trigger the workflow on new Git tags (e.g., v0.1.0)
+      - "v*" # Trigger the workflow on new Git tags (e.g., v0.1.0)
 
 jobs:
   build_and_publish:
@@ -13,10 +13,15 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
       - name: Build and test
         run: cargo build --verbose && cargo test --verbose
 
       - name: Publish to crates.io
         env:
           CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-        run: cargo publish --token $CRATES_IO_TOKEN
+        run: cargo publish -p mal-api --token $CRATES_IO_TOKEN
