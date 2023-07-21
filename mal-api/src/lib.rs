@@ -95,8 +95,8 @@
 //!     // Anime API example
 //!     let api_client = AnimeApiClient::from(&client_id);
 //!     let fields = anime_common_fields!(
-//!         AnimeField::id, 
-//!         AnimeField::num_episodes, 
+//!         AnimeField::id,
+//!         AnimeField::num_episodes,
 //!         AnimeField::title,
 //!     );
 //!

@@ -1,6 +1,6 @@
 //! Module for interacting with the `manga` and `user mangalist` endpoints
 
-use self::requests::{MangaDetail, MangaDetailFields, MangaField, MangaCommonFields};
+use self::requests::{MangaCommonFields, MangaDetail, MangaDetailFields, MangaField};
 use strum::IntoEnumIterator;
 
 /// Manga API client

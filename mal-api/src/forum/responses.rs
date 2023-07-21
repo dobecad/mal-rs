@@ -116,7 +116,7 @@ impl Display for Post {
 pub struct ForumTopicPostCreatedBy {
     pub id: u32,
     pub name: String,
-    pub forum_title: Option<String>,    // Undocumented field in MAL API reference...
+    pub forum_title: Option<String>, // Undocumented field in MAL API reference...
     pub forum_avator: String,
 }
 
