@@ -63,13 +63,20 @@ async fn main() {
     // Example using `new` pattern. Not recommended, but available
     let nsfw = false;
     let limit = Some(5);
-    let query = GetMangaList::new("one".to_string(), nsfw, Some(&fields), limit, None).unwrap();
+    let query = GetMangaList::new("one", nsfw, Some(&fields), limit, None).unwrap();
     let result = api_client.get_manga_list(&query).await.unwrap();
     println!("Result: {}", result);
 }
 ```
 
 You can check out the [examples](./examples/) directory to see additional usage examples.
+
+## Notes
+
+Not all variants for particular fields are documented in the MAL API specification.
+This is expected since the MAL v2 API is still in beta.
+If a request fails because of an unexpected variant, please open an issue and describe
+what query you submitted which revealed the new variant.
 
 ## License
 
