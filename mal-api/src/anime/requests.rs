@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
-use crate::common::limit_check;
-
 use super::error::AnimeApiError;
 
 /// Corresponds to the [Get anime list](https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get) endpoint
