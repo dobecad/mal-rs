@@ -40,8 +40,7 @@ async fn main() {
         .enable_nsfw()
         .fields(&common_fields)
         .limit(5)
-        .build()
-        .unwrap();
+        .build();
     let response = api_client.get_anime_ranking(&query).await;
     if let Ok(response) = response {
         println!("Received response: {}\n", response);

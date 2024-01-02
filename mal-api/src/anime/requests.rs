@@ -27,7 +27,7 @@ impl GetAnimeList {
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, AnimeApiError> {
-        limit.map(|l| l.clamp(1, 100));
+        let limit = limit.map(|l| l.clamp(1, 100));
         let q: String = q.into();
 
         if q.is_empty() {
@@ -44,8 +44,8 @@ impl GetAnimeList {
     }
 
     /// Use builder pattern for building up the query with required arguments
-    pub fn builder(q: &str) -> GetAnimeListBuilder<'static> {
-        GetAnimeListBuilder::new(q.to_string())
+    pub fn builder<T: Into<String>>(q: T) -> GetAnimeListBuilder<'static> {
+        GetAnimeListBuilder::new(q.into())
     }
 }
 
@@ -192,16 +192,16 @@ impl GetAnimeRanking {
         fields: Option<&AnimeCommonFields>,
         limit: Option<u16>,
         offset: Option<u32>,
-    ) -> Result<Self, AnimeApiError> {
-        limit.map(|l| l.clamp(1, 500));
+    ) -> Self {
+        let limit = limit.map(|l| l.clamp(1, 500));
 
-        Ok(Self {
+        Self {
             ranking_type,
             nsfw,
             limit: limit.unwrap_or(100),
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
-        })
+        }
     }
 
     /// Use builder pattern for building up the query with required arguments
@@ -240,7 +240,7 @@ impl<'a> GetAnimeRankingBuilder<'a> {
     }
 
     pub fn limit(mut self, value: u16) -> Self {
-        self.limit = Some(value);
+        self.limit = Some(value.clamp(1, 500));
         self
     }
 
@@ -254,7 +254,7 @@ impl<'a> GetAnimeRankingBuilder<'a> {
         self
     }
 
-    pub fn build(self) -> Result<GetAnimeRanking, AnimeApiError> {
+    pub fn build(self) -> GetAnimeRanking {
         GetAnimeRanking::new(
             self.ranking_type,
             self.nsfw,
@@ -328,7 +328,7 @@ impl GetSeasonalAnime {
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Self {
-        limit.map(|l| l.clamp(1, 500));
+        let limit = limit.map(|l| l.clamp(1, 500));
 
         Self {
             year,
@@ -431,23 +431,21 @@ pub struct GetSuggestedAnime {
 impl GetSuggestedAnime {
     /// Create a new `Get suggested anime` query
     ///
-    /// Limit must be within `[1, 100]`
+    /// Limit must be within `[1, 100]`. Defaults to 100
     pub fn new(
         nsfw: bool,
         fields: Option<&AnimeCommonFields>,
         limit: Option<u16>,
         offset: Option<u32>,
-    ) -> Result<Self, AnimeApiError> {
-        limit_check(limit, 1, 100).map_err(|_| {
-            AnimeApiError::new("Limit must be between 1 and 100 inclusive".to_string())
-        })?;
+    ) -> Self {
+        let limit = limit.map(|l| l.clamp(1, 100));
 
-        Ok(Self {
+        Self {
             nsfw,
             limit: limit.unwrap_or(100),
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
-        })
+        }
     }
 
     /// Use builder pattern for building up the query with required arguments
@@ -484,7 +482,7 @@ impl<'a> GetSuggestedAnimeBuilder<'a> {
     }
 
     pub fn limit(mut self, value: u16) -> Self {
-        self.limit = Some(value);
+        self.limit = Some(value.clamp(1, 100));
         self
     }
 
@@ -493,7 +491,7 @@ impl<'a> GetSuggestedAnimeBuilder<'a> {
         self
     }
 
-    pub fn build(self) -> Result<GetSuggestedAnime, AnimeApiError> {
+    pub fn build(self) -> GetSuggestedAnime {
         GetSuggestedAnime::new(self.nsfw, self.fields, self.limit, self.offset)
     }
 }
@@ -538,7 +536,7 @@ pub struct GetUserAnimeList {
 impl GetUserAnimeList {
     /// Create a new `Get user anime list` query
     ///
-    /// Limit must be within `[1, 1000]`
+    /// Limit must be within `[1, 1000]`. Defaults to 100
     ///
     /// Note: `user_name` should be the targets user name, or `@me` as a
     /// shortcut for yourself. However, you can only use `@me` if you
@@ -552,9 +550,7 @@ impl GetUserAnimeList {
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, AnimeApiError> {
-        limit_check(limit, 1, 1000).map_err(|_| {
-            AnimeApiError::new("Limit must be between 1 and 1000 inclusive".to_string())
-        })?;
+        let limit = limit.map(|l| l.clamp(1, 1000));
 
         if user_name.is_empty() {
             return Err(AnimeApiError::new("user_name cannot be empty".to_string()));
@@ -588,7 +584,8 @@ pub struct GetUserAnimeListBuilder<'a> {
 }
 
 impl<'a> GetUserAnimeListBuilder<'a> {
-    pub fn new(user_name: String) -> Self {
+    pub fn new<T: Into<String>>(user_name: T) -> Self {
+        let user_name = user_name.into();
         Self {
             user_name,
             nsfw: false,
@@ -600,8 +597,8 @@ impl<'a> GetUserAnimeListBuilder<'a> {
         }
     }
 
-    pub fn user_name(mut self, value: &str) -> Self {
-        self.user_name = value.to_string();
+    pub fn user_name<T: Into<String>>(mut self, value: T) -> Self {
+        self.user_name = value.into();
         self
     }
 
@@ -626,7 +623,7 @@ impl<'a> GetUserAnimeListBuilder<'a> {
     }
 
     pub fn limit(mut self, value: u16) -> Self {
-        self.limit = Some(value);
+        self.limit = Some(value.clamp(1, 1000));
         self
     }
 
@@ -693,6 +690,7 @@ impl UpdateMyAnimeListStatus {
         tags: Option<String>,
         comments: Option<String>,
     ) -> Result<Self, AnimeApiError> {
+        // Instead of clamping, be more verbose with errors so the user is more aware of the values
         if let Some(score) = score {
             if score > 10 {
                 return Err(AnimeApiError::new(
@@ -980,32 +978,33 @@ mod tests {
         assert!(query.is_err());
 
         let query = GetAnimeList::new("one".to_string(), false, Some(&fields), Some(999), None);
-        assert!(query.is_err());
+        assert!(query.is_ok());
 
         let query = GetAnimeList::new("one".to_string(), false, Some(&fields), Some(0), None);
-        assert!(query.is_err());
+        assert_eq!(query.unwrap().limit, 1);
 
         let query = GetAnimeList::new("one".to_string(), false, Some(&fields), Some(50), None);
-        assert!(query.is_ok());
+        assert_eq!(query.unwrap().limit, 50);
 
         let query = GetAnimeList::new("one".to_string(), false, Some(&fields), None, None);
-        assert!(query.is_ok());
+        assert!(&query.is_ok());
+        assert_eq!(query.unwrap().limit, 100);
     }
 
     #[test]
     fn test_get_anime_ranking() {
         let fields = all_common_fields();
         let query = GetAnimeRanking::new(RankingType::All, false, Some(&fields), Some(1000), None);
-        assert!(query.is_err());
+        assert_eq!(query.limit, 500);
 
         let query = GetAnimeRanking::new(RankingType::All, false, Some(&fields), Some(0), None);
-        assert!(query.is_err());
+        assert_eq!(query.limit, 1);
 
-        let query = GetAnimeRanking::new(RankingType::All, false, Some(&fields), Some(100), None);
-        assert!(query.is_ok());
+        let query = GetAnimeRanking::new(RankingType::All, false, Some(&fields), Some(500), None);
+        assert_eq!(query.limit, 500);
 
         let query = GetAnimeRanking::new(RankingType::All, false, Some(&fields), None, None);
-        assert!(query.is_ok());
+        assert_eq!(query.limit, 100);
     }
 
     #[test]
@@ -1049,16 +1048,16 @@ mod tests {
     fn test_get_suggested_anime() {
         let fields = all_common_fields();
         let query = GetSuggestedAnime::new(false, Some(&fields), Some(500), None);
-        assert!(query.is_err());
+        assert_eq!(query.limit, 100);
 
         let query = GetSuggestedAnime::new(false, Some(&fields), Some(0), None);
-        assert!(query.is_err());
+        assert_eq!(query.limit, 1);
 
-        let query = GetSuggestedAnime::new(false, Some(&fields), Some(1), None);
-        assert!(query.is_ok());
+        let query = GetSuggestedAnime::new(false, Some(&fields), Some(10), None);
+        assert_eq!(query.limit, 10);
 
         let query = GetSuggestedAnime::new(false, Some(&fields), None, None);
-        assert!(query.is_ok());
+        assert_eq!(query.limit, 100);
     }
 
     #[test]
@@ -1084,7 +1083,8 @@ mod tests {
             Some(0),
             None,
         );
-        assert!(query.is_err());
+        assert!(&query.is_ok());
+        assert_eq!(query.unwrap().limit, 1);
 
         let query = GetUserAnimeList::new(
             "hello".to_string(),
@@ -1107,6 +1107,7 @@ mod tests {
             None,
         );
         assert!(query.is_ok());
+        assert_eq!(query.unwrap().limit, 100);
     }
 
     #[test]

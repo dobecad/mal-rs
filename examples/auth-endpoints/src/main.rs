@@ -58,8 +58,7 @@ async fn endpoints(oauth_client: &OauthClient<Authenticated>) {
     let query = GetSuggestedAnime::builder()
         .fields(&mal_api::anime::all_common_fields())
         .limit(5)
-        .build()
-        .unwrap();
+        .build();
     let response = anime_api_client.get_suggested_anime(&query).await;
     if let Ok(response) = response {
         println!("Response: {}\n", response);
