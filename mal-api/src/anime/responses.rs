@@ -57,10 +57,12 @@ impl Display for AnimePicture {
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum AnimeMediaType {
     Unknown,
+    TvSpecial, // undocumented media type...
     Tv,
+    Cm, // undocumented media type...
     Ova,
     Movie,
     Special,
@@ -139,6 +141,7 @@ pub enum Source {
     CardGame,
     Book,
     PictureBook,
+    MixedMedia, // undocumented source...
     Radio,
     Music,
 }
