@@ -52,8 +52,7 @@ async fn main() {
         .fields(&common_fields)
         .sort(SeasonalAnimeSort::AnimeScore)
         .limit(5)
-        .build()
-        .unwrap();
+        .build();
     let response = api_client.get_seasonal_anime(&query).await;
     if let Ok(response) = response {
         println!("Received response: {}\n", response);

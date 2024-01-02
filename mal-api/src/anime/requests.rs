@@ -19,17 +19,16 @@ pub struct GetAnimeList {
 impl GetAnimeList {
     /// Create new `Get anime list` query
     ///
-    /// Limit must be within `[1, 100]`
-    pub fn new(
-        q: String,
+    /// Limit must be within `[1, 100]`. Defaults to 100
+    pub fn new<T: Into<String>>(
+        q: T,
         nsfw: bool,
         fields: Option<&AnimeCommonFields>,
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, AnimeApiError> {
-        limit_check(limit, 1, 100).map_err(|_| {
-            AnimeApiError::new("Limit must be between 1 and 100 inclusive".to_string())
-        })?;
+        limit.map(|l| l.clamp(1, 100));
+        let q: String = q.into();
 
         if q.is_empty() {
             return Err(AnimeApiError::new("Query cannot be empty".to_string()));
@@ -70,8 +69,8 @@ impl<'a> GetAnimeListBuilder<'a> {
         }
     }
 
-    pub fn q(mut self, value: &str) -> Self {
-        self.q = value.to_string();
+    pub fn q<T: Into<String>>(mut self, value: T) -> Self {
+        self.q = value.into();
         self
     }
 
@@ -81,7 +80,7 @@ impl<'a> GetAnimeListBuilder<'a> {
     }
 
     pub fn limit(mut self, value: u16) -> Self {
-        self.limit = Some(value);
+        self.limit = Some(value.clamp(1, 100));
         self
     }
 
@@ -186,7 +185,7 @@ pub struct GetAnimeRanking {
 impl GetAnimeRanking {
     /// Create a new `Get anime ranking` query
     ///
-    /// Limit must be within `[1, 500]`
+    /// Limit must be within `[1, 500]`. Defaults to 100
     pub fn new(
         ranking_type: RankingType,
         nsfw: bool,
@@ -194,9 +193,7 @@ impl GetAnimeRanking {
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, AnimeApiError> {
-        limit_check(limit, 1, 500).map_err(|_| {
-            AnimeApiError::new("Limit must be between 1 and 500 inclusive".to_string())
-        })?;
+        limit.map(|l| l.clamp(1, 500));
 
         Ok(Self {
             ranking_type,
@@ -330,12 +327,10 @@ impl GetSeasonalAnime {
         sort: Option<SeasonalAnimeSort>,
         limit: Option<u16>,
         offset: Option<u32>,
-    ) -> Result<Self, AnimeApiError> {
-        limit_check(limit, 1, 500).map_err(|_| {
-            AnimeApiError::new("Limit must be between 1 and 500 inclusive".to_string())
-        })?;
+    ) -> Self {
+        limit.map(|l| l.clamp(1, 500));
 
-        Ok(Self {
+        Self {
             year,
             season,
             nsfw,
@@ -343,7 +338,7 @@ impl GetSeasonalAnime {
             limit: limit.unwrap_or(100),
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
-        })
+        }
     }
 
     /// Use builder pattern for building up the query with required arguments
@@ -410,7 +405,7 @@ impl<'a> GetSeasonalAnimeBuilder<'a> {
         self
     }
 
-    pub fn build(self) -> Result<GetSeasonalAnime, AnimeApiError> {
+    pub fn build(self) -> GetSeasonalAnime {
         GetSeasonalAnime::new(
             self.year,
             self.season,
@@ -1025,7 +1020,7 @@ mod tests {
             Some(999),
             None,
         );
-        assert!(query.is_err());
+        assert_eq!(query.limit, 500);
 
         let query = GetSeasonalAnime::new(
             1000,
@@ -1036,7 +1031,7 @@ mod tests {
             Some(0),
             None,
         );
-        assert!(query.is_err());
+        assert_eq!(query.limit, 1);
 
         let query = GetSeasonalAnime::new(
             1000,
@@ -1047,18 +1042,7 @@ mod tests {
             Some(500),
             None,
         );
-        assert!(query.is_ok());
-
-        let query = GetSeasonalAnime::new(
-            1000,
-            Season::Spring,
-            false,
-            Some(&fields),
-            Some(SeasonalAnimeSort::AnimeScore),
-            None,
-            None,
-        );
-        assert!(query.is_ok());
+        assert_eq!(query.limit, 500);
     }
 
     #[test]
