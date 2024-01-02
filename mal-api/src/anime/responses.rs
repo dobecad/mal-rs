@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::common::{
-    AlternativeTitles, Genre, MainPicture, Paging, PagingIter, RelationType, NSFW,
+    AlternativeTitles, Genre, MainPicture, Paging, PagingIter, Ranking, RelationType, NSFW,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{self, Value};
@@ -35,7 +35,7 @@ pub struct AnimeListNode {
     pub node: AnimeFields,
 
     /// This field is only present when querying for a User's anime list
-    pub list_status: Option<ListStatus>,
+    pub list_status: Option<AnimeListStatus>,
 }
 
 impl Display for AnimeListNode {
@@ -58,7 +58,7 @@ impl Display for AnimePicture {
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
-pub enum MediaType {
+pub enum AnimeMediaType {
     Unknown,
     Tv,
     Ova,
@@ -70,14 +70,14 @@ pub enum MediaType {
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
-pub enum Status {
+pub enum AnimeStatus {
     FinishedAiring,
     CurrentlyAiring,
     NotYetAired,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ListStatus {
+pub struct AnimeListStatus {
     pub status: Option<super::requests::UserAnimeListStatus>,
     pub score: u8,
     pub num_episodes_watched: u32,
@@ -92,7 +92,7 @@ pub struct ListStatus {
     pub updated_at: String,
 }
 
-impl Display for ListStatus {
+impl Display for AnimeListStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
     }
@@ -187,9 +187,9 @@ pub struct AnimeFields {
     pub genres: Option<Vec<Genre>>,
     pub created_at: Option<String>,
     pub updated_at: Option<String>,
-    pub media_type: Option<MediaType>,
-    pub status: Option<Status>,
-    pub my_list_status: Option<ListStatus>,
+    pub media_type: Option<AnimeMediaType>,
+    pub status: Option<AnimeStatus>,
+    pub my_list_status: Option<AnimeListStatus>,
     pub num_episodes: Option<u32>,
     pub start_season: Option<StartSeason>,
     pub broadcast: Option<Broadcast>,
@@ -290,18 +290,6 @@ pub struct AnimeDetails {
 }
 
 impl Display for AnimeDetails {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
-    }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Ranking {
-    pub rank: u32,
-    pub previous_rank: Option<u32>,
-}
-
-impl Display for Ranking {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
     }

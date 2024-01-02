@@ -1,7 +1,5 @@
 use serde::Serialize;
 
-use crate::common::limit_check;
-
 use super::error::ForumApiError;
 
 /// Corresponds to the [Get forum topic detail](https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topic_get) endpoint
@@ -16,15 +14,13 @@ pub struct GetForumTopicDetail {
 impl GetForumTopicDetail {
     /// Create new `Get forum topic detail` query
     ///
-    /// Limit must be within `[1, 100]`
+    /// Limit must be within `[1, 100]`. Defaults to 100
     pub fn new(
         topic_id: u32,
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, ForumApiError> {
-        limit_check(limit, 1, 100).map_err(|_| {
-            ForumApiError::new("Limit must be between 1 and 100 inclusive".to_string())
-        })?;
+        let limit = limit.map(|l| l.clamp(1, 100));
 
         Ok(Self {
             topic_id,
@@ -108,9 +104,7 @@ impl GetForumTopics {
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, ForumApiError> {
-        limit_check(limit, 1, 100).map_err(|_| {
-            ForumApiError::new("Limit must be between 1 and 100 inclusive".to_string())
-        })?;
+        let limit = limit.map(|l| l.clamp(1, 100));
 
         if !(q.is_some()
             || board_id.is_some()
@@ -229,16 +223,16 @@ mod tests {
     #[test]
     fn test_get_forum_topic_detail() {
         let query = GetForumTopicDetail::new(1234, Some(101), None);
-        assert!(query.is_err());
+        assert_eq!(query.unwrap().limit, 100);
 
         let query = GetForumTopicDetail::new(1234, Some(0), None);
-        assert!(query.is_err());
+        assert_eq!(query.unwrap().limit, 1);
 
         let query = GetForumTopicDetail::new(1234, Some(1), None);
-        assert!(query.is_ok());
+        assert_eq!(query.unwrap().limit, 1);
 
         let query = GetForumTopicDetail::new(1234, None, None);
-        assert!(query.is_ok());
+        assert_eq!(query.unwrap().limit, 100);
     }
 
     #[test]
@@ -256,7 +250,7 @@ mod tests {
             Some(101),
             None,
         );
-        assert!(query.is_err());
+        assert_eq!(query.unwrap().limit, 100);
 
         let query = GetForumTopics::new(
             false,
@@ -268,7 +262,7 @@ mod tests {
             Some(0),
             None,
         );
-        assert!(query.is_err());
+        assert_eq!(query.unwrap().limit, 1);
 
         let query = GetForumTopics::new(
             false,
@@ -280,7 +274,7 @@ mod tests {
             Some(100),
             None,
         );
-        assert!(query.is_ok());
+        assert_eq!(query.unwrap().limit, 100);
 
         let query = GetForumTopics::new(
             false,
@@ -292,6 +286,6 @@ mod tests {
             None,
             None,
         );
-        assert!(query.is_ok());
+        assert_eq!(query.unwrap().limit, 100);
     }
 }

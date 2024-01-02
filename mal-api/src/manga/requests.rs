@@ -1,5 +1,3 @@
-use crate::common::limit_check;
-
 use super::error::MangaApiError;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
@@ -42,8 +40,8 @@ impl GetMangaList {
     }
 
     /// Use builder pattern for building up the query with required arguments
-    pub fn builder(q: &str) -> GetMangaListBuilder<'static> {
-        GetMangaListBuilder::new(q.to_string())
+    pub fn builder<T: Into<String>>(q: T) -> GetMangaListBuilder<'static> {
+        GetMangaListBuilder::new(q.into())
     }
 }
 
@@ -56,7 +54,8 @@ pub struct GetMangaListBuilder<'a> {
 }
 
 impl<'a> GetMangaListBuilder<'a> {
-    pub fn new(q: String) -> Self {
+    pub fn new<T: Into<String>>(q: T) -> Self {
+        let q = q.into();
         Self {
             q,
             nsfw: false,
@@ -66,8 +65,8 @@ impl<'a> GetMangaListBuilder<'a> {
         }
     }
 
-    pub fn q(mut self, value: &str) -> Self {
-        self.q = value.to_string();
+    pub fn q<T: Into<String>>(mut self, value: T) -> Self {
+        self.q = value.into();
         self
     }
 
@@ -253,7 +252,7 @@ impl<'a> GetMangaRankingBuilder<'a> {
     }
 
     pub fn limit(mut self, value: u16) -> Self {
-        self.limit = Some(value);
+        self.limit = Some(value.clamp(1, 500));
         self
     }
 
@@ -312,7 +311,7 @@ pub struct GetUserMangaList {
 impl GetUserMangaList {
     /// Create new `Get user manga list` query
     ///
-    /// Limit must be within `[1, 1000]`
+    /// Limit must be within `[1, 1000]`. Defaults to 100
     pub fn new(
         user_name: String,
         nsfw: bool,
@@ -322,9 +321,7 @@ impl GetUserMangaList {
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, MangaApiError> {
-        limit_check(limit, 1, 1000).map_err(|_| {
-            MangaApiError::new("Limit must be between 1 and 1000 inclusive".to_string())
-        })?;
+        let limit = limit.map(|l| l.clamp(1, 1000));
 
         if user_name.is_empty() {
             return Err(MangaApiError::new("user_name cannot be empty".to_string()));
@@ -370,8 +367,8 @@ impl<'a> GetUserMangaListBuilder<'a> {
         }
     }
 
-    pub fn user_name(mut self, value: &str) -> Self {
-        self.user_name = value.to_string();
+    pub fn user_name<T: Into<String>>(mut self, value: T) -> Self {
+        self.user_name = value.into();
         self
     }
 
@@ -396,7 +393,7 @@ impl<'a> GetUserMangaListBuilder<'a> {
     }
 
     pub fn limit(mut self, value: u16) -> Self {
-        self.limit = Some(value);
+        self.limit = Some(value.clamp(1, 1000));
         self
     }
 
@@ -465,6 +462,7 @@ impl UpdateMyMangaListStatus {
         tags: Option<String>,
         comments: Option<String>,
     ) -> Result<Self, MangaApiError> {
+        // Instead of clamping, be more verbose with errors so the user is more aware of the values
         if let Some(score) = score {
             if score > 10 {
                 return Err(MangaApiError::new(
@@ -752,16 +750,16 @@ mod tests {
         assert!(query.is_err());
 
         let query = GetMangaList::new("one".to_string(), false, Some(&fields), Some(101), None);
-        assert!(query.is_err());
+        assert_eq!(query.unwrap().limit, 100);
 
-        let query = GetMangaList::new("".to_string(), false, Some(&fields), Some(0), None);
-        assert!(query.is_err());
+        let query = GetMangaList::new("one".to_string(), false, Some(&fields), Some(0), None);
+        assert_eq!(query.unwrap().limit, 1);
 
-        let query = GetMangaList::new("".to_string(), false, Some(&fields), Some(100), None);
-        assert!(query.is_err());
+        let query = GetMangaList::new("one".to_string(), false, Some(&fields), Some(100), None);
+        assert_eq!(query.unwrap().limit, 100);
 
-        let query = GetMangaList::new("".to_string(), false, Some(&fields), None, None);
-        assert!(query.is_err());
+        let query = GetMangaList::new("one".to_string(), false, Some(&fields), None, None);
+        assert_eq!(query.unwrap().limit, 100);
     }
 
     #[test]
@@ -799,7 +797,7 @@ mod tests {
             Some(1001),
             None,
         );
-        assert!(query.is_err());
+        assert_eq!(query.unwrap().limit, 1000);
 
         let query = GetUserMangaList::new(
             "hello".to_string(),
@@ -810,7 +808,7 @@ mod tests {
             Some(0),
             None,
         );
-        assert!(query.is_err());
+        assert_eq!(query.unwrap().limit, 1);
 
         let query = GetUserMangaList::new(
             "hello".to_string(),
@@ -821,7 +819,7 @@ mod tests {
             Some(1000),
             None,
         );
-        assert!(query.is_ok());
+        assert_eq!(query.unwrap().limit, 1000);
 
         let query = GetUserMangaList::new(
             "hello".to_string(),
@@ -832,7 +830,7 @@ mod tests {
             None,
             None,
         );
-        assert!(query.is_ok());
+        assert_eq!(query.unwrap().limit, 100);
     }
 
     #[test]

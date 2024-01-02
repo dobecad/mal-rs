@@ -86,6 +86,18 @@ impl Display for Genre {
     }
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Ranking {
+    pub rank: u32,
+    pub previous_rank: Option<u32>,
+}
+
+impl Display for Ranking {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum RelationType {
@@ -98,21 +110,6 @@ pub enum RelationType {
     Summary,
     FullStory,
     Character, // this type is not documented in the MAL API reference...
-}
-
-/// Verify that the given optional `value` is within `[lowerbound, upperbound]`
-pub(crate) fn limit_check(
-    value: Option<u16>,
-    lowerbound: u16,
-    upperbound: u16,
-) -> Result<(), CommonError> {
-    if value.is_some() {
-        let value = value.unwrap();
-        if value < lowerbound || value > upperbound {
-            return Err(CommonError::new("Given limit is out of range".to_string()));
-        }
-    }
-    Ok(())
 }
 
 pub(crate) fn struct_to_form_data<T>(query: &T) -> Result<HashMap<String, String>, Box<dyn Error>>
@@ -137,24 +134,4 @@ pub trait PagingIter {
     fn next_page(&self) -> Option<&String>;
 
     fn prev_page(&self) -> Option<&String>;
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_limit_check() {
-        let result = limit_check(Some(100), 1, 10);
-        assert!(result.is_err());
-
-        let result = limit_check(Some(100), 1, 1000);
-        assert!(result.is_ok());
-
-        let result = limit_check(Some(100), 100, 1000);
-        assert!(result.is_ok());
-
-        let result = limit_check(Some(100), 1, 100);
-        assert!(result.is_ok());
-    }
 }

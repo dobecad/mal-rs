@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::common::{
-    AlternativeTitles, Genre, MainPicture, Paging, PagingIter, RelationType, NSFW,
+    AlternativeTitles, Genre, MainPicture, Paging, PagingIter, Ranking, RelationType, NSFW,
 };
 use serde::{Deserialize, Serialize};
 
@@ -34,7 +34,7 @@ pub struct MangaListNode {
     pub node: MangaFields,
 
     /// This field is only present when querying for a User's anime list
-    pub list_status: Option<ListStatus>,
+    pub list_status: Option<MangaListStatus>,
 }
 
 impl Display for MangaListNode {
@@ -62,9 +62,9 @@ pub struct MangaFields {
     pub genres: Option<Vec<Genre>>,
     pub created_at: Option<String>,
     pub updated_at: Option<String>,
-    pub media_type: Option<MediaType>,
-    pub status: Option<Status>,
-    pub my_list_status: Option<ListStatus>,
+    pub media_type: Option<MangaMediaType>,
+    pub status: Option<MangaStatus>,
+    pub my_list_status: Option<MangaListStatus>,
     pub num_volumes: Option<u32>,
     pub num_chapters: Option<u32>,
     pub authors: Option<Vec<Author>>,
@@ -78,7 +78,7 @@ impl Display for MangaFields {
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
-pub enum MediaType {
+pub enum MangaMediaType {
     Unknown,
     Manga,
     Novel,
@@ -91,7 +91,7 @@ pub enum MediaType {
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
-pub enum Status {
+pub enum MangaStatus {
     Finished,
     CurrentlyPublishing,
     NotYetPublished,
@@ -124,7 +124,7 @@ impl Display for AuthorDetails {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ListStatus {
+pub struct MangaListStatus {
     pub status: Option<super::requests::UserMangaListStatus>,
     pub score: u8,
     pub num_volumes_read: u32,
@@ -140,7 +140,7 @@ pub struct ListStatus {
     pub updated_at: String,
 }
 
-impl Display for ListStatus {
+impl Display for MangaListStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
     }
@@ -257,18 +257,6 @@ pub struct MangaRankingNode {
 }
 
 impl Display for MangaRankingNode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
-    }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Ranking {
-    pub rank: u32,
-    pub previous_rank: Option<u32>,
-}
-
-impl Display for Ranking {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
     }

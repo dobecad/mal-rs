@@ -1,4 +1,4 @@
-use super::{error::MangaApiError, requests::GetUserMangaList, responses::ListStatus};
+use super::{error::MangaApiError, requests::GetUserMangaList, responses::MangaListStatus};
 use async_trait::async_trait;
 use oauth2::{AccessToken, ClientId};
 use serde::{de::DeserializeOwned, Serialize};
@@ -444,7 +444,7 @@ impl MangaApiClient<Oauth> {
     pub async fn update_manga_list_status(
         &self,
         query: &UpdateMyMangaListStatus,
-    ) -> Result<ListStatus, MangaApiError> {
+    ) -> Result<MangaListStatus, MangaApiError> {
         let form_data = struct_to_form_data(&query).map_err(|err| {
             MangaApiError::new(format!("Failed to turn request into form data: {}", err))
         })?;
@@ -458,7 +458,7 @@ impl MangaApiClient<Oauth> {
             .map_err(|err| MangaApiError::new(format!("Failed put request: {}", err)))?;
 
         let response = handle_response(response).await?;
-        let result: ListStatus = serde_json::from_str(response.as_str()).map_err(|err| {
+        let result: MangaListStatus = serde_json::from_str(response.as_str()).map_err(|err| {
             MangaApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
         Ok(result)

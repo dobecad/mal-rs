@@ -1,7 +1,7 @@
 use super::{
     error::AnimeApiError,
     requests::{DeleteMyAnimeListItem, GetUserAnimeList, UpdateMyAnimeListStatus},
-    responses::ListStatus,
+    responses::AnimeListStatus,
 };
 use async_trait::async_trait;
 use oauth2::{AccessToken, ClientId};
@@ -540,7 +540,7 @@ impl AnimeApiClient<Oauth> {
     pub async fn update_anime_list_status(
         &self,
         query: &UpdateMyAnimeListStatus,
-    ) -> Result<ListStatus, AnimeApiError> {
+    ) -> Result<AnimeListStatus, AnimeApiError> {
         let form_data = struct_to_form_data(&query).map_err(|err| {
             AnimeApiError::new(format!("Failed to turn request into form data: {}", err))
         })?;
@@ -559,7 +559,7 @@ impl AnimeApiClient<Oauth> {
             })?;
 
         let response = handle_response(response).await?;
-        let result: ListStatus = serde_json::from_str(response.as_str()).map_err(|err| {
+        let result: AnimeListStatus = serde_json::from_str(response.as_str()).map_err(|err| {
             AnimeApiError::new(format!("Failed to parse Anime List result: {}", err))
         })?;
         Ok(result)
