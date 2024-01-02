@@ -17,17 +17,16 @@ pub struct GetMangaList {
 impl GetMangaList {
     /// Create new `Get manga list` query
     ///
-    /// Limit must be within `[1, 100]`
-    pub fn new(
-        q: String,
+    /// Limit must be within `[1, 100]`. Default to 100
+    pub fn new<T: Into<String>>(
+        q: T,
         nsfw: bool,
         fields: Option<&MangaCommonFields>,
         limit: Option<u16>,
         offset: Option<u32>,
     ) -> Result<Self, MangaApiError> {
-        limit_check(limit, 1, 100).map_err(|_| {
-            MangaApiError::new("Limit must be between 1 and 100 inclusive".to_string())
-        })?;
+        let q = q.into();
+        let limit = limit.map(|l| l.clamp(1, 100));
 
         if q.is_empty() {
             return Err(MangaApiError::new("Query cannot be empty".to_string()));
@@ -83,7 +82,7 @@ impl<'a> GetMangaListBuilder<'a> {
     }
 
     pub fn limit(mut self, value: u16) -> Self {
-        self.limit = Some(value);
+        self.limit = Some(value.clamp(1, 100));
         self
     }
 
@@ -194,25 +193,23 @@ pub struct GetMangaRanking {
 impl GetMangaRanking {
     /// Create new `Get manga ranking`
     ///
-    /// Limit must be within `[1, 500]`
+    /// Limit must be within `[1, 500]`. Defaults to 100
     pub fn new(
         ranking_type: MangaRankingType,
         nsfw: bool,
         fields: Option<&MangaCommonFields>,
         limit: Option<u16>,
         offset: Option<u32>,
-    ) -> Result<Self, MangaApiError> {
-        limit_check(limit, 1, 500).map_err(|_| {
-            MangaApiError::new("Limit must be between 1 and 500 inclusive".to_string())
-        })?;
+    ) -> Self {
+        let limit = limit.map(|l| l.clamp(1, 500));
 
-        Ok(Self {
+        Self {
             ranking_type,
             nsfw,
             limit: limit.unwrap_or(100),
             offset: offset.unwrap_or(0),
             fields: fields.map(|f| f.into()),
-        })
+        }
     }
 
     /// Use builder pattern for building up the query with required arguments
@@ -265,7 +262,7 @@ impl<'a> GetMangaRankingBuilder<'a> {
         self
     }
 
-    pub fn build(self) -> Result<GetMangaRanking, MangaApiError> {
+    pub fn build(self) -> GetMangaRanking {
         GetMangaRanking::new(
             self.ranking_type,
             self.nsfw,
@@ -772,18 +769,18 @@ mod tests {
         let fields = all_common_fields();
         let query =
             GetMangaRanking::new(MangaRankingType::All, false, Some(&fields), Some(501), None);
-        assert!(query.is_err());
+        assert_eq!(query.limit, 500);
 
         let query =
             GetMangaRanking::new(MangaRankingType::All, false, Some(&fields), Some(0), None);
-        assert!(query.is_err());
+        assert_eq!(query.limit, 1);
 
         let query =
             GetMangaRanking::new(MangaRankingType::All, false, Some(&fields), Some(500), None);
-        assert!(query.is_ok());
+        assert_eq!(query.limit, 500);
 
         let query = GetMangaRanking::new(MangaRankingType::All, false, Some(&fields), None, None);
-        assert!(query.is_ok());
+        assert_eq!(query.limit, 100);
     }
 
     #[test]
