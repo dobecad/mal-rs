@@ -4,7 +4,7 @@ use crate::{OAUTH_TOKEN_URL, OAUTH_URL};
 use oauth2::basic::BasicClient;
 use oauth2::http::Uri;
 use oauth2::reqwest::async_http_client;
-pub use oauth2::ClientId;
+use oauth2::ClientId;
 use oauth2::{
     AccessToken, AuthUrl, AuthorizationCode, ClientSecret, CsrfToken, PkceCodeChallenge,
     PkceCodeVerifier, RedirectUrl, RefreshToken, TokenResponse, TokenUrl,
@@ -27,6 +27,9 @@ const CONFIG_LOCATION: &'static str = ".mal/config.toml";
 
 #[derive(Debug, Error)]
 pub enum OauthError {
+    #[error("missing environment variable")]
+    MissingEnvVar,
+
     #[error("missing client id")]
     MissingClientId,
 
@@ -96,7 +99,7 @@ impl MalClientId {
 
     /// Try to load your MAL ClientId from the environment variable `MAL_CLIENT_ID`
     pub fn try_from_env() -> Result<Self, OauthError> {
-        let client_id = env::var("MAL_CLIENT_ID").map_err(|_| OauthError::MissingClientId)?;
+        let client_id = OauthClient::load_client_id_from_env()?;
         Ok(Self(ClientId::new(client_id)))
     }
 }
@@ -122,22 +125,16 @@ pub struct OauthClient<State = Unauthenticated> {
 }
 
 impl OauthClient<Unauthenticated> {
-    pub fn new() -> Result<Self, OauthError> {
-        let client_id = env::var("MAL_CLIENT_ID").map_err(|_| OauthError::MissingClientId)?;
-        let client_secret =
-            env::var("MAL_CLIENT_SECRET").map_err(|_| OauthError::MissingClientSecret)?;
-        let redirect_url =
-            env::var("MAL_REDIRECT_URL").map_err(|_| OauthError::MissingRedirectUrl)?;
+    /// Creates a new [OauthClient] for the PKCE flow
+    pub fn new<T: Into<String>>(
+        client_id: T,
+        client_secret: Option<T>,
+        redirect_url: T,
+    ) -> Result<Self, OauthError> {
+        let (client_id, redirect_url) = (client_id.into(), redirect_url.into());
+        let client_secret = client_secret.map(|c| c.into());
 
-        let client = BasicClient::new(
-            ClientId::new(client_id),
-            Some(ClientSecret::new(client_secret)),
-            AuthUrl::new(OAUTH_URL.to_string()).unwrap(),
-            Some(TokenUrl::new(OAUTH_TOKEN_URL.to_string()).unwrap()),
-        )
-        .set_redirect_uri(
-            RedirectUrl::new(redirect_url).map_err(|_| OauthError::InvalidRedirectUrl)?,
-        );
+        let client = Self::create_oauth2_client(client_id, client_secret, redirect_url)?;
 
         Ok(Self {
             client,
@@ -148,6 +145,41 @@ impl OauthClient<Unauthenticated> {
             refresh_token: RefreshToken::new("".to_string()),
             expires_at: Duration::new(0, 0).as_secs(),
         })
+    }
+
+    fn create_oauth2_client(
+        client_id: String,
+        client_secret: Option<String>,
+        redirect_url: String,
+    ) -> Result<BasicClient, OauthError> {
+        match client_secret {
+            Some(c) => {
+                let client = BasicClient::new(
+                    ClientId::new(client_id),
+                    Some(ClientSecret::new(c.into())),
+                    AuthUrl::new(OAUTH_URL.to_string()).unwrap(),
+                    Some(TokenUrl::new(OAUTH_TOKEN_URL.to_string()).unwrap()),
+                )
+                .set_redirect_uri(
+                    RedirectUrl::new(redirect_url).map_err(|_| OauthError::InvalidRedirectUrl)?,
+                )
+                .set_auth_type(oauth2::AuthType::BasicAuth);
+                Ok(client)
+            }
+            None => {
+                let client = BasicClient::new(
+                    ClientId::new(client_id),
+                    None,
+                    AuthUrl::new(OAUTH_URL.to_string()).unwrap(),
+                    Some(TokenUrl::new(OAUTH_TOKEN_URL.to_string()).unwrap()),
+                )
+                .set_redirect_uri(
+                    RedirectUrl::new(redirect_url).map_err(|_| OauthError::InvalidRedirectUrl)?,
+                )
+                .set_auth_type(oauth2::AuthType::RequestBody);
+                Ok(client)
+            }
+        }
     }
 
     /// Generate an authorization URL for the user to navigate to,
@@ -176,9 +208,10 @@ impl OauthClient<Unauthenticated> {
             return Err(OauthError::StateMismatch);
         }
 
+        let code = AuthorizationCode::new(authorization_response.code);
         let token_result = self
             .client
-            .exchange_code(AuthorizationCode::new(authorization_response.code))
+            .exchange_code(code)
             .set_pkce_verifier(self.pkce_verifier)
             .request_async(async_http_client)
             .await
@@ -209,27 +242,17 @@ impl OauthClient<Unauthenticated> {
     /// `Note`: This is expected to work after saving the credentials from an
     /// authenticated OauthClient
     fn load_from_env() -> Result<OauthClient<Authenticated>, OauthError> {
-        let client_id = env::var("MAL_CLIENT_ID").map_err(|_| OauthError::MissingClientId)?;
-        let client_secret =
-            env::var("MAL_CLIENT_SECRET").map_err(|_| OauthError::MissingClientSecret)?;
-        let redirect_url =
-            env::var("MAL_REDIRECT_URL").map_err(|_| OauthError::MissingRedirectUrl)?;
-
-        let client = BasicClient::new(
-            ClientId::new(client_id),
-            Some(ClientSecret::new(client_secret)),
-            AuthUrl::new(OAUTH_URL.to_string()).unwrap(),
-            Some(TokenUrl::new(OAUTH_TOKEN_URL.to_string()).unwrap()),
-        )
-        .set_redirect_uri(
-            RedirectUrl::new(redirect_url).map_err(|_| OauthError::InvalidRedirectUrl)?,
+        let (client_id, redirect_url) = (
+            Self::load_client_id_from_env()?,
+            Self::load_redirect_url_from_env()?,
         );
+        let client_secret = Self::load_client_secret_from_env().ok();
 
-        let access_token =
-            env::var("MAL_ACCESS_TOKEN").map_err(|_| OauthError::MissingAccessToken)?;
-        let refresh_token =
-            env::var("MAL_REFRESH_TOKEN").map_err(|_| OauthError::MissingRefreshToken)?;
-        let expires_at = env::var("MAL_TOKEN_EXPIRES_AT")
+        let client = Self::create_oauth2_client(client_id, client_secret, redirect_url)?;
+
+        let access_token = Self::load_env_var("MAL_ACCESS_TOKEN")?;
+        let refresh_token = Self::load_env_var("MAL_REFRESH_TOKEN")?;
+        let expires_at = Self::load_env_var("MAL_TOKEN_EXPIRES_AT")
             .map_err(|_| OauthError::MissingTokenExpiration)?
             .parse::<u64>()
             .map_err(|_| OauthError::InvalidExpirationTime)?;
@@ -278,17 +301,20 @@ impl OauthClient<Unauthenticated> {
     ///
     /// `Note`: This method still relies on the `MAL_CLIENT_ID`, `MAL_CLIENT_SECRET`, and
     /// `MAL_REDIRECT_URL` environment variables being set
-    pub fn load_from_values(
-        access_token: String,
-        refresh_token: String,
+    pub fn load_from_values<T: Into<String>>(
+        access_token: T,
+        refresh_token: T,
+        client_id: T,
+        client_secret: Option<T>,
+        redirect_url: T,
         expires_at: u64,
     ) -> Result<OauthClient<Authenticated>, OauthError> {
-        let client_id =
-            env::var("MAL_CLIENT_ID".to_string()).map_err(|_| OauthError::MissingClientId)?;
-        let client_secret = env::var("MAL_CLIENT_SECRET".to_string())
-            .map_err(|_| OauthError::MissingClientSecret)?;
-        let redirect_url =
-            env::var("MAL_REDIRECT_URL".to_string()).map_err(|_| OauthError::MissingRedirectUrl)?;
+        let (access_token, refresh_token) = (access_token.into(), refresh_token.into());
+        let (client_id, client_secret, redirect_url) = (
+            client_id.into(),
+            client_secret.map(|c| c.into()),
+            redirect_url.into(),
+        );
 
         let unix_epoch = SystemTime::UNIX_EPOCH
             .duration_since(SystemTime::UNIX_EPOCH)
@@ -299,15 +325,7 @@ impl OauthClient<Unauthenticated> {
             return Err(OauthError::InvalidExpirationTime);
         }
 
-        let client = BasicClient::new(
-            ClientId::new(client_id),
-            Some(ClientSecret::new(client_secret)),
-            AuthUrl::new(OAUTH_URL.to_string()).unwrap(),
-            Some(TokenUrl::new(OAUTH_TOKEN_URL.to_string()).unwrap()),
-        )
-        .set_redirect_uri(
-            RedirectUrl::new(redirect_url).map_err(|_| OauthError::InvalidRedirectUrl)?,
-        );
+        let client = Self::create_oauth2_client(client_id, client_secret, redirect_url)?;
 
         Ok(OauthClient::<Authenticated> {
             client,
@@ -318,6 +336,32 @@ impl OauthClient<Unauthenticated> {
             refresh_token: RefreshToken::new(refresh_token),
             expires_at,
         })
+    }
+
+    fn load_env_var(name: &str) -> Result<String, OauthError> {
+        let result = env::var(name).map_err(|_| OauthError::MissingEnvVar)?;
+        Ok(result)
+    }
+
+    /// Load the MAL_CLIENT_ID environment variable
+    pub fn load_client_id_from_env() -> Result<String, OauthError> {
+        let client_id =
+            Self::load_env_var("MAL_CLIENT_ID").map_err(|_| OauthError::MissingClientId)?;
+        Ok(client_id)
+    }
+
+    /// Load the MAL_CLIENT_SECRET environment variable
+    pub fn load_client_secret_from_env() -> Result<String, OauthError> {
+        let client_secret =
+            Self::load_env_var("MAL_CLIENT_SECRET").map_err(|_| OauthError::MissingClientSecret)?;
+        Ok(client_secret)
+    }
+
+    /// Load the MAL_REDIRECT_URL environment variable
+    pub fn load_redirect_url_from_env() -> Result<String, OauthError> {
+        let redirect_url =
+            Self::load_env_var("MAL_REDIRECT_URL").map_err(|_| OauthError::MissingRedirectUrl)?;
+        Ok(redirect_url)
     }
 }
 
@@ -413,7 +457,7 @@ impl RedirectResponse {
 
         match query_params {
             Some(q) => Ok(q),
-            None => Err(OauthError::FailedToRefreshToken),
+            None => Err(OauthError::InvalidRedirectResponse),
         }
     }
 }
