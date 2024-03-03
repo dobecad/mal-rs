@@ -1,3 +1,4 @@
 [workspace]
 members = ["mal-api", "examples/*"]
 default-members = ["mal-api"]
+resolver = "2"
