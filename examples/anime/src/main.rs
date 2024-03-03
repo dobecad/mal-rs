@@ -6,7 +6,7 @@ use mal_api::prelude::*;
 async fn main() {
     dotenvy::dotenv().ok();
 
-    let client_id = MalClientId::from_env().unwrap();
+    let client_id = MalClientId::try_from_env().unwrap();
     let api_client = AnimeApiClient::from(&client_id);
     let common_fields = mal_api::anime::all_common_fields();
     let detail_fields = mal_api::anime::all_detail_fields();

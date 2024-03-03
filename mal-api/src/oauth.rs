@@ -15,10 +15,9 @@ use std::marker::PhantomData;
 use std::path::Path;
 use std::time::{Duration, SystemTime};
 use std::{env, fs};
+use thiserror::Error;
 use toml;
 use url::Url;
-
-use std::fmt;
 
 // Expiration date for access tokens is one month
 // We use 28 days in seconds to be safe
@@ -26,44 +25,78 @@ const EXPIRATION_IN_SECONDS: u64 = 2419200;
 
 const CONFIG_LOCATION: &'static str = ".mal/config.toml";
 
-#[derive(Debug)]
-pub struct OauthError {
-    pub message: String,
-}
+#[derive(Debug, Error)]
+pub enum OauthError {
+    #[error("missing client id")]
+    MissingClientId,
 
-impl Error for OauthError {}
+    #[error("missing client secret")]
+    MissingClientSecret,
 
-impl fmt::Display for OauthError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.message)
-    }
-}
+    #[error("missing redirect url")]
+    MissingRedirectUrl,
 
-impl OauthError {
-    pub fn new(message: String) -> Self {
-        Self { message }
-    }
+    #[error("received state does not match")]
+    StateMismatch,
+
+    #[error("bad token response")]
+    BadTokenResponse,
+
+    #[error("invalid redirect url")]
+    InvalidRedirectUrl,
+
+    #[error("invalid redirect response")]
+    InvalidRedirectResponse,
+
+    #[error("missing access token")]
+    MissingAccessToken,
+
+    #[error("missing refresh token")]
+    MissingRefreshToken,
+
+    #[error("missing token expiration time")]
+    MissingTokenExpiration,
+
+    #[error("missing config")]
+    MissingConfig,
+
+    #[error("invalid config format")]
+    InvalidConfigFormat,
+
+    #[error("failed to create config")]
+    ConfigCreationFailure,
+
+    #[error("unable to fetch system time")]
+    NoSystemTime,
+
+    #[error("invalid expiration time")]
+    InvalidExpirationTime,
+
+    #[error("failed to refresh the authentication token")]
+    FailedToRefreshToken,
+
+    #[error("missing the code or state from response")]
+    MissingCodeOrState,
 }
 
 /// If you only need to access public information on MAL that does
 /// not require an Oauth access token, you can use the [MalClientId]
 /// as your authorization client
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct MalClientId(pub ClientId);
 
 impl MalClientId {
     /// Create a [MalClientId] by passing in your ClientId as a string
     ///
     /// Useful if you want to control how your program fetches your MAL `MAL_CLIENT_ID`
-    pub fn new(id: String) -> Self {
-        let client_id = ClientId::new(id);
+    pub fn new<T: Into<String>>(id: T) -> Self {
+        let client_id = ClientId::new(id.into());
         Self(client_id)
     }
 
     /// Try to load your MAL ClientId from the environment variable `MAL_CLIENT_ID`
-    pub fn from_env() -> Result<Self, OauthError> {
-        let client_id = env::var("MAL_CLIENT_ID")
-            .map_err(|err| OauthError::new(format!("Failed to load CLIENT_ID: {}", err)))?;
+    pub fn try_from_env() -> Result<Self, OauthError> {
+        let client_id = env::var("MAL_CLIENT_ID").map_err(|_| OauthError::MissingClientId)?;
         Ok(Self(ClientId::new(client_id)))
     }
 }
@@ -90,15 +123,11 @@ pub struct OauthClient<State = Unauthenticated> {
 
 impl OauthClient<Unauthenticated> {
     pub fn new() -> Result<Self, OauthError> {
-        let client_id = env::var("MAL_CLIENT_ID".to_string()).map_err(|_| {
-            OauthError::new("Missing MAL_CLIENT_ID environment variable".to_string())
-        })?;
-        let client_secret = env::var("MAL_CLIENT_SECRET".to_string()).map_err(|_| {
-            OauthError::new("Missing MAL_CLIENT_SECRET environment variable".to_string())
-        })?;
-        let redirect_url = env::var("MAL_REDIRECT_URL".to_string()).map_err(|_| {
-            OauthError::new("Missing MAL_REDIRECT_URL environment variable".to_string())
-        })?;
+        let client_id = env::var("MAL_CLIENT_ID").map_err(|_| OauthError::MissingClientId)?;
+        let client_secret =
+            env::var("MAL_CLIENT_SECRET").map_err(|_| OauthError::MissingClientSecret)?;
+        let redirect_url =
+            env::var("MAL_REDIRECT_URL").map_err(|_| OauthError::MissingRedirectUrl)?;
 
         let client = BasicClient::new(
             ClientId::new(client_id),
@@ -107,8 +136,7 @@ impl OauthClient<Unauthenticated> {
             Some(TokenUrl::new(OAUTH_TOKEN_URL.to_string()).unwrap()),
         )
         .set_redirect_uri(
-            RedirectUrl::new(redirect_url)
-                .map_err(|err| OauthError::new(format!("Malformed REDIRECT_URL: {}", err)))?,
+            RedirectUrl::new(redirect_url).map_err(|_| OauthError::InvalidRedirectUrl)?,
         );
 
         Ok(Self {
@@ -143,11 +171,9 @@ impl OauthClient<Unauthenticated> {
     pub async fn authenticate(
         self,
         authorization_response: RedirectResponse,
-    ) -> Result<OauthClient<Authenticated>, Box<dyn Error>> {
+    ) -> Result<OauthClient<Authenticated>, OauthError> {
         if authorization_response.state != *self.csrf.secret() {
-            return Err(Box::new(OauthError::new(
-                "State does not match".to_string(),
-            )));
+            return Err(OauthError::StateMismatch);
         }
 
         let token_result = self
@@ -156,7 +182,7 @@ impl OauthClient<Unauthenticated> {
             .set_pkce_verifier(self.pkce_verifier)
             .request_async(async_http_client)
             .await
-            .map_err(|err| OauthError::new(format!("Failed to authenticate token: {}", err)))?;
+            .map_err(|_| OauthError::BadTokenResponse)?;
 
         let now = calculate_current_system_time()?;
 
@@ -168,7 +194,7 @@ impl OauthClient<Unauthenticated> {
             access_token: token_result.access_token().to_owned(),
             refresh_token: token_result
                 .refresh_token()
-                .expect("Missing refresh token")
+                .ok_or_else(|| OauthError::MissingRefreshToken)?
                 .to_owned(),
             expires_at: now
                 + token_result
@@ -183,15 +209,11 @@ impl OauthClient<Unauthenticated> {
     /// `Note`: This is expected to work after saving the credentials from an
     /// authenticated OauthClient
     fn load_from_env() -> Result<OauthClient<Authenticated>, OauthError> {
-        let client_id = env::var("MAL_CLIENT_ID".to_string()).map_err(|_| {
-            OauthError::new("Missing MAL_CLIENT_ID environment variable".to_string())
-        })?;
-        let client_secret = env::var("MAL_CLIENT_SECRET".to_string()).map_err(|_| {
-            OauthError::new("Missing MAL_CLIENT_SECRET environment variable".to_string())
-        })?;
-        let redirect_url = env::var("MAL_REDIRECT_URL".to_string()).map_err(|_| {
-            OauthError::new("Missing MAL_REDIRECT_URL environment variable".to_string())
-        })?;
+        let client_id = env::var("MAL_CLIENT_ID").map_err(|_| OauthError::MissingClientId)?;
+        let client_secret =
+            env::var("MAL_CLIENT_SECRET").map_err(|_| OauthError::MissingClientSecret)?;
+        let redirect_url =
+            env::var("MAL_REDIRECT_URL").map_err(|_| OauthError::MissingRedirectUrl)?;
 
         let client = BasicClient::new(
             ClientId::new(client_id),
@@ -200,18 +222,17 @@ impl OauthClient<Unauthenticated> {
             Some(TokenUrl::new(OAUTH_TOKEN_URL.to_string()).unwrap()),
         )
         .set_redirect_uri(
-            RedirectUrl::new(redirect_url)
-                .map_err(|e| OauthError::new(format!("Malformed REDIRECT_URL: {}", e)))?,
+            RedirectUrl::new(redirect_url).map_err(|_| OauthError::InvalidRedirectUrl)?,
         );
 
-        let access_token = env::var("MAL_ACCESS_TOKEN")
-            .map_err(|_| OauthError::new("MAL_ACCESS_TOKEN is missing".to_string()))?;
-        let refresh_token = env::var("MAL_REFRESH_TOKEN")
-            .map_err(|_| OauthError::new("MAL_REFRESH_TOKEN is missing".to_string()))?;
+        let access_token =
+            env::var("MAL_ACCESS_TOKEN").map_err(|_| OauthError::MissingAccessToken)?;
+        let refresh_token =
+            env::var("MAL_REFRESH_TOKEN").map_err(|_| OauthError::MissingRefreshToken)?;
         let expires_at = env::var("MAL_TOKEN_EXPIRES_AT")
-            .map_err(|_| OauthError::new("MAL_TOKEN_EXPIRES_AT is missing".to_string()))?
+            .map_err(|_| OauthError::MissingTokenExpiration)?
             .parse::<u64>()
-            .map_err(|_| OauthError::new("Failed to parse MAL_TOKEN_EXPIRES_AT".to_string()))?;
+            .map_err(|_| OauthError::InvalidExpirationTime)?;
 
         Ok(OauthClient::<Authenticated> {
             client,
@@ -230,16 +251,13 @@ impl OauthClient<Unauthenticated> {
     /// that all of the tokens are still valid
     pub fn load_from_config() -> Result<OauthClient<Authenticated>, OauthError> {
         if !Path::new(CONFIG_LOCATION).exists() {
-            return Err(OauthError::new(format!(
-                "Failed to find config at {}",
-                CONFIG_LOCATION
-            )));
+            return Err(OauthError::MissingConfig);
         }
 
-        let toml_content = fs::read_to_string(CONFIG_LOCATION)
-            .map_err(|err| OauthError::new(format!("Failed to load config: {}", err)))?;
-        let parsed_toml: MalCredentialsConfig = toml::from_str(&toml_content)
-            .map_err(|err| OauthError::new(format!("Failed to parse config: {}", err)))?;
+        let toml_content =
+            fs::read_to_string(CONFIG_LOCATION).map_err(|_| OauthError::MissingConfig)?;
+        let parsed_toml: MalCredentialsConfig =
+            toml::from_str(&toml_content).map_err(|_| OauthError::InvalidConfigFormat)?;
 
         env::set_var("MAL_ACCESS_TOKEN", parsed_toml.mal_access_token.to_string());
         env::set_var(
@@ -265,26 +283,20 @@ impl OauthClient<Unauthenticated> {
         refresh_token: String,
         expires_at: u64,
     ) -> Result<OauthClient<Authenticated>, OauthError> {
-        let client_id = env::var("MAL_CLIENT_ID".to_string()).map_err(|_| {
-            OauthError::new("Missing MAL_CLIENT_ID environment variable".to_string())
-        })?;
-        let client_secret = env::var("MAL_CLIENT_SECRET".to_string()).map_err(|_| {
-            OauthError::new("Missing MAL_CLIENT_SECRET environment variable".to_string())
-        })?;
-        let redirect_url = env::var("MAL_REDIRECT_URL".to_string()).map_err(|_| {
-            OauthError::new("Missing MAL_REDIRECT_URL environment variable".to_string())
-        })?;
+        let client_id =
+            env::var("MAL_CLIENT_ID".to_string()).map_err(|_| OauthError::MissingClientId)?;
+        let client_secret = env::var("MAL_CLIENT_SECRET".to_string())
+            .map_err(|_| OauthError::MissingClientSecret)?;
+        let redirect_url =
+            env::var("MAL_REDIRECT_URL".to_string()).map_err(|_| OauthError::MissingRedirectUrl)?;
 
         let unix_epoch = SystemTime::UNIX_EPOCH
             .duration_since(SystemTime::UNIX_EPOCH)
-            .map_err(|err| OauthError::new(format!("Failed to get system time: {}", err)))?
+            .map_err(|_| OauthError::NoSystemTime)?
             .as_secs();
 
         if expires_at < unix_epoch {
-            return Err(OauthError::new(format!(
-                "Invalid expires_at value. Must be greater than {}",
-                unix_epoch
-            )));
+            return Err(OauthError::InvalidExpirationTime);
         }
 
         let client = BasicClient::new(
@@ -294,8 +306,7 @@ impl OauthClient<Unauthenticated> {
             Some(TokenUrl::new(OAUTH_TOKEN_URL.to_string()).unwrap()),
         )
         .set_redirect_uri(
-            RedirectUrl::new(redirect_url)
-                .map_err(|e| OauthError::new(format!("Malformed REDIRECT_URL: {}", e)))?,
+            RedirectUrl::new(redirect_url).map_err(|_| OauthError::InvalidRedirectUrl)?,
         );
 
         Ok(OauthClient::<Authenticated> {
@@ -347,17 +358,13 @@ impl OauthClient<Authenticated> {
             mal_refresh_token: self.refresh_token.secret().clone(),
             mal_token_expires_at: *self.get_expires_at(),
         };
-        let toml = toml::to_string(&config)
-            .map_err(|err| OauthError::new(format!("Failed to turn config into toml: {}", err)))?;
+        let toml = toml::to_string(&config).map_err(|_| OauthError::InvalidConfigFormat)?;
 
         if let Some(parent_dir) = Path::new(CONFIG_LOCATION).parent() {
-            fs::create_dir_all(parent_dir).map_err(|err| {
-                OauthError::new(format!("Failed to create parent directory: {}", err))
-            })?;
+            fs::create_dir_all(parent_dir).map_err(|_| OauthError::ConfigCreationFailure)?;
         }
 
-        fs::write(CONFIG_LOCATION, toml)
-            .map_err(|err| OauthError::new(format!("Failed to write to config: {}", err)))?;
+        fs::write(CONFIG_LOCATION, toml).map_err(|_| OauthError::ConfigCreationFailure)?;
         Ok(())
     }
 
@@ -368,7 +375,7 @@ impl OauthClient<Authenticated> {
             .exchange_refresh_token(&self.refresh_token)
             .request_async(async_http_client)
             .await
-            .map_err(|err| OauthError::new(format!("Failed to refresh token: {}", err)))?;
+            .map_err(|_| OauthError::FailedToRefreshToken)?;
 
         let now = calculate_current_system_time()?;
 
@@ -406,9 +413,7 @@ impl RedirectResponse {
 
         match query_params {
             Some(q) => Ok(q),
-            None => Err(OauthError::new(
-                "Failed to get code and state from authorization redirect".to_string(),
-            )),
+            None => Err(OauthError::FailedToRefreshToken),
         }
     }
 }
@@ -419,21 +424,21 @@ impl TryFrom<String> for RedirectResponse {
     fn try_from(value: String) -> Result<Self, Self::Error> {
         let query_string = value
             .parse::<Url>()
-            .map_err(|err| OauthError::new(format!("Given string is not a valid URL: {}", err)))?;
+            .map_err(|_| OauthError::InvalidRedirectResponse)?;
 
-        let query_params = query_string.query().ok_or_else(|| {
-            OauthError::new("Failed to get code and state from redirect".to_string())
-        })?;
+        let query_params = query_string
+            .query()
+            .ok_or_else(|| OauthError::MissingCodeOrState)?;
 
         serde_urlencoded::from_str::<RedirectResponse>(&query_params)
-            .map_err(|_| OauthError::new("Failed to get code and state from redirect".to_string()))
+            .map_err(|_| OauthError::MissingCodeOrState)
     }
 }
 
 fn calculate_current_system_time() -> Result<u64, OauthError> {
     let now = SystemTime::UNIX_EPOCH
         .duration_since(SystemTime::UNIX_EPOCH)
-        .map_err(|err| OauthError::new(format!("Failed to get system time: {}", err)))?
+        .map_err(|_| OauthError::NoSystemTime)?
         .as_secs();
     Ok(now)
 }

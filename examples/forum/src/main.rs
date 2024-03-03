@@ -6,7 +6,7 @@ use mal_api::prelude::*;
 async fn main() {
     dotenvy::dotenv().ok();
 
-    let client_id = MalClientId::from_env().unwrap();
+    let client_id = MalClientId::try_from_env().unwrap();
     let api_client = ForumApiClient::from(&client_id);
     let limit = Some(3);
 

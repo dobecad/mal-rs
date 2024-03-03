@@ -26,6 +26,7 @@ async-trait = "0.1.68"
 strum = { version = "0.25.0", features = ["strum_macros"] }
 strum_macros = "0.25.0"
 toml = "0.7.6"
+thiserror = "1.0.57"
 
 [features]
 full = ["forum", "user"]
