@@ -90,7 +90,7 @@
 //! async fn main() {
 //!     dotenvy::dotenv().ok();
 //!
-//!     let client_id = MalClientId::from_env().unwrap();
+//!     let client_id = MalClientId::try_from_env().unwrap();
 //!
 //!     // Anime API example
 //!     let api_client = AnimeApiClient::from(&client_id);
