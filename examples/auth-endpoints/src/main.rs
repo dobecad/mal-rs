@@ -25,7 +25,8 @@ async fn main() {
     let client_id = OauthClient::load_client_id_from_env().unwrap();
     let client_secret = OauthClient::load_client_secret_from_env().unwrap();
     let redirect_url = OauthClient::load_redirect_url_from_env().unwrap();
-    let mut oauth_client = OauthClient::new(&client_id, Some(&client_secret), &redirect_url).unwrap();
+    let mut oauth_client =
+        OauthClient::new(&client_id, Some(&client_secret), &redirect_url).unwrap();
     println!("Visit this URL: {}\n", oauth_client.generate_auth_url());
 
     println!("After authorizing, please enter the URL you were redirected to: ");
