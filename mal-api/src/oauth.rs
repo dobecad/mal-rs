@@ -10,7 +10,6 @@ use oauth2::{
     PkceCodeVerifier, RedirectUrl, RefreshToken, TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
-use std::error::Error;
 use std::marker::PhantomData;
 use std::path::Path;
 use std::time::{Duration, SystemTime};
@@ -21,9 +20,7 @@ use url::Url;
 
 // Expiration date for access tokens is one month
 // We use 28 days in seconds to be safe
-const EXPIRATION_IN_SECONDS: u64 = 2419200;
-
-const CONFIG_LOCATION: &'static str = ".mal/config.toml";
+const EXPIRATION_IN_SECONDS: u64 = 2415600;
 
 #[derive(Debug, Error)]
 pub enum OauthError {
@@ -199,7 +196,8 @@ impl OauthClient<Unauthenticated> {
         auth_url.to_string()
     }
 
-    /// Try and authenticate the client to get an authenticated Oauth client back.
+    /// Try and authenticate the client using a redirect response to
+    /// get an authenticated Oauth client back
     pub async fn authenticate(
         self,
         authorization_response: RedirectResponse,
@@ -268,17 +266,22 @@ impl OauthClient<Unauthenticated> {
         })
     }
 
-    /// Load Oauth credentials from the MAL config
+    /// Load an authenticated Oauth client from a MAL config file
     ///
     /// It is recommended to refresh the client after loading to ensure
     /// that all of the tokens are still valid
-    pub fn load_from_config() -> Result<OauthClient<Authenticated>, OauthError> {
-        if !Path::new(CONFIG_LOCATION).exists() {
+    pub fn load_from_config<T: Into<String>>(
+        path: T,
+    ) -> Result<OauthClient<Authenticated>, OauthError> {
+        let path: String = path.into();
+        let dir = env::current_dir().map_err(|_| OauthError::MissingConfig)?;
+        let path_to_config = dir.join(path);
+        if !Path::new(&path_to_config).exists() {
             return Err(OauthError::MissingConfig);
         }
 
         let toml_content =
-            fs::read_to_string(CONFIG_LOCATION).map_err(|_| OauthError::MissingConfig)?;
+            fs::read_to_string(&path_to_config).map_err(|_| OauthError::InvalidConfigFormat)?;
         let parsed_toml: MalCredentialsConfig =
             toml::from_str(&toml_content).map_err(|_| OauthError::InvalidConfigFormat)?;
 
@@ -396,7 +399,14 @@ impl OauthClient<Authenticated> {
     }
 
     /// Save the Oauth credentials to the config
-    pub fn save_to_config(&self) -> Result<(), OauthError> {
+    ///
+    /// This method is available if you want to persist your
+    /// access, refresh, and expires_at values on the host
+    pub fn save_to_config<T: Into<String>>(&self, path: T) -> Result<(), OauthError> {
+        let path: String = path.into();
+        let dir = env::current_dir().map_err(|_| OauthError::MissingConfig)?;
+        let path_to_config = dir.join(path);
+
         let config = MalCredentialsConfig {
             mal_access_token: self.access_token.secret().clone(),
             mal_refresh_token: self.refresh_token.secret().clone(),
@@ -404,16 +414,16 @@ impl OauthClient<Authenticated> {
         };
         let toml = toml::to_string(&config).map_err(|_| OauthError::InvalidConfigFormat)?;
 
-        if let Some(parent_dir) = Path::new(CONFIG_LOCATION).parent() {
+        if let Some(parent_dir) = Path::new(&path_to_config).parent() {
             fs::create_dir_all(parent_dir).map_err(|_| OauthError::ConfigCreationFailure)?;
         }
 
-        fs::write(CONFIG_LOCATION, toml).map_err(|_| OauthError::ConfigCreationFailure)?;
+        fs::write(&path_to_config, toml).map_err(|_| OauthError::ConfigCreationFailure)?;
         Ok(())
     }
 
     /// Refresh the access token using the refresh token
-    pub async fn refresh(self) -> Result<Self, Box<dyn Error>> {
+    pub async fn refresh(self) -> Result<Self, OauthError> {
         let refresh_result = self
             .client
             .exchange_refresh_token(&self.refresh_token)
@@ -446,11 +456,18 @@ pub struct RedirectResponse {
 }
 
 impl RedirectResponse {
+    /// Create a new RedirectResponse from given code and state
+    pub fn new<T: Into<String>>(code: T, state: T) -> Self {
+        let code = code.into();
+        let state = state.into();
+        Self { code, state }
+    }
+
     /// Create a RedirectResponse from the given OAuth2 redirect result
     ///
-    /// Ultimately, this function just requires a reference to a Uri, that includes
+    /// This function just requires a reference to a Uri, that includes
     /// the `code` and `state` parameters
-    pub fn new(uri: &Uri) -> Result<RedirectResponse, OauthError> {
+    pub fn try_from_uri(uri: &Uri) -> Result<RedirectResponse, OauthError> {
         let query_params: Option<Self> = uri.query().map(|query| {
             serde_urlencoded::from_str(query).expect("Failed to get code and state from response.")
         });
