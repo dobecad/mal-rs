@@ -8,18 +8,20 @@ use mal_api::{
 };
 use std::io;
 
+const MAL_CONFIG_PATH: &'static str = ".mal/config.toml";
+
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
 
-    let authenticated_client = OauthClient::load_from_config();
+    let authenticated_client = OauthClient::load_from_config(MAL_CONFIG_PATH);
     match authenticated_client {
         Ok(c) => {
             println!("An existing authorized Oauth client already exists");
             endpoints(&c).await;
             return;
         }
-        Err(_) => println!("No existing Oauth client exists"),
+        Err(_) => println!("No existing Oauth client exists. Creating a new one..."),
     }
 
     let client_id = OauthClient::load_client_id_from_env().unwrap();
@@ -51,7 +53,9 @@ async fn main() {
     };
 
     // Save credentials to config to be re-used later
-    let _ = authenticated_client.save_to_config();
+    let _ = authenticated_client.save_to_config(MAL_CONFIG_PATH);
+
+    endpoints(&authenticated_client).await;
 }
 
 async fn endpoints(oauth_client: &OauthClient<Authenticated>) {

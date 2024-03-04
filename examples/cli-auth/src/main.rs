@@ -36,7 +36,7 @@ async fn main() {
     };
 
     // Save credentials to config to be re-used later
-    let _ = authenticated_oauth_client.save_to_config();
+    let _ = authenticated_oauth_client.save_to_config(".mal/config.toml");
 
     // OAuth2 flow without a client_secret
     let client_id = OauthClient::load_client_id_from_env().unwrap();
