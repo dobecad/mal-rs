@@ -42,7 +42,7 @@ pub enum OauthError {
     #[error("received state does not match")]
     StateMismatch,
 
-    #[error("bad token response")]
+    #[error("server failed to authenticate client")]
     BadTokenResponse,
 
     #[error("invalid redirect url")]
