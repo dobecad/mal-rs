@@ -25,7 +25,7 @@ async fn main() {
     // environment variables you are expected to define
     dotenvy::dotenv().ok();
 
-    let client_id = MalClientId::from_env().unwrap();
+    let client_id = MalClientId::try_from_env().unwrap();
 
     let api_client = AnimeApiClient::from(&client_id);
     let fields = anime_common_fields!(
@@ -35,7 +35,7 @@ async fn main() {
     );
 
     // Example using the builder pattern. 
-    // The `builder(args...)` method will only require
+    // The `builder(args...)` method will only take
     // the required arguments for the specific API endpoint, while the
     // other builder instance methods will build up the optional arguments
     let query = GetAnimeList::builder("One")
