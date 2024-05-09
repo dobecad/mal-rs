@@ -77,7 +77,7 @@ impl Display for MangaFields {
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum MangaMediaType {
     Unknown,
     Manga,
@@ -87,6 +87,7 @@ pub enum MangaMediaType {
     Manhwa,
     Manhua,
     Oel,
+    LightNovel,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
