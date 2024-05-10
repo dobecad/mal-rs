@@ -82,7 +82,7 @@ pub enum MangaMediaType {
     Unknown,
     Manga,
     Novel,
-    Oneshot,
+    OneShot,
     Doujinshi,
     Manhwa,
     Manhua,
