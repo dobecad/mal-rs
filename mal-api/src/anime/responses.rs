@@ -68,6 +68,7 @@ pub enum AnimeMediaType {
     Special,
     Ona,
     Music,
+    Pv, // undocumented media type...
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
