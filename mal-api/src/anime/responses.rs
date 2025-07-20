@@ -144,6 +144,7 @@ pub enum Source {
     MixedMedia, // undocumented source...
     Radio,
     Music,
+    WebNovel // undocumented source...
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
