@@ -68,6 +68,7 @@ pub enum AnimeMediaType {
     Special,
     Ona,
     Music,
+    Pv, // undocumented media type...
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
@@ -144,6 +145,7 @@ pub enum Source {
     MixedMedia, // undocumented source...
     Radio,
     Music,
+    WebNovel // undocumented source...
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
