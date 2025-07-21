@@ -1,6 +1,6 @@
 [package]
 name = "mal-api"
-version = "2.0.2"
+version = "2.0.3"
 edition = "2021"
 authors = ["dobecad https://github.com/dobecad"]
 license = "MIT"
